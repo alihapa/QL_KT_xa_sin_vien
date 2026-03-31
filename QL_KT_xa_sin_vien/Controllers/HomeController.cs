@@ -19,12 +19,28 @@ namespace QL_KT_xa_sin_vien.Controllers
         public IActionResult Index()
         {
             //kiểm tra session
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("user")))
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
             {
                 // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
                 return RedirectToAction("DangNhap");
             }
-            return View();
+
+            var sv = db.SinhViens.FirstOrDefault(s => s.MaTaiKhoan == HttpContext.Session.GetString("users"));
+            if(sv == null)
+            {
+                sv = new SinhVien
+                {
+                    MaSv = "chưa có dữ liệu",
+                    HoTen = "chưa có dữ liệu",
+                    Lop = "chưa có dữ liệu",
+                    Khoa = "chưa có dữ liệu",
+                    SoCmnd = "chưa có dữ liệu",
+                    Email = "chưa có dữ liệu"
+
+                };
+
+            }
+            return View(sv);
         }
 
         public IActionResult Privacy()
@@ -43,10 +59,21 @@ namespace QL_KT_xa_sin_vien.Controllers
             // Thực hiện kiểm tra đăng nhập ở đây (ví dụ: so sánh với dữ liệu trong cơ sở dữ liệu)
 
             var user = db.TaiKhoans.SingleOrDefault(u => u.TenDangNhap == username && u.MatKhauMh == password);
-
             if (user != null) 
             {
-                HttpContext.Session.SetString("user", user.ToString());
+                var userId = user.MaTaiKhoan;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var tenSinhVien = db.SinhViens
+                        .Where(s => s.MaTaiKhoan == userId)
+                        .Select(s => s.HoTen)
+                        .FirstOrDefault();
+                    if (tenSinhVien == null)
+                        tenSinhVien = "chưa có tên";
+                    // tenSinhVien có thể null nếu chưa có sinh viên liên kết
+                    HttpContext.Session.SetString("users", tenSinhVien);
+                }
+                
                 return RedirectToAction("Index");
                 
             }
