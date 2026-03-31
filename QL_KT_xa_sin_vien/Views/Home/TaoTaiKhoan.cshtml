@@ -1,30 +1,45 @@
 ﻿@model QL_KT_xa_sin_vien.Models.TaiKhoan
 
+@if (TempData["ModelErrors"] != null)
+{
+    <pre>@TempData["ModelErrors"]</pre>
+}
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form asp-action="TaoTaiKhoan" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div>
         <label asp-for="TenDangNhap">Tên đăng nhập</label>
         <input asp-for="TenDangNhap" class="form-control" />
+        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
     </div>
+
     <div>
         <label asp-for="MatKhauMh">Mật khẩu</label>
-        <input asp-for="MatKhauMh" class="form-control" />
+        <input asp-for="MatKhauMh" type="password" class="form-control" />
+        <span asp-validation-for="MatKhauMh" class="text-danger"></span>
     </div>
+
     <div>
         <label asp-for="Email">Email</label>
         <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
+
     <div>
         <label asp-for="Sdt">Số điện thoại</label>
         <input asp-for="Sdt" class="form-control" />
+        <span asp-validation-for="Sdt" class="text-danger"></span>
     </div>
-    <table>
-        <tr>
-            <td><button type="submit" class="btn btn-primary">Tạo tài khoản</button></td>
-            <td>
-                <a asp-action="DangNhap" class="btn btn-info">DangNhap</a>
-            </td>
-        </tr>
-    </table>
-    
+
+    <div>
+        <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
+        <a asp-action="DangNhap" class="btn btn-info">Đăng nhập</a>
+    </div>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

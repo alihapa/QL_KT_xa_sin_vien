@@ -58,24 +58,71 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         [HttpGet]
-        public IActionResult TaoTaiKhoan()
+public IActionResult TaoTaiKhoan()
+{
+    return View();
+}
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult TaoTaiKhoan(TaiKhoan taikhoan)
+{
+            
+
+    try
+    {
+        // kiểm tra vai trò "1" có tồn tại không
+        var role = db.VaiTros.FirstOrDefault(v => v.MaVaiTro == "1");
+        if (role == null)
         {
-            return View();
-        }
-        [HttpPost]
-        public IActionResult TaoTaiKhoan(TaiKhoan taikhoan)
-        {
-            if(ModelState.IsValid)
-            {
-                taikhoan.MaTaiKhoan = Guid.NewGuid().ToString();
-                taikhoan.VaiTro = "1";
-                taikhoan.TrangThai = "0";
-                db.TaiKhoans.Add(taikhoan);
-                db.SaveChanges();
-                return RedirectToAction("DangNhap");
-            }
+            ModelState.AddModelError("", "Vai trò mặc định không tồn tại trong hệ thống.");
             return View(taikhoan);
         }
+
+        // gán khóa chính
+        taikhoan.MaTaiKhoan = Guid.NewGuid().ToString();
+
+        // gán vai trò (phải khớp MaVaiTro)
+        taikhoan.VaiTro = role.MaVaiTro;
+
+        // trạng thái mặc định
+        taikhoan.TrangThai = "0";
+
+        // (tùy chọn) hash mật khẩu trước khi lưu
+        // taikhoan.MatKhauMh = HashPassword(taikhoan.MatKhauMh);
+
+        
+    }
+    catch (Exception ex)
+    {
+        // log ex nếu có
+        ModelState.AddModelError("", "Lỗi khi tạo tài khoản: " + ex.Message);
+        return View(taikhoan);
+    }
+
+    if (!ModelState.IsValid)
+    {
+        // Ghi log hoặc lấy chi tiết lỗi để hiển thị
+        var errors = ModelState
+            .Where(ms => ms.Value.Errors.Count > 0)
+            .Select(ms => new {
+                Key = ms.Key,
+                Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+            }).ToList();
+
+        // Ví dụ: lưu vào TempData để hiển thị trên View (chỉ dev)
+        TempData["ModelErrors"] = System.Text.Json.JsonSerializer.Serialize(errors);
+
+        return View(taikhoan);
+    }
+    else {
+        db.TaiKhoans.Add(taikhoan);
+        db.SaveChanges();
+
+        return RedirectToAction("DangNhap");
+    }
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
