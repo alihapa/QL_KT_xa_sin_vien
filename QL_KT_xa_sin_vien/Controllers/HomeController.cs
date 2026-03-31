@@ -42,11 +42,11 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             // Thực hiện kiểm tra đăng nhập ở đây (ví dụ: so sánh với dữ liệu trong cơ sở dữ liệu)
 
-            var user = db.TaiKhoans.FirstOrDefault(u => u.TenDangNhap == username && u.MatKhauMh == password);
+            var user = db.TaiKhoans.SingleOrDefault(u => u.TenDangNhap == username && u.MatKhauMh == password);
 
             if (user != null) 
             {
-                HttpContext.Session.SetString("user", username);
+                HttpContext.Session.SetString("user", user.ToString());
                 return RedirectToAction("Index");
                 
             }

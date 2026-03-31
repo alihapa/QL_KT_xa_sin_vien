@@ -9,12 +9,11 @@
         <label for="password">Mật khẩu</label>
         <input type="password" class="form-control" id="password" name="password" required>
     </div>
-    <table>
-        <tr>
-            <td><button type="submit" class="btn btn-primary">Đăng nhập</button></td>
-            <td>
-                <a asp-action="TaoTaiKhoan" class="btn btn-info">Tạo tài khoản</a>
-            </td>
-        </tr>
-    </table>
+    <div>
+        <p>@ViewBag.ErrorMessage</p>
+    </div>
+    <div>
+        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+        <a asp-action="TaoTaiKhoan" class="btn btn-info">Tạo tài khoản</a>
+    </div>
 </form>
