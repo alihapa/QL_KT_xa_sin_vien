@@ -1,0 +1,20 @@
+﻿
+
+<form asp-action="DangNhap" method="post">
+    <div class="form-group">
+        <label for="username">Tên đăng nhập</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <table>
+        <tr>
+            <td><button type="submit" class="btn btn-primary">Đăng nhập</button></td>
+            <td>
+                <a asp-action="TaoTaiKhoan" class="btn btn-info">Tạo tài khoản</a>
+            </td>
+        </tr>
+    </table>
+</form>

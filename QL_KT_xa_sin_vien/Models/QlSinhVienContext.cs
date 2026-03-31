@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace QL_KT_xa_sin_vien.Models;
 
-public partial class QlSinhVienContext : DbContext
+public partial class QLSinhVienContext : DbContext
 {
-    public QlSinhVienContext()
+    public QLSinhVienContext()
     {
     }
 
-    public QlSinhVienContext(DbContextOptions<QlSinhVienContext> options)
+    public QLSinhVienContext(DbContextOptions<QLSinhVienContext> options)
         : base(options)
     {
     }
@@ -45,7 +45,7 @@ public partial class QlSinhVienContext : DbContext
     {
         modelBuilder.Entity<Giuong>(entity =>
         {
-            entity.HasKey(e => e.MaGiuong).HasName("PK__Giuong__1D39A54C4533E400");
+            entity.HasKey(e => e.MaGiuong).HasName("PK__Giuong__1D39A54C871BDD00");
 
             entity.ToTable("Giuong");
 
@@ -72,16 +72,16 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.Giuongs)
                 .HasForeignKey(d => d.MaPhong)
-                .HasConstraintName("FK__Giuong__maPhong__02FC7413");
+                .HasConstraintName("FK__Giuong__maPhong__2739D489");
 
             entity.HasOne(d => d.OccupiedByNavigation).WithMany(p => p.Giuongs)
                 .HasForeignKey(d => d.OccupiedBy)
-                .HasConstraintName("FK__Giuong__occupied__03F0984C");
+                .HasConstraintName("FK__Giuong__occupied__282DF8C2");
         });
 
         modelBuilder.Entity<HoaDon>(entity =>
         {
-            entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDon__026B4D9A77ADB03D");
+            entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDon__026B4D9A7EAADDCE");
 
             entity.ToTable("HoaDon");
 
@@ -110,16 +110,16 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.MaHopDongNavigation).WithMany(p => p.HoaDons)
                 .HasForeignKey(d => d.MaHopDong)
-                .HasConstraintName("FK__HoaDon__maHopDon__0B91BA14");
+                .HasConstraintName("FK__HoaDon__maHopDon__2FCF1A8A");
 
             entity.HasOne(d => d.MaSvNavigation).WithMany(p => p.HoaDons)
                 .HasForeignKey(d => d.MaSv)
-                .HasConstraintName("FK__HoaDon__maSV__0C85DE4D");
+                .HasConstraintName("FK__HoaDon__maSV__30C33EC3");
         });
 
         modelBuilder.Entity<HopDong>(entity =>
         {
-            entity.HasKey(e => e.MaHopDong).HasName("PK__HopDong__429F83D9989123B4");
+            entity.HasKey(e => e.MaHopDong).HasName("PK__HopDong__429F83D99317F2D4");
 
             entity.ToTable("HopDong");
 
@@ -151,20 +151,20 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.MaGiuongNavigation).WithMany(p => p.HopDongs)
                 .HasForeignKey(d => d.MaGiuong)
-                .HasConstraintName("FK__HopDong__maGiuon__08B54D69");
+                .HasConstraintName("FK__HopDong__maGiuon__2CF2ADDF");
 
             entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.HopDongs)
                 .HasForeignKey(d => d.MaPhong)
-                .HasConstraintName("FK__HopDong__maPhong__07C12930");
+                .HasConstraintName("FK__HopDong__maPhong__2BFE89A6");
 
             entity.HasOne(d => d.MaSvNavigation).WithMany(p => p.HopDongs)
                 .HasForeignKey(d => d.MaSv)
-                .HasConstraintName("FK__HopDong__maSV__06CD04F7");
+                .HasConstraintName("FK__HopDong__maSV__2B0A656D");
         });
 
         modelBuilder.Entity<NhatKy>(entity =>
         {
-            entity.HasKey(e => e.MaLog).HasName("PK__NhatKy__261ECAEABC269A97");
+            entity.HasKey(e => e.MaLog).HasName("PK__NhatKy__261ECAEA6CEC6600");
 
             entity.ToTable("NhatKy");
 
@@ -177,10 +177,12 @@ public partial class QlSinhVienContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("doiTuong");
             entity.Property(e => e.GiaTriSau)
-                .HasColumnType("text")
+                .HasMaxLength(100)
+                .IsUnicode(false)
                 .HasColumnName("giaTriSau");
             entity.Property(e => e.GiaTriTruoc)
-                .HasColumnType("text")
+                .HasMaxLength(100)
+                .IsUnicode(false)
                 .HasColumnName("giaTriTruoc");
             entity.Property(e => e.HanhDong)
                 .HasMaxLength(100)
@@ -196,12 +198,12 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.NguoiThucHienNavigation).WithMany(p => p.NhatKies)
                 .HasForeignKey(d => d.NguoiThucHien)
-                .HasConstraintName("FK__NhatKy__nguoiThu__787EE5A0");
+                .HasConstraintName("FK__NhatKy__nguoiThu__1CBC4616");
         });
 
         modelBuilder.Entity<PhanAnh>(entity =>
         {
-            entity.HasKey(e => e.MaPhanAnh).HasName("PK__PhanAnh__40283471A4CB3DAB");
+            entity.HasKey(e => e.MaPhanAnh).HasName("PK__PhanAnh__4028347105BFE5F0");
 
             entity.ToTable("PhanAnh");
 
@@ -218,7 +220,8 @@ public partial class QlSinhVienContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("maSV");
             entity.Property(e => e.MoTa)
-                .HasColumnType("text")
+                .HasMaxLength(5000)
+                .IsUnicode(false)
                 .HasColumnName("moTa");
             entity.Property(e => e.MucDoUuTien)
                 .HasMaxLength(50)
@@ -241,20 +244,20 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.PhanAnhs)
                 .HasForeignKey(d => d.MaPhong)
-                .HasConstraintName("FK__PhanAnh__maPhong__10566F31");
+                .HasConstraintName("FK__PhanAnh__maPhong__3493CFA7");
 
             entity.HasOne(d => d.MaSvNavigation).WithMany(p => p.PhanAnhs)
                 .HasForeignKey(d => d.MaSv)
-                .HasConstraintName("FK__PhanAnh__maSV__0F624AF8");
+                .HasConstraintName("FK__PhanAnh__maSV__339FAB6E");
 
             entity.HasOne(d => d.NguoiXuLyNavigation).WithMany(p => p.PhanAnhs)
                 .HasForeignKey(d => d.NguoiXuLy)
-                .HasConstraintName("FK__PhanAnh__nguoiXu__114A936A");
+                .HasConstraintName("FK__PhanAnh__nguoiXu__3587F3E0");
         });
 
         modelBuilder.Entity<Phong>(entity =>
         {
-            entity.HasKey(e => e.MaPhong).HasName("PK__Phong__4CD55E1078D78C40");
+            entity.HasKey(e => e.MaPhong).HasName("PK__Phong__4CD55E109AAB6959");
 
             entity.ToTable("Phong");
 
@@ -284,12 +287,12 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.ToaNhaNavigation).WithMany(p => p.Phongs)
                 .HasForeignKey(d => d.ToaNha)
-                .HasConstraintName("FK__Phong__toaNha__7D439ABD");
+                .HasConstraintName("FK__Phong__toaNha__2180FB33");
         });
 
         modelBuilder.Entity<SinhVien>(entity =>
         {
-            entity.HasKey(e => e.MaSv).HasName("PK__SinhVien__7A227A6433BC42FC");
+            entity.HasKey(e => e.MaSv).HasName("PK__SinhVien__7A227A6410C7D164");
 
             entity.ToTable("SinhVien");
 
@@ -324,16 +327,16 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.MaTaiKhoanNavigation).WithMany(p => p.SinhViens)
                 .HasForeignKey(d => d.MaTaiKhoan)
-                .HasConstraintName("FK__SinhVien__maTaiK__00200768");
+                .HasConstraintName("FK__SinhVien__maTaiK__245D67DE");
         });
 
         modelBuilder.Entity<TaiKhoan>(entity =>
         {
-            entity.HasKey(e => e.MaTaiKhoan).HasName("PK__TaiKhoan__8FFF6A9DDD632658");
+            entity.HasKey(e => e.MaTaiKhoan).HasName("PK__TaiKhoan__8FFF6A9D15F201F9");
 
             entity.ToTable("TaiKhoan");
 
-            entity.HasIndex(e => e.TenDangNhap, "UQ__TaiKhoan__59267D4A85ADB739").IsUnique();
+            entity.HasIndex(e => e.TenDangNhap, "UQ__TaiKhoan__59267D4A0C6BCA01").IsUnique();
 
             entity.Property(e => e.MaTaiKhoan)
                 .HasMaxLength(50)
@@ -366,12 +369,12 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.VaiTroNavigation).WithMany(p => p.TaiKhoans)
                 .HasForeignKey(d => d.VaiTro)
-                .HasConstraintName("FK__TaiKhoan__vaiTro__72C60C4A");
+                .HasConstraintName("FK__TaiKhoan__vaiTro__17036CC0");
         });
 
         modelBuilder.Entity<ThongBao>(entity =>
         {
-            entity.HasKey(e => e.MaThongBao).HasName("PK__ThongBao__657CA539883D571E");
+            entity.HasKey(e => e.MaThongBao).HasName("PK__ThongBao__657CA539BBDBBEAB");
 
             entity.ToTable("ThongBao");
 
@@ -400,12 +403,12 @@ public partial class QlSinhVienContext : DbContext
 
             entity.HasOne(d => d.NguoiNhanNavigation).WithMany(p => p.ThongBaos)
                 .HasForeignKey(d => d.NguoiNhan)
-                .HasConstraintName("FK__ThongBao__nguoiN__75A278F5");
+                .HasConstraintName("FK__ThongBao__nguoiN__19DFD96B");
         });
 
         modelBuilder.Entity<ToaNha>(entity =>
         {
-            entity.HasKey(e => e.MaToaNha).HasName("PK__ToaNha__35A878347505E367");
+            entity.HasKey(e => e.MaToaNha).HasName("PK__ToaNha__35A87834E94250F9");
 
             entity.ToTable("ToaNha");
 
@@ -425,7 +428,7 @@ public partial class QlSinhVienContext : DbContext
 
         modelBuilder.Entity<VaiTro>(entity =>
         {
-            entity.HasKey(e => e.MaVaiTro).HasName("PK__VaiTro__BFC88AB7DD30F5CB");
+            entity.HasKey(e => e.MaVaiTro).HasName("PK__VaiTro__BFC88AB73053790E");
 
             entity.ToTable("VaiTro");
 
@@ -433,6 +436,10 @@ public partial class QlSinhVienContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("maVaiTro");
+            entity.Property(e => e.QuyenHan)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("quyenHan");
             entity.Property(e => e.TenVaiTro)
                 .HasMaxLength(100)
                 .IsUnicode(false)

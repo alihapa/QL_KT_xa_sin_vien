@@ -1,4 +1,4 @@
-namespace QL_KT_xa_sin_vien
+﻿namespace QL_KT_xa_sin_vien
 {
     public class Program
     {
@@ -8,6 +8,14 @@ namespace QL_KT_xa_sin_vien
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            // Thêm cache và session
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // thời gian hết hạn session
+                options.Cookie.HttpOnly = true;                 // bảo mật cookie
+                options.Cookie.IsEssential = true;              // bắt buộc cookie
+            });
 
             var app = builder.Build();
 
@@ -23,6 +31,9 @@ namespace QL_KT_xa_sin_vien
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            // Bật session trước khi dùng endpoints
+            app.UseSession();
 
             app.UseAuthorization();
 

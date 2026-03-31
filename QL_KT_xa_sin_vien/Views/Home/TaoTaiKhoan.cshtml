@@ -1,0 +1,30 @@
+﻿@model QL_KT_xa_sin_vien.Models.TaiKhoan
+
+
+<form asp-action="TaoTaiKhoan" method="post">
+    <div>
+        <label asp-for="TenDangNhap">Tên đăng nhập</label>
+        <input asp-for="TenDangNhap" class="form-control" />
+    </div>
+    <div>
+        <label asp-for="MatKhauMh">Mật khẩu</label>
+        <input asp-for="MatKhauMh" class="form-control" />
+    </div>
+    <div>
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+    <div>
+        <label asp-for="Sdt">Số điện thoại</label>
+        <input asp-for="Sdt" class="form-control" />
+    </div>
+    <table>
+        <tr>
+            <td><button type="submit" class="btn btn-primary">Tạo tài khoản</button></td>
+            <td>
+                <a asp-action="DangNhap" class="btn btn-info">DangNhap</a>
+            </td>
+        </tr>
+    </table>
+    
+</form>
