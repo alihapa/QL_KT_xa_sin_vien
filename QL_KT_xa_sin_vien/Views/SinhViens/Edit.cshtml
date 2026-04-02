@@ -38,6 +38,7 @@
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
+            <input type="hidden" asp-for="MaTaiKhoan" />
             @* <div class="form-group">
                 <label asp-for="MaTaiKhoan" class="control-label"></label>
                 <select asp-for="MaTaiKhoan" class="form-control" asp-items="ViewBag.MaTaiKhoan"></select>
