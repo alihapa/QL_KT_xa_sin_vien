@@ -16,7 +16,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             //kiểm tra session
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
@@ -25,22 +25,96 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return RedirectToAction("DangNhap");
             }
 
-            var sv = db.SinhViens.FirstOrDefault(s => s.MaTaiKhoan == HttpContext.Session.GetString("userId"));
-            if(sv == null)
+            // Lấy sinh viên theo tài khoản
+            var sinhVien = await db.SinhViens
+                .FirstOrDefaultAsync(s => s.MaTaiKhoan == HttpContext.Session.GetString("userId"));
+
+            if (sinhVien == null)
             {
-                sv = new SinhVien
+                sinhVien = new SinhVien
                 {
-                    MaSv = "chưa có dữ liệu",
-                    HoTen = "chưa có dữ liệu",
-                    Lop = "chưa có dữ liệu",
-                    Khoa = "chưa có dữ liệu",
-                    SoCmnd = "chưa có dữ liệu",
-                    Email = "chưa có dữ liệu"
-
+                    HoTen = "chưa có tên",
+                    MaSv = "chưa có mã sinh viên",
+                    Lop = "chưa có lớp",
+                    Email = "chưa có email"
                 };
-
             }
-            return View(sv);
+
+            // Lấy hóa đơn
+            var hoaDons = await db.HoaDons
+                .Where(hd => hd.MaSv == sinhVien.MaSv)
+                .OrderByDescending(hd => hd.NgayXuat)
+                .ToListAsync();
+            
+            // Lấy phản ánh
+            var phanAnhs = await db.PhanAnhs
+                .Where(pa => pa.MaSv == sinhVien.MaSv)
+                .OrderByDescending(pa => pa.ThoiGianTao)
+                .ToListAsync();
+
+            if (phanAnhs == null || !phanAnhs.Any())
+            {
+                phanAnhs = new List<PhanAnh>
+                {
+                    new PhanAnh { MaPhanAnh = "chưa có phản ánh", TrangThai = "chưa có thông tin" }
+                };
+            }
+
+            // Lấy thông báo
+            var thongBaos = await db.ThongBaos
+                .Where(tb => tb.NguoiNhan == HttpContext.Session.GetString("userId"))
+                .OrderByDescending(tb => tb.ThoiGianGui)
+                .ToListAsync();
+
+            if (thongBaos == null || !thongBaos.Any())
+            {
+                thongBaos = new List<ThongBao>
+                {
+                    new ThongBao { MaThongBao = "chưa có thông báo", NoiDung = "chưa có thông tin" }
+                };
+            }
+
+            var hopDong = await db.HopDongs
+            .FirstOrDefaultAsync(h => h.MaSv == sinhVien.MaSv && h.TrangThai == "1");
+
+            if (hopDong == null)
+            {
+                hopDong = new HopDong
+                {
+                    MaHopDong = "chưa có hợp đồng",
+                    NgayBatDau = null,
+                    NgayKetThuc = null,
+                    TrangThai = "chưa có thông tin"
+                };
+            }
+
+            Phong phong = null;
+            if (hopDong != null)
+            {
+                phong = await db.Phongs.FirstOrDefaultAsync(p => p.MaPhong == hopDong.MaPhong);
+            }
+
+            if (phong == null)
+            {
+                phong = new Phong
+                {
+                    MaPhong = "chưa có phòng",
+                    LoaiPhong = "chưa có thông tin",
+                    TrangThai = "chưa có thông tin"
+                };
+            }
+
+            var vm = new DashboardViewModel
+            {
+                SinhVien = sinhVien,
+                Phong = phong,
+                HopDong = hopDong,
+                HoaDons = hoaDons,
+                PhanAnhs = phanAnhs,
+                ThongBaos = thongBaos
+            };
+
+            return View(vm);
         }
 
         public IActionResult Privacy()
