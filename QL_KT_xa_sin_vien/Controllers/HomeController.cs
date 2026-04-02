@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QL_KT_xa_sin_vien.Models;
-
+using Microsoft.AspNetCore.Identity;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
@@ -25,7 +25,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return RedirectToAction("DangNhap");
             }
 
-            var sv = db.SinhViens.FirstOrDefault(s => s.MaTaiKhoan == HttpContext.Session.GetString("users"));
+            var sv = db.SinhViens.FirstOrDefault(s => s.MaTaiKhoan == HttpContext.Session.GetString("userId"));
             if(sv == null)
             {
                 sv = new SinhVien
@@ -58,31 +58,36 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             // Thực hiện kiểm tra đăng nhập ở đây (ví dụ: so sánh với dữ liệu trong cơ sở dữ liệu)
 
-            var user = db.TaiKhoans.SingleOrDefault(u => u.TenDangNhap == username && u.MatKhauMh == password);
+            var user = db.TaiKhoans.SingleOrDefault(u => u.TenDangNhap == username);
             if (user != null) 
             {
-                var userId = user.MaTaiKhoan;
-                if (!string.IsNullOrEmpty(userId))
+                var hasher = new PasswordHasher<TaiKhoan>();
+                var result = hasher.VerifyHashedPassword(user, user.MatKhauMh, password);
+
+                if (result == PasswordVerificationResult.Success)
                 {
-                    var tenSinhVien = db.SinhViens
-                        .Where(s => s.MaTaiKhoan == userId)
-                        .Select(s => s.HoTen)
-                        .FirstOrDefault();
-                    if (tenSinhVien == null)
-                        tenSinhVien = "chưa có tên";
-                    // tenSinhVien có thể null nếu chưa có sinh viên liên kết
-                    HttpContext.Session.SetString("users", tenSinhVien);
+                    var userId = user.MaTaiKhoan;
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        var tenSinhVien = db.SinhViens
+                            .Where(s => s.MaTaiKhoan == userId)
+                            .Select(s => s.HoTen)
+                            .FirstOrDefault();
+                        if (tenSinhVien == null)
+                            tenSinhVien = "chưa có tên";
+                        // tenSinhVien có thể null nếu chưa có sinh viên liên kết
+                        HttpContext.Session.SetString("users", tenSinhVien);
+                        HttpContext.Session.SetString("userId", userId); // Lưu MaTaiKhoan vào session để sử dụng sau này
+                    }
+                    user.TrangThai = "1"; // Cập nhật trạng thái đăng nhập
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
                 }
-                
-                return RedirectToAction("Index");
-                
             }
-            else
-            {
                 // Đăng nhập thất bại, hiển thị thông báo lỗi
-                ViewBag.ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng.";
-                return View();
-            }
+            ViewBag.ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng.";
+            return View();
+            
         }
 
         [HttpGet]
@@ -118,8 +123,10 @@ namespace QL_KT_xa_sin_vien.Controllers
 
                 // (tùy chọn) hash mật khẩu trước khi lưu
                 // taikhoan.MatKhauMh = HashPassword(taikhoan.MatKhauMh);
+                // Hash mật khẩu
+                var hasher = new PasswordHasher<TaiKhoan>();
+                taikhoan.MatKhauMh = hasher.HashPassword(taikhoan, taikhoan.MatKhauMh);
 
-        
             }
             catch (Exception ex)
             {
@@ -128,8 +135,14 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return View(taikhoan);
             }
 
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
+                db.TaiKhoans.Add(taikhoan);
+                db.SaveChanges();
+
+                return RedirectToAction("DangNhap");
+            }
+            else {
                 // Ghi log hoặc lấy chi tiết lỗi để hiển thị
                 var errors = ModelState
                     .Where(ms => ms.Value.Errors.Count > 0)
@@ -143,18 +156,20 @@ namespace QL_KT_xa_sin_vien.Controllers
 
                 return View(taikhoan);
             }
-            else {
-                db.TaiKhoans.Add(taikhoan);
-                db.SaveChanges();
-
-                return RedirectToAction("DangNhap");
-            }
         }
 
         public IActionResult DangXuat()
         {
+            var user = db.TaiKhoans.FirstOrDefault(u => u.MaTaiKhoan == HttpContext.Session.GetString("userId"));
+            if (user != null)
+            {
+                user.TrangThai = "0"; // Cập nhật trạng thái đăng xuất
+                db.SaveChanges();
+            }
             HttpContext.Session.Remove("user");
+            HttpContext.Session.Remove("userId");
             SignOut();
+            
             return RedirectToAction("DangNhap");
         }
 
