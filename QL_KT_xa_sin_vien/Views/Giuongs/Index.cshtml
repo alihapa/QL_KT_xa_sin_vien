@@ -1,0 +1,53 @@
+﻿@model IEnumerable<QL_KT_xa_sin_vien.Models.Giuong>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.SoGiuong)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TrangThai)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaPhongNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OccupiedByNavigation)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SoGiuong)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TrangThai)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaPhongNavigation.MaPhong)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OccupiedByNavigation.MaSv)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaGiuong">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.MaGiuong">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaGiuong">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

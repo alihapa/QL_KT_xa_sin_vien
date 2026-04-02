@@ -1,13 +1,40 @@
 ﻿@model QL_KT_xa_sin_vien.Models.SinhVien
-
-
-<body>
-    <div>
-        <h1>Thông tin cá nhân</h1>
-        <p>Mã sinh viên: @Model.MaSv</p>
-        <p>Họ tên: @Model.HoTen</p>
-        <p>Lớp: @Model.Lop</p>
+<link href="~/css/index.css" rel="stylesheet" />
+<div class="dashboard-box">
+    <h2>TỔNG QUAN HỆ THỐNG KÝ TÚC XÁ</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>Thông tin cá nhân</h3>
+            <p>Mã sinh viên: @Model.MaSv</p>
+            <p>Họ tên: @Model.HoTen</p>
+            <p>Lớp: @Model.Lop</p>
+            <a asp-controller="SinhViens" asp-action="Details" asp-route-id="@Model.MaSv" class="btn btn-primary">Chi tiết</a>
+            <a href="#" class="btn btn-secondary">Cập nhật thông tin</a>
+        </div>
+        <div class="card">
+            <h3>Phòng đang ở</h3>
+            <p>Tòa A - Phòng 101</p>
+            <p>Giường số: 2</p>
+        </div>
+        <div class="card">
+            <h3>Hợp đồng</h3>
+            <p>Ngày bắt đầu: 01/09/2025</p>
+            <p>Ngày kết thúc: 31/05/2026</p>
+        </div>
+        <div class="card">
+            <h3>Hóa đơn</h3>
+            <p>Tháng 3/2026: Chưa thanh toán</p>
+            <p>Tháng 2/2026: Đã thanh toán</p>
+        </div>
+        <div class="card">
+            <h3>Phản ánh sự cố</h3>
+            <p>2 phản ánh đang xử lý</p>
+            <p>1 phản ánh đã hoàn thành</p>
+        </div>
+        <div class="card">
+            <h3>Thông báo</h3>
+            <p>Thông báo mới từ Ban quản lý</p>
+            <p>Ngày: 12/03/2026</p>
+        </div>
     </div>
-    <div>
-    </div>
-</body>
+</div>

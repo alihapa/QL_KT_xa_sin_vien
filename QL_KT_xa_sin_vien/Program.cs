@@ -1,10 +1,16 @@
-﻿namespace QL_KT_xa_sin_vien
+﻿using Microsoft.EntityFrameworkCore;
+using QL_KT_xa_sin_vien.Models;
+
+namespace QL_KT_xa_sin_vien
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<QLSinhVienContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("ABC")));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();

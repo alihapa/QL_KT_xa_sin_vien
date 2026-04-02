@@ -1,0 +1,43 @@
+﻿@model QL_KT_xa_sin_vien.Models.ToaNha
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>ToaNha</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="MaToaNha" class="control-label"></label>
+                <input asp-for="MaToaNha" class="form-control" />
+                <span asp-validation-for="MaToaNha" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TenToaNha" class="control-label"></label>
+                <input asp-for="TenToaNha" class="form-control" />
+                <span asp-validation-for="TenToaNha" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DiaChi" class="control-label"></label>
+                <input asp-for="DiaChi" class="form-control" />
+                <span asp-validation-for="DiaChi" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
