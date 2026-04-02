@@ -1,19 +1,21 @@
 ﻿
 
-<form asp-action="DangNhap" method="post">
-    <div class="form-group">
-        <label for="username">Tên đăng nhập</label>
-        <input type="text" class="form-control" id="username" name="username" required>
-    </div>
-    <div class="form-group">
-        <label for="password">Mật khẩu</label>
-        <input type="password" class="form-control" id="password" name="password" required>
-    </div>
-    <div>
-        <p>@ViewBag.ErrorMessage</p>
-    </div>
-    <div>
-        <button type="submit" class="btn btn-primary">Đăng nhập</button>
-        <a asp-action="TaoTaiKhoan" class="btn btn-info">Tạo tài khoản</a>
-    </div>
-</form>
+<link href="~/css/dangnhap.css" rel="stylesheet" />
+<div class="login-box">
+    <h2>ĐĂNG NHẬP</h2>
+    <p style="text-align:center;">Thông tin đăng nhập hệ thống</p>
+    <form asp-action="DangNhap" method="post">
+        <label for="username">Tài khoản:</label>
+        <input type="text" id="username" name="username" class="form-control" required>
+
+        <label for="password">Mật khẩu:</label>
+        <input type="password" id="password" name="password" class="form-control" required>
+        <div>
+            <p>@ViewBag.ErrorMessage</p>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-login">Đăng nhập</button>
+            <button type="button" class="btn btn-info" onclick="location.href='@Url.Action("TaoTaiKhoan")'">Đăng ký</button>
+        </div>
+    </form>
+</div>
