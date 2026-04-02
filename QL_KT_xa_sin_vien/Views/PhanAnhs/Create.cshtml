@@ -11,38 +11,31 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="MaPhanAnh" class="control-label"></label>
-                <input asp-for="MaPhanAnh" class="form-control" readonly/>
-                <span asp-validation-for="MaPhanAnh" class="text-danger"></span>
-            </div>
+            <input type="hidden" asp-for="MaPhanAnh" class="form-control" />
+            <input type="hidden" asp-for="MucDoUuTien" class="form-control" />
+            <input type="hidden" asp-for="TrangThai" class="form-control" />
             <div class="form-group">
                 <label asp-for="MaSv" class="control-label"></label>
                 <select asp-for="MaSv" class ="form-control" asp-items="ViewBag.MaSv"></select>
+                <span asp-validation-for="MaSv" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="MaPhong" class="control-label"></label>
                 <select asp-for="MaPhong" class ="form-control" asp-items="ViewBag.MaPhong"></select>
+                <span asp-validation-for="MaPhong" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="MoTa" class="control-label"></label>
                 <input asp-for="MoTa" class="form-control" />
                 <span asp-validation-for="MoTa" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="MucDoUuTien" class="control-label"></label>
-                <input asp-for="MucDoUuTien" class="form-control" />
-                <span asp-validation-for="MucDoUuTien" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TrangThai" class="control-label"></label>
-                <input asp-for="TrangThai" class="form-control" />
-                <span asp-validation-for="TrangThai" class="text-danger"></span>
-            </div>
+            
             <div class="form-group">
                 <label asp-for="NguoiXuLy" class="control-label"></label>
-                <select asp-for="NguoiXuLy" class ="form-control" asp-items="ViewBag.NguoiXuLy"></select>
+                <select asp-for="NguoiXuLy" asp-items="@(ViewData["NguoiXuLy"] as SelectList)" class="form-control"></select>
+                <span asp-validation-for="NguoiXuLy" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ThoiGianTao" class="control-label"></label>

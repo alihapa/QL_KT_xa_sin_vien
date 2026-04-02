@@ -49,10 +49,30 @@ namespace QL_KT_xa_sin_vien.Controllers
         // GET: PhanAnhs/Create
         public IActionResult Create()
         {
+            var phanAnh = new PhanAnh
+            {
+                MaPhanAnh = Guid.NewGuid().ToString(),
+                MucDoUuTien = "1",
+                TrangThai = "đang xác minh",
+                ThoiGianTao = DateTime.Now,
+                ThoiGianCapNhat = DateTime.Now
+            };
             ViewData["MaPhong"] = new SelectList(_context.Phongs, "MaPhong", "MaPhong");
             ViewData["MaSv"] = new SelectList(_context.SinhViens, "MaSv", "MaSv");
-            ViewData["NguoiXuLy"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan");
-            return View();
+            var dsNguoiXuLy = _context.TaiKhoans
+                .Where(t => t.VaiTro == "2")
+                .Join(_context.SinhViens,
+                      tk => tk.MaTaiKhoan,
+                      sv => sv.MaTaiKhoan,
+                      (tk, sv) => new {
+                          MaTaiKhoan = tk.MaTaiKhoan, // value
+                          HoTen = sv.HoTen + " (" + tk.MaTaiKhoan + ")" 
+                      })
+                .ToList();
+
+            ViewData["NguoiXuLy"] = new SelectList(dsNguoiXuLy, "MaTaiKhoan", "HoTen");
+            
+            return View(phanAnh);
         }
 
         // POST: PhanAnhs/Create
@@ -60,17 +80,43 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MaPhanAnh,MaSv,MaPhong,MoTa,MucDoUuTien,TrangThai,NguoiXuLy,ThoiGianTao,ThoiGianCapNhat")] PhanAnh phanAnh)
+        public async Task<IActionResult> Create([Bind("MaPhanAnh,MaSv,MaPhong,MucDoUuTien,TrangThai,MoTa,NguoiXuLy,ThoiGianTao,ThoiGianCapNhat")] PhanAnh phanAnh)
         {
+            //phanAnh.MaPhanAnh = Guid.NewGuid().ToString();
+            //phanAnh.MucDoUuTien = "1";
+            //phanAnh.TrangThai = "đang xác minh";
+
             if (ModelState.IsValid)
             {
                 _context.Add(phanAnh);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Home");
             }
+
+            // Nếu ModelState không hợp lệ → log lỗi để kiểm tra
+            var errors = ModelState.Values.SelectMany(v => v.Errors).ToList();
+            foreach (var error in errors)
+            {
+                Console.WriteLine(error.ErrorMessage); // hoặc log ra file
+            }
+
+            // Load lại danh sách để hiển thị dropdown
             ViewData["MaPhong"] = new SelectList(_context.Phongs, "MaPhong", "MaPhong", phanAnh.MaPhong);
-            ViewData["MaSv"] = new SelectList(_context.SinhViens, "MaSv", "MaSv", phanAnh.MaSv);
-            ViewData["NguoiXuLy"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan", phanAnh.NguoiXuLy);
+            ViewData["MaSv"] = new SelectList(_context.SinhViens, "MaSv", "HoTen", phanAnh.MaSv);
+
+            var dsNguoiXuLy = _context.TaiKhoans
+                .Where(t => t.VaiTro == "2")
+                .Join(_context.SinhViens,
+                      tk => tk.MaTaiKhoan,
+                      sv => sv.MaTaiKhoan,
+                      (tk, sv) => new {
+                          MaTaiKhoan = tk.MaTaiKhoan,
+                          DisplayText = sv.HoTen + " (" + tk.MaTaiKhoan + ")"
+                      })
+                .ToList();
+
+            ViewData["NguoiXuLy"] = new SelectList(dsNguoiXuLy, "MaTaiKhoan", "DisplayText", phanAnh.NguoiXuLy);
+
             return View(phanAnh);
         }
 
