@@ -4,47 +4,75 @@
     <h2>TỔNG QUAN HỆ THỐNG KÝ TÚC XÁ</h2>
     <div class="grid">
         <div class="card">
-            <h3>Thông tin cá nhân</h3>
-            <p>Mã sinh viên: @Model.SinhVien.MaSv</p>
-            <p>Họ tên: @Model.SinhVien.HoTen</p>
-            <p>Lớp: @Model.SinhVien.Lop</p>
+            <div class="cards">
+                <h3>Thông tin cá nhân</h3>
+                <p>Mã sinh viên: @Model.SinhVien.MaSv</p>
+                <p>Họ tên: @Model.SinhVien.HoTen</p>
+                <p>Lớp: @Model.SinhVien.Lop</p>
+            </div>
             <a asp-controller="SinhViens" asp-action="Details" asp-route-id="@Model.SinhVien.MaSv" class="btn btn-primary">Chi tiết</a>
         </div>
 
         <div class="card">
-            <h3>Phòng đang ở</h3>
-            <p>@Model.Phong.ToaNha - Phòng @Model.Phong.MaPhong</p>
+            <div class="cards">
+                <h3>Phòng đang ở</h3>
+                <p>Tòa @Model.Phong.ToaNha - Phòng @Model.Phong.MaPhong</p>
+            </div>
+            <a asp-action="Details" asp-controller="Phongs" asp-route-id="@Model.Phong.MaPhong" class="btn btn-primary">Xem chi tiết</a>
         </div>
 
         <div class="card">
-            <h3>Hợp đồng</h3>
-            <p>Bắt đầu: @Model.HopDong.NgayBatDau?.ToString("dd/MM/yyyy")</p>
-            <p>Kết thúc: @Model.HopDong.NgayKetThuc?.ToString("dd/MM/yyyy")</p>
+            <div class="cards">
+                <h3>Hợp đồng</h3>
+                <p>Bắt đầu: @Model.HopDong.NgayBatDau?.ToString("dd/MM/yyyy")</p>
+                <p>Kết thúc: @Model.HopDong.NgayKetThuc?.ToString("dd/MM/yyyy")</p>
+            </div>
+            <a asp-controller="HopDongs" asp-action="Details" asp-route-id="@Model.HopDong.MaHopDong" class="btn btn-primary">Xem chi tiết</a>
         </div>
 
         <div class="card">
-            <h3>Hóa đơn</h3>
-            @foreach (var hd in Model.HoaDons.Take(2))
-            {
-                <p>
-                    Tháng @(hd.NgayXuat.HasValue? hd.NgayXuat.Value.Month : 0)/
-                    @(hd.NgayXuat.HasValue? hd.NgayXuat.Value.Year : 0):
-                    @hd.TrangThai
-                </p>
-            }
+            <div class="cards">
+                <h3>Hóa đơn</h3>
+                @foreach (var hd in Model.HoaDons.Take(2))
+                {
+                    <table class="table">
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Trạng thái</th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <td>
+                                Tháng @(hd.NgayXuat.HasValue? hd.NgayXuat.Value.Month : 0)/
+                                @(hd.NgayXuat.HasValue? hd.NgayXuat.Value.Year : 0)
+                            </td>
+                            <td>@hd.TrangThai</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@hd.MaHoaDon" asp-controller="HoaDons" class="btn btn-info">Xem chi tiết</a>
+                            </td>
+                        </tr>
+                    </table>
+                }
+            </div>
         </div>
 
         <div class="card">
-            <h3>Phản ánh sự cố</h3>
-            <p>@Model.PhanAnhs.Count(pa => pa.TrangThai == "Đang xử lý") phản ánh đang xử lý</p>
-            <p>@Model.PhanAnhs.Count(pa => pa.TrangThai == "Hoàn thành") phản ánh đã hoàn thành</p>
-            <a asp-action="Create" asp-controller="PhanAnhs" class="btn btn-primary">thêm phản ánh</a>
+            <div class="cards">
+                <h3>Phản ánh sự cố</h3>
+                <p>@Model.PhanAnhs.Count(pa => pa.TrangThai == "Đang xử lý") phản ánh đang xử lý</p>
+                <p>@Model.PhanAnhs.Count(pa => pa.TrangThai == "Hoàn thành") phản ánh đã hoàn thành</p>
+            </div>
+            @* <a asp-action="Create" asp-controller="PhanAnhs" class="btn btn-primary">Thêm phản ánh</a> *@
+            <a asp-action="Index" asp-controller="PhanAnhs" class="btn btn-primary">Xem chi tiết</a>
         </div>
 
         <div class="card">
-            <h3>Thông báo</h3>
-            <p>@Model.ThongBaos.First().NoiDung</p>
-            <p>Ngày: @Model.ThongBaos.First().ThoiGianGui?.ToString("dd/MM/yyyy")</p>
+            <div class="cards">
+                <h3>Thông báo</h3>
+                <p>@Model.ThongBaos.First().NoiDung</p>
+                <p>Ngày: @Model.ThongBaos.First().ThoiGianGui?.ToString("dd/MM/yyyy")</p>
+            </div>
+            <a asp-action="Index" asp-controller="ThongBaos" class="btn btn-primary">Xem chi tiết</a>
         </div>
     </div>
 </div>
