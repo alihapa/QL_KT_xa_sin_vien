@@ -40,7 +40,7 @@ namespace QL_KT_xa_sin_vien.Controllers
 
             if (id == null)
             {
-                return NotFound();
+                return View();
             }
 
             var sinhVien = await _context.SinhViens
@@ -48,7 +48,13 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaSv == id);
             if (sinhVien == null)
             {
-                return NotFound();
+                sinhVien = new SinhVien
+                {
+                    HoTen = "chưa có tên",
+                    MaSv = "chưa có mã sinh viên",
+                    Lop = "chưa có lớp",
+                    Email = "chưa có email"
+                };
             }
 
             return View(sinhVien);

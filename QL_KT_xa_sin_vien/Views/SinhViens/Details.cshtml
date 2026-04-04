@@ -4,6 +4,7 @@
     ViewData["Title"] = "Details";
 }
 
+
 <h1>Chi tiết</h1>
 
 <div>
@@ -50,5 +51,11 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.MaSv" class="btn btn-info">Chỉn sửa</a>
-    @* <a asp-action="Index">Back to List</a> *@
+    @{
+        var role = Context.Session.GetString("userRole");
+        if( role == "2" || role == "3") {
+            <a asp-action="Index">Back to List</a>
+        }
+    }
+    
 </div>
