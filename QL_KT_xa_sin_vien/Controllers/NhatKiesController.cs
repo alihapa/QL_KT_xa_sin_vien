@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize( "3")]
     public class NhatKiesController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,6 +20,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: NhatKies
+        [RoleAuthorize("3")]
         public async Task<IActionResult> Index()
         {
             var qLSinhVienContext = _context.NhatKies.Include(n => n.NguoiThucHienNavigation);
@@ -26,6 +28,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: NhatKies/Details/5
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -45,6 +48,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: NhatKies/Create
+        [RoleAuthorize( "3")]
         public IActionResult Create()
         {
             ViewData["NguoiThucHien"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan");
@@ -56,6 +60,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> Create([Bind("MaLog,NguoiThucHien,HanhDong,DoiTuong,GiaTriTruoc,GiaTriSau,ThoiGian")] NhatKy nhatKy)
         {
             if (ModelState.IsValid)
@@ -69,6 +74,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: NhatKies/Edit/5
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -90,6 +96,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaLog,NguoiThucHien,HanhDong,DoiTuong,GiaTriTruoc,GiaTriSau,ThoiGian")] NhatKy nhatKy)
         {
             if (id != nhatKy.MaLog)
@@ -122,6 +129,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: NhatKies/Delete/5
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -143,6 +151,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: NhatKies/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var nhatKy = await _context.NhatKies.FindAsync(id);

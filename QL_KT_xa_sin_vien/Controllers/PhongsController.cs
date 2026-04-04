@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize("1", "2", "3")]
     public class PhongsController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,6 +20,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Phongs
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Index()
         {
             var qLSinhVienContext = _context.Phongs.Include(p => p.ToaNhaNavigation);
@@ -26,6 +28,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Phongs/Details/5
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -45,6 +48,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Phongs/Create
+        [RoleAuthorize( "2", "3")]
         public IActionResult Create()
         {
             ViewData["ToaNha"] = new SelectList(_context.ToaNhas, "MaToaNha", "MaToaNha");
@@ -56,6 +60,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Create([Bind("MaPhong,ToaNha,Tang,LoaiPhong,SucChua,SoLuongDangO,GioiTinh,TrangThai")] Phong phong)
         {
             if (ModelState.IsValid)
@@ -69,6 +74,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Phongs/Edit/5
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -90,6 +96,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaPhong,ToaNha,Tang,LoaiPhong,SucChua,SoLuongDangO,GioiTinh,TrangThai")] Phong phong)
         {
             if (id != phong.MaPhong)
@@ -122,6 +129,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Phongs/Delete/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -143,6 +151,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: Phongs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var phong = await _context.Phongs.FindAsync(id);

@@ -1,4 +1,20 @@
 ﻿@model QL_KT_xa_sin_vien.Models.DashboardViewModel
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+                Swal.fire({
+                icon: 'error',
+                title: 'Thông báo',
+                text: '@TempData["ErrorMessage"]',
+                confirmButtonText: 'OK'
+                });
+            </text>
+        }
+    </script>
+}
 <link href="~/css/index.css" rel="stylesheet" />
 <div class="dashboard-box">
     <h2>TỔNG QUAN HỆ THỐNG KÝ TÚC XÁ</h2>

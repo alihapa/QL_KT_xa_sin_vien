@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize("1", "2", "3")]
     public class TaiKhoansController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,6 +20,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: TaiKhoans
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Index()
         {
             var qLSinhVienContext = _context.TaiKhoans.Include(t => t.VaiTroNavigation);
@@ -26,6 +28,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: TaiKhoans/Details/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -45,6 +48,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: TaiKhoans/Create
+        [RoleAuthorize( "3")]
         public IActionResult Create()
         {
             ViewData["VaiTro"] = new SelectList(_context.VaiTros, "MaVaiTro", "MaVaiTro");
@@ -56,6 +60,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("3")]
         public async Task<IActionResult> Create([Bind("MaTaiKhoan,TenDangNhap,MatKhauMh,Email,Sdt,VaiTro,TrangThai")] TaiKhoan taiKhoan)
         {
             if (ModelState.IsValid)
@@ -69,6 +74,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: TaiKhoans/Edit/5
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -90,6 +96,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaTaiKhoan,TenDangNhap,MatKhauMh,Email,Sdt,VaiTro,TrangThai")] TaiKhoan taiKhoan)
         {
             if (id != taiKhoan.MaTaiKhoan)
@@ -122,6 +129,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: TaiKhoans/Delete/5
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -143,6 +151,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: TaiKhoans/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var taiKhoan = await _context.TaiKhoans.FindAsync(id);

@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize("1", "2", "3")]
     public class HopDongsController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,6 +20,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HopDongs
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Index()
         {
             var qLSinhVienContext = _context.HopDongs.Include(h => h.MaGiuongNavigation).Include(h => h.MaPhongNavigation).Include(h => h.MaSvNavigation);
@@ -26,6 +28,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HopDongs/Details/5
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -47,6 +50,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HopDongs/Create
+        [RoleAuthorize("2", "3")]
         public IActionResult Create()
         {
             ViewData["MaGiuong"] = new SelectList(_context.Giuongs, "MaGiuong", "MaGiuong");
@@ -60,6 +64,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Create([Bind("MaHopDong,MaSv,MaPhong,MaGiuong,NgayBatDau,NgayKetThuc,TrangThai,DieuKhoan")] HopDong hopDong)
         {
             if (ModelState.IsValid)
@@ -75,6 +80,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HopDongs/Edit/5
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -98,6 +104,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaHopDong,MaSv,MaPhong,MaGiuong,NgayBatDau,NgayKetThuc,TrangThai,DieuKhoan")] HopDong hopDong)
         {
             if (id != hopDong.MaHopDong)
@@ -132,6 +139,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HopDongs/Delete/5
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -155,6 +163,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: HopDongs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var hopDong = await _context.HopDongs.FindAsync(id);

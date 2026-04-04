@@ -32,7 +32,7 @@ namespace QL_KT_xa_sin_vien
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -40,7 +40,6 @@ namespace QL_KT_xa_sin_vien
 
             // Bật session trước khi dùng endpoints
             app.UseSession();
-
             app.UseAuthorization();
 
             app.MapControllerRoute(

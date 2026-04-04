@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize("1", "2", "3", "4")]
     public class HoaDonsController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,6 +20,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HoaDons
+        [RoleAuthorize("1", "2", "3", "4")]
         public async Task<IActionResult> Index()
         {
             var qLSinhVienContext = _context.HoaDons.Include(h => h.MaHopDongNavigation).Include(h => h.MaSvNavigation);
@@ -26,6 +28,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HoaDons/Details/5
+        [RoleAuthorize("1", "2", "3", "4")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -46,6 +49,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HoaDons/Create
+        [RoleAuthorize("2", "3")]
         public IActionResult Create()
         {
             ViewData["MaHopDong"] = new SelectList(_context.HopDongs, "MaHopDong", "MaHopDong");
@@ -58,6 +62,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Create([Bind("MaHoaDon,MaHopDong,MaSv,SoTien,TrangThai,NgayXuat")] HoaDon hoaDon)
         {
             if (ModelState.IsValid)
@@ -72,6 +77,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HoaDons/Edit/5
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -94,6 +100,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaHoaDon,MaHopDong,MaSv,SoTien,TrangThai,NgayXuat")] HoaDon hoaDon)
         {
             if (id != hoaDon.MaHoaDon)
@@ -127,6 +134,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: HoaDons/Delete/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -149,6 +157,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: HoaDons/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var hoaDon = await _context.HoaDons.FindAsync(id);

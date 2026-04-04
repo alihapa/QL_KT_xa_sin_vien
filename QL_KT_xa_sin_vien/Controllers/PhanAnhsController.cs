@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize("1", "2", "3")]
     public class PhanAnhsController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,6 +20,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: PhanAnhs
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Index()
         {
             var qLSinhVienContext = _context.PhanAnhs.Include(p => p.MaPhongNavigation).Include(p => p.MaSvNavigation).Include(p => p.NguoiXuLyNavigation);
@@ -26,6 +28,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: PhanAnhs/Details/5
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -47,6 +50,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: PhanAnhs/Create
+        [RoleAuthorize("1", "2", "3")]
         public IActionResult Create()
         {
             var phanAnh = new PhanAnh
@@ -80,6 +84,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Create([Bind("MaPhanAnh,MaSv,MaPhong,MucDoUuTien,TrangThai,MoTa,NguoiXuLy,ThoiGianTao,ThoiGianCapNhat")] PhanAnh phanAnh)
         {
             //phanAnh.MaPhanAnh = Guid.NewGuid().ToString();
@@ -121,6 +126,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: PhanAnhs/Edit/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -144,6 +150,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaPhanAnh,MaSv,MaPhong,MoTa,MucDoUuTien,TrangThai,NguoiXuLy,ThoiGianTao,ThoiGianCapNhat")] PhanAnh phanAnh)
         {
             if (id != phanAnh.MaPhanAnh)
@@ -178,6 +185,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: PhanAnhs/Delete/5
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -201,6 +209,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: PhanAnhs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var phanAnh = await _context.PhanAnhs.FindAsync(id);

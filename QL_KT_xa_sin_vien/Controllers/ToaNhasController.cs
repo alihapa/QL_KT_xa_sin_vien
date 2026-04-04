@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize( "2", "3")]
     public class ToaNhasController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,12 +20,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ToaNhas
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.ToaNhas.ToListAsync());
         }
 
         // GET: ToaNhas/Details/5
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -43,6 +46,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ToaNhas/Create
+        [RoleAuthorize("2", "3")]
         public IActionResult Create()
         {
             return View();
@@ -53,6 +57,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Create([Bind("MaToaNha,TenToaNha,DiaChi")] ToaNha toaNha)
         {
             if (ModelState.IsValid)
@@ -65,6 +70,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ToaNhas/Edit/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -85,6 +91,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaToaNha,TenToaNha,DiaChi")] ToaNha toaNha)
         {
             if (id != toaNha.MaToaNha)
@@ -116,6 +123,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ToaNhas/Delete/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -136,6 +144,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: ToaNhas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var toaNha = await _context.ToaNhas.FindAsync(id);

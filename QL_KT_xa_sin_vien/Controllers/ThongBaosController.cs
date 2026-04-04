@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize("1", "2", "3")]
     public class ThongBaosController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,6 +20,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ThongBaos
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Index()
         {
             var qLSinhVienContext = _context.ThongBaos.Include(t => t.NguoiNhanNavigation);
@@ -26,6 +28,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ThongBaos/Details/5
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -45,6 +48,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ThongBaos/Create
+        [RoleAuthorize( "2", "3")]
         public IActionResult Create()
         {
             ViewData["NguoiNhan"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan");
@@ -56,6 +60,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Create([Bind("MaThongBao,NguoiNhan,LoaiThongBao,NoiDung,TrangThai,ThoiGianGui")] ThongBao thongBao)
         {
             if (ModelState.IsValid)
@@ -69,6 +74,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ThongBaos/Edit/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -90,6 +96,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaThongBao,NguoiNhan,LoaiThongBao,NoiDung,TrangThai,ThoiGianGui")] ThongBao thongBao)
         {
             if (id != thongBao.MaThongBao)
@@ -122,6 +129,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: ThongBaos/Delete/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -143,6 +151,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: ThongBaos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var thongBao = await _context.ThongBaos.FindAsync(id);

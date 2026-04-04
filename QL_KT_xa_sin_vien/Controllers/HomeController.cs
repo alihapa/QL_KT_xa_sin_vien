@@ -5,7 +5,7 @@ using QL_KT_xa_sin_vien.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace QL_KT_xa_sin_vien.Controllers
-{
+{ 
     public class HomeController : Controller
     {
         QLSinhVienContext db = new QLSinhVienContext();
@@ -23,6 +23,10 @@ namespace QL_KT_xa_sin_vien.Controllers
             {
                 // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
                 return RedirectToAction("DangNhap");
+            }
+            if (HttpContext.Items.ContainsKey("ErrorMessage"))
+            {
+                TempData["ErrorMessage"] = HttpContext.Items["ErrorMessage"];
             }
 
             // Lấy sinh viên theo tài khoản
@@ -117,14 +121,13 @@ namespace QL_KT_xa_sin_vien.Controllers
             return View(vm);
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
         [HttpGet]
         public IActionResult DangNhap()
         {
+            if (HttpContext.Items.ContainsKey("ErrorMessage"))
+            {
+                TempData["ErrorMessage"] = HttpContext.Items["ErrorMessage"];
+            }
             return View();
         }
         [HttpPost]
@@ -152,6 +155,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                         // tenSinhVien có thể null nếu chưa có sinh viên liên kết
                         HttpContext.Session.SetString("users", tenSinhVien);
                         HttpContext.Session.SetString("userId", userId); // Lưu MaTaiKhoan vào session để sử dụng sau này
+                        HttpContext.Session.SetString("userRole", user.VaiTro); // Lưu vai trò vào session nếu cần thiết
                     }
                     user.TrangThai = "1"; // Cập nhật trạng thái đăng nhập
                     db.SaveChanges();
@@ -174,8 +178,6 @@ namespace QL_KT_xa_sin_vien.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult TaoTaiKhoan(TaiKhoan taikhoan)
         {
-            
-
             try
             {
                 // kiểm tra vai trò "1" có tồn tại không
@@ -242,6 +244,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             }
             HttpContext.Session.Remove("user");
             HttpContext.Session.Remove("userId");
+            HttpContext.Session.Remove("userRole");
             SignOut();
             
             return RedirectToAction("DangNhap");

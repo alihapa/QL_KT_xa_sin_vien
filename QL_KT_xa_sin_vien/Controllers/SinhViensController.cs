@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize("1", "2", "3")]
     public class SinhViensController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,20 +20,22 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: SinhViens
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Index()
-        {
+        { 
             var qLSinhVienContext = _context.SinhViens.Include(s => s.MaTaiKhoanNavigation);
             return View(await qLSinhVienContext.ToListAsync());
         }
 
         // GET: SinhViens/Details/5
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Details(string id)
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            {
-                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-                return RedirectToAction("DangNhap");
-            }
+            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            //{
+            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+            //    return RedirectToAction("DangNhap");
+            //}
 
             if (id == null)
             {
@@ -51,13 +54,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: SinhViens/Create
+        [RoleAuthorize("3")]
         public IActionResult Create()
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            {
-                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-                return RedirectToAction("DangNhap");
-            }
+            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            //{
+            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+            //    return RedirectToAction("DangNhap");
+            //}
             ViewData["MaTaiKhoan"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan");
             return View();
         }
@@ -67,13 +71,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("3")]
         public async Task<IActionResult> Create([Bind("MaSv,HoTen,Lop,Khoa,SoCmnd,Email,MaTaiKhoan")] SinhVien sinhVien)
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            {
-                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-                return RedirectToAction("DangNhap");
-            }
+            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            //{
+            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+            //    return RedirectToAction("DangNhap");
+            //}
             if (ModelState.IsValid)
             {
                 _context.Add(sinhVien);
@@ -85,13 +90,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: SinhViens/Edit/5
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            {
-                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-                return RedirectToAction("DangNhap");
-            }
+            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            //{
+            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+            //    return RedirectToAction("DangNhap");
+            //}
             if (id == null)
             {
                 return NotFound();
@@ -111,13 +117,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaSv,HoTen,Lop,Khoa,SoCmnd,Email,MaTaiKhoan")] SinhVien sinhVien)
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            {
-                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-                return RedirectToAction("DangNhap");
-            }
+            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            //{
+            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+            //    return RedirectToAction("DangNhap");
+            //}
             if (id != sinhVien.MaSv)
             {
                 return NotFound();
@@ -148,13 +155,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: SinhViens/Delete/5
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            {
-                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-                return RedirectToAction("DangNhap");
-            }
+            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            //{
+            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+            //    return RedirectToAction("DangNhap");
+            //}
             if (id == null)
             {
                 return NotFound();
@@ -174,13 +182,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: SinhViens/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            {
-                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-                return RedirectToAction("DangNhap");
-            }
+            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            //{
+            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+            //    return RedirectToAction("DangNhap");
+            //}
             var sinhVien = await _context.SinhViens.FindAsync(id);
             if (sinhVien != null)
             {

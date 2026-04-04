@@ -9,6 +9,7 @@ using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
+    [RoleAuthorize("2", "3")]
     public class GiuongsController : Controller
     {
         private readonly QLSinhVienContext _context;
@@ -19,6 +20,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Giuongs
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Index()
         {
             var qLSinhVienContext = _context.Giuongs.Include(g => g.MaPhongNavigation).Include(g => g.OccupiedByNavigation);
@@ -26,6 +28,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Giuongs/Details/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -46,6 +49,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Giuongs/Create
+        [RoleAuthorize("2", "3")]
         public IActionResult Create()
         {
             ViewData["MaPhong"] = new SelectList(_context.Phongs, "MaPhong", "MaPhong");
@@ -58,6 +62,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Create([Bind("MaGiuong,MaPhong,SoGiuong,OccupiedBy,TrangThai")] Giuong giuong)
         {
             if (ModelState.IsValid)
@@ -72,6 +77,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Giuongs/Edit/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -94,6 +100,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Edit(string id, [Bind("MaGiuong,MaPhong,SoGiuong,OccupiedBy,TrangThai")] Giuong giuong)
         {
             if (id != giuong.MaGiuong)
@@ -127,6 +134,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
 
         // GET: Giuongs/Delete/5
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -149,6 +157,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         // POST: Giuongs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var giuong = await _context.Giuongs.FindAsync(id);
