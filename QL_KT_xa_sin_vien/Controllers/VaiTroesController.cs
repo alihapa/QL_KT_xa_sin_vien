@@ -18,7 +18,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             _context = context;
         }
-
+         
         // GET: VaiTroes
         [RoleAuthorize("3")]
         public async Task<IActionResult> Index()
@@ -58,6 +58,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("3")]
+         
         public async Task<IActionResult> Create([Bind("MaVaiTro,TenVaiTro,QuyenHan")] VaiTro vaiTro)
         {
             if (ModelState.IsValid)
@@ -92,6 +93,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("3")]
+         
         public async Task<IActionResult> Edit(string id, [Bind("MaVaiTro,TenVaiTro,QuyenHan")] VaiTro vaiTro)
         {
             if (id != vaiTro.MaVaiTro)
@@ -145,6 +147,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("3")]
+         
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var vaiTro = await _context.VaiTros.FindAsync(id);

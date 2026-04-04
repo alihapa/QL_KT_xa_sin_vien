@@ -13,7 +13,7 @@ namespace QL_KT_xa_sin_vien.Controllers
     public class TaiKhoansController : Controller
     {
         private readonly QLSinhVienContext _context;
-
+         
         public TaiKhoansController(QLSinhVienContext context)
         {
             _context = context;
@@ -61,6 +61,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("3")]
+         
         public async Task<IActionResult> Create([Bind("MaTaiKhoan,TenDangNhap,MatKhauMh,Email,Sdt,VaiTro,TrangThai")] TaiKhoan taiKhoan)
         {
             if (ModelState.IsValid)
@@ -97,6 +98,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "3")]
+         
         public async Task<IActionResult> Edit(string id, [Bind("MaTaiKhoan,TenDangNhap,MatKhauMh,Email,Sdt,VaiTro,TrangThai")] TaiKhoan taiKhoan)
         {
             if (id != taiKhoan.MaTaiKhoan)
@@ -152,6 +154,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("1", "2", "3")]
+         
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var taiKhoan = await _context.TaiKhoans.FindAsync(id);

@@ -18,7 +18,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             _context = context;
         }
-
+         
         // GET: HopDongs
         [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Index()
@@ -65,6 +65,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> Create([Bind("MaHopDong,MaSv,MaPhong,MaGiuong,NgayBatDau,NgayKetThuc,TrangThai,DieuKhoan")] HopDong hopDong)
         {
             if (ModelState.IsValid)
@@ -105,6 +106,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> Edit(string id, [Bind("MaHopDong,MaSv,MaPhong,MaGiuong,NgayBatDau,NgayKetThuc,TrangThai,DieuKhoan")] HopDong hopDong)
         {
             if (id != hopDong.MaHopDong)
@@ -164,6 +166,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var hopDong = await _context.HopDongs.FindAsync(id);

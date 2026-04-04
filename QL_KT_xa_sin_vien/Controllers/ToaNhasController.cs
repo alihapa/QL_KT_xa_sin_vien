@@ -18,7 +18,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             _context = context;
         }
-
+         
         // GET: ToaNhas
         [RoleAuthorize( "2", "3")]
         public async Task<IActionResult> Index()
@@ -58,6 +58,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> Create([Bind("MaToaNha,TenToaNha,DiaChi")] ToaNha toaNha)
         {
             if (ModelState.IsValid)
@@ -92,6 +93,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> Edit(string id, [Bind("MaToaNha,TenToaNha,DiaChi")] ToaNha toaNha)
         {
             if (id != toaNha.MaToaNha)
@@ -145,6 +147,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("2", "3")]
+         
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var toaNha = await _context.ToaNhas.FindAsync(id);

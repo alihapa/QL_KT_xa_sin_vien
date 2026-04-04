@@ -18,7 +18,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             _context = context;
         }
-
+         
         // GET: ThongBaos
         [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Index()
@@ -61,6 +61,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> Create([Bind("MaThongBao,NguoiNhan,LoaiThongBao,NoiDung,TrangThai,ThoiGianGui")] ThongBao thongBao)
         {
             if (ModelState.IsValid)
@@ -97,6 +98,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> Edit(string id, [Bind("MaThongBao,NguoiNhan,LoaiThongBao,NoiDung,TrangThai,ThoiGianGui")] ThongBao thongBao)
         {
             if (id != thongBao.MaThongBao)
@@ -152,6 +154,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("2", "3")]
+         
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var thongBao = await _context.ThongBaos.FindAsync(id);

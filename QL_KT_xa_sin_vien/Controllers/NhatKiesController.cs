@@ -18,6 +18,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             _context = context;
         }
+       
 
         // GET: NhatKies
         [RoleAuthorize("3")]
@@ -61,6 +62,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "3")]
+       
         public async Task<IActionResult> Create([Bind("MaLog,NguoiThucHien,HanhDong,DoiTuong,GiaTriTruoc,GiaTriSau,ThoiGian")] NhatKy nhatKy)
         {
             if (ModelState.IsValid)
@@ -97,6 +99,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "3")]
+       
         public async Task<IActionResult> Edit(string id, [Bind("MaLog,NguoiThucHien,HanhDong,DoiTuong,GiaTriTruoc,GiaTriSau,ThoiGian")] NhatKy nhatKy)
         {
             if (id != nhatKy.MaLog)
@@ -152,6 +155,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "3")]
+       
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var nhatKy = await _context.NhatKies.FindAsync(id);

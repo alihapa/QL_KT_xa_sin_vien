@@ -10,10 +10,11 @@ using QL_KT_xa_sin_vien.Models;
 namespace QL_KT_xa_sin_vien.Controllers
 {
     [RoleAuthorize("1", "2", "3")]
+
     public class PhongsController : Controller
     {
         private readonly QLSinhVienContext _context;
-
+         
         public PhongsController(QLSinhVienContext context)
         {
             _context = context;
@@ -61,6 +62,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> Create([Bind("MaPhong,ToaNha,Tang,LoaiPhong,SucChua,SoLuongDangO,GioiTinh,TrangThai")] Phong phong)
         {
             if (ModelState.IsValid)
@@ -97,6 +99,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("2", "3")]
+         
         public async Task<IActionResult> Edit(string id, [Bind("MaPhong,ToaNha,Tang,LoaiPhong,SucChua,SoLuongDangO,GioiTinh,TrangThai")] Phong phong)
         {
             if (id != phong.MaPhong)
@@ -152,6 +155,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var phong = await _context.Phongs.FindAsync(id);

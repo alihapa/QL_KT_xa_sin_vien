@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,7 +14,7 @@ namespace QL_KT_xa_sin_vien.Controllers
     public class SinhViensController : Controller
     {
         private readonly QLSinhVienContext _context;
-
+         
         public SinhViensController(QLSinhVienContext context)
         {
             _context = context;
@@ -72,6 +73,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("3")]
+        //ghi nhật ký
+         
         public async Task<IActionResult> Create([Bind("MaSv,HoTen,Lop,Khoa,SoCmnd,Email,MaTaiKhoan")] SinhVien sinhVien)
         {
             //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
@@ -79,6 +82,12 @@ namespace QL_KT_xa_sin_vien.Controllers
             //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
             //    return RedirectToAction("DangNhap");
             //}
+
+            //var oldSv = await _context.SinhViens.FindAsync(id);
+            //if (oldSv == null) return NotFound();
+
+            //var giaTriTruoc = JsonSerializer.Serialize(oldSv);
+
             if (ModelState.IsValid)
             {
                 _context.Add(sinhVien);
@@ -86,6 +95,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["MaTaiKhoan"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan", sinhVien.MaTaiKhoan);
+            //await LogService.GhiNhatKy(HttpContext.Session.GetString("userId"), "Them", "SinhVien", null, sinhVien);
             return View(sinhVien);
         }
 
@@ -98,6 +108,9 @@ namespace QL_KT_xa_sin_vien.Controllers
             //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
             //    return RedirectToAction("DangNhap");
             //}
+            var oldSv = await _context.SinhViens.FindAsync(id);
+            if (oldSv == null) return NotFound();
+            var giaTriTruoc = JsonSerializer.Serialize(oldSv);
             if (id == null)
             {
                 return NotFound();
@@ -183,6 +196,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("1", "2", "3")]
+         
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))

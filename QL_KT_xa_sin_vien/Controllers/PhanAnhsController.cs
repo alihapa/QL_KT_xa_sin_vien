@@ -18,6 +18,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             _context = context;
         }
+         
 
         // GET: PhanAnhs
         [RoleAuthorize("1", "2", "3")]
@@ -151,6 +152,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+         
         public async Task<IActionResult> Edit(string id, [Bind("MaPhanAnh,MaSv,MaPhong,MoTa,MucDoUuTien,TrangThai,NguoiXuLy,ThoiGianTao,ThoiGianCapNhat")] PhanAnh phanAnh)
         {
             if (id != phanAnh.MaPhanAnh)
@@ -210,6 +212,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "3")]
+         
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var phanAnh = await _context.PhanAnhs.FindAsync(id);

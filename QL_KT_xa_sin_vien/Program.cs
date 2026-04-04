@@ -41,7 +41,7 @@ namespace QL_KT_xa_sin_vien
             // Bật session trước khi dùng endpoints
             app.UseSession();
             app.UseAuthorization();
-
+            app.UseMiddleware<LoggingMiddleware>();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");

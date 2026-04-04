@@ -5,7 +5,7 @@ using QL_KT_xa_sin_vien.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace QL_KT_xa_sin_vien.Controllers
-{ 
+{
     public class HomeController : Controller
     {
         QLSinhVienContext db = new QLSinhVienContext();

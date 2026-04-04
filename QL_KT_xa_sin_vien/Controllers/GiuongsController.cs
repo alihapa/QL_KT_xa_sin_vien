@@ -13,7 +13,7 @@ namespace QL_KT_xa_sin_vien.Controllers
     public class GiuongsController : Controller
     {
         private readonly QLSinhVienContext _context;
-
+        
         public GiuongsController(QLSinhVienContext context)
         {
             _context = context;
@@ -63,6 +63,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+        
         public async Task<IActionResult> Create([Bind("MaGiuong,MaPhong,SoGiuong,OccupiedBy,TrangThai")] Giuong giuong)
         {
             if (ModelState.IsValid)
@@ -101,6 +102,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("2", "3")]
+        
         public async Task<IActionResult> Edit(string id, [Bind("MaGiuong,MaPhong,SoGiuong,OccupiedBy,TrangThai")] Giuong giuong)
         {
             if (id != giuong.MaGiuong)
@@ -158,6 +160,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
+        
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var giuong = await _context.Giuongs.FindAsync(id);
