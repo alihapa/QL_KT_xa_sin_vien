@@ -7,7 +7,7 @@ public partial class Phong
 {
     public string MaPhong { get; set; } = null!;
 
-    public string? ToaNha { get; set; }
+    public string? MaToaNha { get; set; }
 
     public int? Tang { get; set; }
 
@@ -25,7 +25,7 @@ public partial class Phong
 
     public virtual ICollection<HopDong> HopDongs { get; set; } = new List<HopDong>();
 
-    public virtual ICollection<PhanAnh> PhanAnhs { get; set; } = new List<PhanAnh>();
+    public virtual ToaNha? MaToaNhaNavigation { get; set; }
 
-    public virtual ToaNha? ToaNhaNavigation { get; set; }
+    public virtual ICollection<PhanAnh> PhanAnhs { get; set; } = new List<PhanAnh>();
 }

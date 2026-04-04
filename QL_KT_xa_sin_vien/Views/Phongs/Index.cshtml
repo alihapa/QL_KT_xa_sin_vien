@@ -31,7 +31,7 @@
                 @Html.DisplayNameFor(model => model.TrangThai)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ToaNhaNavigation)
+                @Html.DisplayNameFor(model => model.MaToaNhaNavigation)
             </th>
             <th></th>
         </tr>
@@ -58,7 +58,7 @@
                 @Html.DisplayFor(modelItem => item.TrangThai)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ToaNhaNavigation.MaToaNha)
+                @Html.DisplayFor(modelItem => item.MaToaNhaNavigation.MaToaNha)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.MaPhong">Edit</a> |

@@ -24,7 +24,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Index()
         {
-            var qLSinhVienContext = _context.Phongs.Include(p => p.ToaNhaNavigation);
+            var qLSinhVienContext = _context.Phongs.Include(p => p.MaToaNhaNavigation);
             return View(await qLSinhVienContext.ToListAsync());
         }
 
@@ -38,7 +38,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             }
 
             var phong = await _context.Phongs
-                .Include(p => p.ToaNhaNavigation)
+                .Include(p => p.MaToaNhaNavigation)
                 .FirstOrDefaultAsync(m => m.MaPhong == id);
             if (phong == null)
             {
@@ -71,7 +71,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ToaNha"] = new SelectList(_context.ToaNhas, "MaToaNha", "MaToaNha", phong.ToaNha);
+            ViewData["ToaNha"] = new SelectList(_context.ToaNhas, "MaToaNha", "MaToaNha", phong.MaToaNha);
             return View(phong);
         }
 
@@ -89,7 +89,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             {
                 return NotFound();
             }
-            ViewData["ToaNha"] = new SelectList(_context.ToaNhas, "MaToaNha", "MaToaNha", phong.ToaNha);
+            ViewData["ToaNha"] = new SelectList(_context.ToaNhas, "MaToaNha", "MaToaNha", phong.MaToaNha);
             return View(phong);
         }
 
@@ -127,7 +127,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ToaNha"] = new SelectList(_context.ToaNhas, "MaToaNha", "MaToaNha", phong.ToaNha);
+            ViewData["ToaNha"] = new SelectList(_context.ToaNhas, "MaToaNha", "MaToaNha", phong.MaToaNha);
             return View(phong);
         }
 
@@ -141,7 +141,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             }
 
             var phong = await _context.Phongs
-                .Include(p => p.ToaNhaNavigation)
+                .Include(p => p.MaToaNhaNavigation)
                 .FirstOrDefaultAsync(m => m.MaPhong == id);
             if (phong == null)
             {

@@ -1,4 +1,5 @@
-﻿@model QL_KT_xa_sin_vien.Models.DashboardViewModel
+﻿<meta charset="utf-8" />
+@model QL_KT_xa_sin_vien.Models.DashboardViewModel
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -32,7 +33,7 @@
         <div class="card">
             <div class="cards">
                 <h3>Phòng đang ở</h3>
-                <p>Tòa @Model.Phong.ToaNha - Phòng @Model.Phong.MaPhong</p>
+                <p>Tòa @Model.Phong.MaToaNha - Phòng @Model.Phong.MaPhong</p>
             </div>
             <a asp-action="Details" asp-controller="Phongs" asp-route-id="@Model.Phong.MaPhong" class="btn btn-primary">Xem chi tiết</a>
         </div>

@@ -171,7 +171,9 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpGet]
         public IActionResult TaoTaiKhoan()
         {
-            return View();
+            var taikhoan = new TaiKhoan();
+            taikhoan.MaTaiKhoan = Guid.NewGuid().ToString();
+            return View(taikhoan);
         }
 
         [HttpPost]
@@ -189,7 +191,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 }
 
                 // gán khóa chính
-                taikhoan.MaTaiKhoan = Guid.NewGuid().ToString();
+                
 
                 // gán vai trò (phải khớp MaVaiTro)
                 taikhoan.VaiTro = role.MaVaiTro;

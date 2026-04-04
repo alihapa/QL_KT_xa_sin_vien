@@ -9,7 +9,7 @@
 <form asp-action="TaoTaiKhoan" method="post">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
+    <input type="hidden" asp-for="MaTaiKhoan" />
     <div>
         <label asp-for="TenDangNhap">Tên đăng nhập</label>
         <input asp-for="TenDangNhap" class="form-control" />

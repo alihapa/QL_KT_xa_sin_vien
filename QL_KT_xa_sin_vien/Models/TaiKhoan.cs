@@ -5,9 +5,9 @@ namespace QL_KT_xa_sin_vien.Models;
 
 public partial class TaiKhoan
 {
-    public string? MaTaiKhoan { get; set; } 
+    public string MaTaiKhoan { get; set; } = null!;
 
-    public string? TenDangNhap { get; set; }
+    public string TenDangNhap { get; set; } = null!;
 
     public string? MatKhauMh { get; set; }
 

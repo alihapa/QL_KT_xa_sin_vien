@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.EntityFrameworkCore;
 using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien
@@ -24,6 +26,47 @@ namespace QL_KT_xa_sin_vien
             });
 
             var app = builder.Build();
+            var supportedCultures = new[] { "vi-VN" };
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture("vi-VN")
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<QLSinhVienContext>();
+
+                // Nếu chưa có vai trò nào thì thêm
+                if (!db.VaiTros.Any())
+                {
+                    db.VaiTros.AddRange(
+                        new VaiTro { MaVaiTro = "1", TenVaiTro = "Sinh viên", QuyenHan = "1" },
+                        new VaiTro { MaVaiTro = "2", TenVaiTro = "BQL", QuyenHan = "2" },
+                        new VaiTro { MaVaiTro = "3", TenVaiTro = "Admin", QuyenHan = "3" },
+                        new VaiTro { MaVaiTro = "4", TenVaiTro = "KeToan", QuyenHan = "4"}
+                    );
+                    db.SaveChanges();
+                }
+
+                // Nếu chưa có tài khoản nào thì thêm tài khoản mặc định
+                if (!db.TaiKhoans.Any())
+                {
+                    var hasher = new PasswordHasher<TaiKhoan>();
+                    var tk = new TaiKhoan
+                    {
+                        MaTaiKhoan = Guid.NewGuid().ToString(),
+                        TenDangNhap = "admin",
+                        MatKhauMh = hasher.HashPassword(null, "123456"), // hash bằng PasswordHasher
+                        Email = "admin@example.com",
+                        Sdt = "0123456789",
+                        VaiTro = "3", // Admin
+                        TrangThai = "Active"
+                    };
+
+                    db.TaiKhoans.Add(tk);
+                    db.SaveChanges();
+                }
+            }
+            app.UseRequestLocalization(localizationOptions);
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
