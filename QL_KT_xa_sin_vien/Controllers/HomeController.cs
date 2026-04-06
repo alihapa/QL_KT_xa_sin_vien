@@ -24,6 +24,11 @@ namespace QL_KT_xa_sin_vien.Controllers
                 // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
                 return RedirectToAction("DangNhap");
             }
+            if (HttpContext.Session.GetString("userRole") == "3")
+            {
+                //Nếu là admin thì chuyển hướng đến trang quản lý
+                return RedirectToAction("IndexAdmin");
+            }
             if (HttpContext.Items.ContainsKey("ErrorMessage"))
             {
                 TempData["ErrorMessage"] = HttpContext.Items["ErrorMessage"];
@@ -119,6 +124,129 @@ namespace QL_KT_xa_sin_vien.Controllers
             };
 
             return View(vm);
+        }
+
+        public IActionResult IndexAdmin()
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            {
+                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+                return RedirectToAction("DangNhap");
+            }
+            if (HttpContext.Session.GetString("userRole") != "3")
+            {
+                // Nếu không phải admin, chuyển hướng về trang chính
+                return RedirectToAction("Index");
+            }
+
+            var viewModel = new DashboardADMINViewModel();
+
+            var sinhViens = db.SinhViens.Include(s => s.MaTaiKhoanNavigation).ToList();
+            viewModel.SoLuongSinhVien = sinhViens.Count;
+            if (sinhViens == null || !sinhViens.Any())
+            {
+                sinhViens = new List<SinhVien>
+                {
+                    new SinhVien { MaSv = "chưa có mã sinh viên", HoTen = "chưa có tên", Lop = "chưa có lớp", Khoa = "chưa có khoa", SoCmnd = "chưa có số chứng minh nhân dân", Email = "chưa có email", MaTaiKhoan = "chưa có mã tài khoản"}
+                };
+            }
+
+            var taikhoans = db.TaiKhoans.ToList();
+            if (taikhoans == null || !taikhoans.Any())
+            {
+                taikhoans = new List<TaiKhoan>
+                {
+                    new TaiKhoan { MaTaiKhoan = "chưa có mã tài khoản", TenDangNhap = "chưa có tên đăng nhập", MatKhauMh = "chưa có mật khẩu" , Email = "chưa có email" , Sdt = "chưa có số điện thoại", VaiTro = "chưa có vai trò", TrangThai = "chưa có trạng thái" }
+                };
+            }
+
+            var giuongs = db.Giuongs.ToList();
+            if (giuongs == null || !giuongs.Any())
+            {
+                giuongs = new List<Giuong>
+                {
+                    new Giuong { MaGiuong = "chưa có mã giường", MaPhong = "chưa có mã phòng", SoGiuong = "chưa có số giường" , OccupiedBy = "chưa có người sở hữu" , TrangThai = "chưa có trạng thái" }
+                };
+            }
+
+            var phongs = db.Phongs.ToList();
+            viewModel.SoLuongPhong = phongs.Count;
+            if (phongs == null || !phongs.Any())
+            {
+                phongs = new List<Phong>
+                {
+                    new Phong { MaPhong = "chưa có mã phòng", MaToaNha = "chưa có mã tòa nhà", Tang = 0 , LoaiPhong = "chưa có loại phòng", SucChua = 0 , SoLuongDangO = 0 , GioiTinh = "chưa có giới tính" , TrangThai = "chưa có trạng thái" }
+                };
+            }
+
+            var toaNhas = db.ToaNhas.ToList();
+            if (toaNhas == null || !toaNhas.Any())
+            {
+                toaNhas = new List<ToaNha>
+                {
+                    new ToaNha { MaToaNha = "chưa có mã tòa nhà", TenToaNha = "chưa có tên tòa nhà", DiaChi = "chưa có địa chỉ" }
+                };
+            }
+
+            var hopDongs = db.HopDongs.ToList();
+            if (hopDongs == null || !hopDongs.Any())
+            {
+                hopDongs = new List<HopDong>
+                {
+                    new HopDong { MaHopDong = "chưa có mã hợp đồng", MaSv = "chưa có mã sinh viên", MaPhong = "chưa có mã phòng", MaGiuong = "chưa có mã giường" , NgayBatDau = null, NgayKetThuc = null, TrangThai = "chưa có trạng thái" , DieuKhoan = "chưa có điều khoản"}
+                };
+            }
+
+            var hoaDons = db.HoaDons.ToList();
+            viewModel.SoLuongHoaDon = hoaDons.Count;
+            if (hoaDons == null || !hoaDons.Any())
+            {
+                hoaDons = new List<HoaDon>
+                {
+                    new HoaDon { MaHoaDon = "chưa có mã hóa đơn", MaHopDong = "chưa có mã hợp đồng", MaSv = "chưa có mã sinh viên" , SoTien = 0 , NgayXuat = null , TrangThai = "chưa có trạng thái" }
+                };
+            }
+
+            var phanAnhs = db.PhanAnhs.ToList();
+            viewModel.SoLuongPhanAnh = phanAnhs.Count;
+            if (phanAnhs == null || !phanAnhs.Any())
+            {
+                phanAnhs = new List<PhanAnh>
+                {
+                    new PhanAnh { MaPhanAnh = "chưa có mã phản ánh", MaSv = "chưa có mã sinh viên",MaPhong = "chưa có mã phòng" , MoTa = "chưa có mô tả", MucDoUuTien = "chưa có mức độ ưu tiên" , TrangThai = "chưa có trạng thái" , NguoiXuLy = "chưa có người xử lý" , ThoiGianTao = null , ThoiGianCapNhat = null}
+                };
+            }
+
+            var nhatKis = db.NhatKies.ToList();
+            if (nhatKis == null || !nhatKis.Any())
+            {
+                nhatKis = new List<NhatKy>
+                {
+                    new NhatKy { MaLog = "chưa có mã nhật ký", NguoiThucHien = "chưa có người thực hiện" , HanhDong = "chưa có hành động", DoiTuong = "chưa có đối tượng", GiaTriTruoc = "chưa có giá trị trước", GiaTriSau = "chưa có giá trị sau" , ThoiGian = null}
+                };
+            }
+
+            var thongBaos = db.ThongBaos.ToList();
+            if (thongBaos == null || !thongBaos.Any())
+            {
+                thongBaos = new List<ThongBao>
+                {
+                    new ThongBao { MaThongBao = "chưa có mã thông báo", NguoiNhan = "chưa có người nhận" ,LoaiThongBao = "chưa có loại thông báo", NoiDung = "chưa có nội dung", ThoiGianGui = null , TrangThai = "chưa có trạng thái" }
+                };
+            }
+
+            var vaiTros = db.VaiTros.ToList();
+            if (vaiTros == null || !vaiTros.Any())
+            {
+                vaiTros = new List<VaiTro>
+                {
+                    new VaiTro { MaVaiTro = "chưa có mã vai trò", TenVaiTro = "chưa có tên vai trò" , QuyenHan = "chưa có quyền hạn"}
+                };
+            }
+
+            viewModel.HopDongs = hopDongs;
+            viewModel.PhanAnhs = phanAnhs;
+            return View(viewModel);
         }
 
         [HttpGet]

@@ -1,0 +1,157 @@
+﻿@model QL_KT_xa_sin_vien.Models.DashboardADMINViewModel
+@{
+    ViewData["Title"] = "Bảng điều khiển Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml"; 
+}
+
+<div class="container-fluid px-4">
+    <h2 class="mt-4 mb-4 text-primary fw-bold">Tổng quan hệ thống KTX</h2>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-primary text-white shadow h-100 py-2 border-0 rounded-3">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Sinh viên lưu trú</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.SoLuongSinhVien</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-graduate fa-2x text-gray-300 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between border-0 bg-transparent">
+                    <a class="small text-white stretched-link text-decoration-none" href="/SinhViens/Index">Xem chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-success text-white shadow h-100 py-2 border-0 rounded-3">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Số phòng đang sử dụng</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.SoLuongPhong</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-door-open fa-2x text-gray-300 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between border-0 bg-transparent">
+                    <a class="small text-white stretched-link text-decoration-none" href="/Phongs/Index">Xem chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-warning text-dark shadow h-100 py-2 border-0 rounded-3">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Hóa đơn cần xử lý</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.SoLuongHoaDon</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-invoice-dollar fa-2x text-gray-300 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between border-0 bg-transparent">
+                    <a class="small text-dark stretched-link text-decoration-none" href="/HoaDon">Xem chi tiết</a>
+                    <div class="small text-dark"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-danger text-white shadow h-100 py-2 border-0 rounded-3">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Phản ánh & Sự cố</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.SoLuongPhanAnh</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between border-0 bg-transparent">
+                    <a class="small text-white stretched-link text-decoration-none" href="/PhanAnh">Xem chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow border-0 rounded-3">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h5 class="fw-bold text-secondary"><i class="fas fa-bell text-warning me-2"></i>Phản ánh gần đây</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sinh viên</th>
+                                    <th>Nội dung</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* Hiển thị 5 phản ánh mới nhất *@
+                                @foreach (var pa in Model.PhanAnhs.Take(5))
+                                {
+                                    <tr>
+                                        <td>@pa.MaSv</td>
+                                        <td><span class="text-truncate d-inline-block" style="max-width: 200px;">@pa.MoTa</span></td>
+                                        <td><span class="badge bg-warning text-dark">Chờ xử lý</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow border-0 rounded-3">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h5 class="fw-bold text-secondary"><i class="fas fa-file-contract text-primary me-2"></i>Hợp đồng mới</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã HĐ</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Phòng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* Hiển thị 5 hợp đồng mới nhất *@
+                                @foreach (var hd in Model.HopDongs.Take(5))
+                                {
+                                    <tr>
+                                        <td><span class="fw-bold">@hd.MaHopDong</span></td>
+                                        <td>@hd.NgayBatDau?.ToString("dd/MM/yyyy")</td>
+                                        <td>@hd.MaPhong</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
