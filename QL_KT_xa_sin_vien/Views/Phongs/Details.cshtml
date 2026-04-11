@@ -1,60 +1,54 @@
 ﻿@model QL_KT_xa_sin_vien.Models.Phong
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Chi tiết phòng";
 }
 
-<h1>Details</h1>
+<h2 class="mb-4">Thông tin chi tiết phòng</h2>
 
-<div>
-    <h4>Phong</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Tang)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Tang)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LoaiPhong)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LoaiPhong)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SucChua)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SucChua)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SoLuongDangO)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SoLuongDangO)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.GioiTinh)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GioiTinh)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TrangThai)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaToaNhaNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaToaNhaNavigation.MaToaNha)
-        </dd>
-    </dl>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-bordered">
+            <tr>
+                <th>Tầng</th>
+                <td>@Model.Tang</td>
+            </tr>
+            <tr>
+                <th>Loại phòng</th>
+                <td>@Model.LoaiPhong</td>
+            </tr>
+            <tr>
+                <th>Sức chứa</th>
+                <td>@Model.SucChua</td>
+            </tr>
+            <tr>
+                <th>Số lượng đang ở</th>
+                <td>@Model.SoLuongDangO</td>
+            </tr>
+            <tr>
+                <th>Giới tính</th>
+                <td>@Model.GioiTinh</td>
+            </tr>
+            <tr>
+                <th>Trạng thái</th>
+                <td>@Model.TrangThai</td>
+            </tr>
+            <tr>
+                <th>Tòa nhà</th>
+                <td>@Model.MaToaNhaNavigation?.MaToaNha</td>
+            </tr>
+        </table>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaPhong">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="mt-3">
+    @{
+        var role = Context.Session.GetString("userRole");
+        if (role == "2" || role == "3")
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.MaPhong" class="btn btn-warning me-2">Sửa</a>
+        }
+    }
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary me-2">Trở lại trang chủ</a>
+    <a asp-action="Index" class="btn btn-info">Xem danh sách phòng</a>
 </div>

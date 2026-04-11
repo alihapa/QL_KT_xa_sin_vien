@@ -1,65 +1,47 @@
 ﻿@model IEnumerable<QL_KT_xa_sin_vien.Models.NhatKy>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Danh sách nhật ký";
 }
 
-<h1>Index</h1>
+<h2 class="mb-4">Danh sách nhật ký</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-success mb-3">+ Thêm nhật ký mới</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.HanhDong)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DoiTuong)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GiaTriTruoc)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GiaTriSau)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ThoiGian)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NguoiThucHienNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.HanhDong)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DoiTuong)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GiaTriTruoc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GiaTriSau)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ThoiGian)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NguoiThucHienNavigation.MaTaiKhoan)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaLog">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaLog">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaLog">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.HanhDong)</th>
+                    <th>@Html.DisplayNameFor(model => model.DoiTuong)</th>
+                    <th>@Html.DisplayNameFor(model => model.GiaTriTruoc)</th>
+                    <th>@Html.DisplayNameFor(model => model.GiaTriSau)</th>
+                    <th>@Html.DisplayNameFor(model => model.ThoiGian)</th>
+                    <th>@Html.DisplayNameFor(model => model.NguoiThucHienNavigation)</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.HanhDong</td>
+                        <td>@item.DoiTuong</td>
+                        <td>@item.GiaTriTruoc</td>
+                        <td>@item.GiaTriSau</td>
+                        <td>@item.ThoiGian</td>
+                        <td>@item.NguoiThucHienNavigation?.MaTaiKhoan</td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.MaLog" class="btn btn-warning btn-sm me-1">Sửa</a>
+                            <a asp-action="Details" asp-route-id="@item.MaLog" class="btn btn-info btn-sm me-1">Chi tiết</a>
+                            <a asp-action="Delete" asp-route-id="@item.MaLog" class="btn btn-danger btn-sm">Xóa</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

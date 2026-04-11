@@ -3,33 +3,36 @@
     <script>
         @if (TempData["ErrorMessage"] != null)
         {
-            <text>
+            <script>
                 Swal.fire({
                 icon: 'error',
                 title: 'Thông báo',
                 text: '@TempData["ErrorMessage"]',
                 confirmButtonText: 'OK'
                 });
-            </text>
+            </script>
         }
+
     </script>
 }
 <link href="~/css/dangnhap.css" rel="stylesheet" />
 <div class="login-box">
     <h2>ĐĂNG NHẬP</h2>
-    <p style="text-align:center;">Thông tin đăng nhập hệ thống</p>
+    <p class="text-center">Thông tin đăng nhập hệ thống</p>
     <form asp-action="DangNhap" method="post">
-        <label for="username">Tài khoản:</label>
-        <input type="text" id="username" name="username" class="form-control" required>
-
-        <label for="password">Mật khẩu:</label>
-        <input type="password" id="password" name="password" class="form-control" required>
-        <div>
-            <p>@ViewBag.ErrorMessage</p>
+        <div class="mb-3">
+            <label for="username" class="form-label">Tài khoản:</label>
+            <input type="text" id="username" name="username" class="form-control" required>
         </div>
-        <div>
-            <button type="submit" class="btn btn-login">Đăng nhập</button>
-            <button type="button" class="btn btn-info" onclick="location.href='@Url.Action("TaoTaiKhoan")'">Đăng ký</button>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Mật khẩu:</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <button type="submit" class="btn btn-primary">Đăng nhập</button>
+            <button type="button" onclick="location.href='@Url.Action("TaoTaiKhoan")'" class="btn btn-info w-50">Đăng ký</button>
         </div>
     </form>
 </div>

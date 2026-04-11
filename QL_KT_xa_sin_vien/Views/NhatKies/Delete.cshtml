@@ -1,57 +1,47 @@
 ﻿@model QL_KT_xa_sin_vien.Models.NhatKy
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Xóa nhật ký";
 }
 
-<h1>Delete</h1>
+<h2 class="mb-4 text-danger">Xóa nhật ký</h2>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>NhatKy</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HanhDong)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HanhDong)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DoiTuong)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DoiTuong)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.GiaTriTruoc)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GiaTriTruoc)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.GiaTriSau)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GiaTriSau)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ThoiGian)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ThoiGian)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NguoiThucHienNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NguoiThucHienNavigation.MaTaiKhoan)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="MaLog" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="mb-3">Bạn có chắc chắn muốn xóa nhật ký này?</h5>
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>Hành động</th>
+                <td>@Model.HanhDong</td>
+            </tr>
+            <tr>
+                <th>Đối tượng</th>
+                <td>@Model.DoiTuong</td>
+            </tr>
+            <tr>
+                <th>Giá trị trước</th>
+                <td>@Model.GiaTriTruoc</td>
+            </tr>
+            <tr>
+                <th>Giá trị sau</th>
+                <td>@Model.GiaTriSau</td>
+            </tr>
+            <tr>
+                <th>Thời gian</th>
+                <td>@Model.ThoiGian</td>
+            </tr>
+            <tr>
+                <th>Người thực hiện</th>
+                <td>@Model.NguoiThucHienNavigation?.MaTaiKhoan</td>
+            </tr>
+        </table>
+
+        <div class="mt-3">
+            <form asp-action="Delete" method="post" class="d-inline">
+                <input type="hidden" asp-for="MaLog" />
+                <button type="submit" class="btn btn-danger me-2">Xóa</button>
+            </form>
+            <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+        </div>
+    </div>
 </div>

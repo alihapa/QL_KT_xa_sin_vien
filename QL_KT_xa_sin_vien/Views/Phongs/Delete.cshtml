@@ -1,63 +1,51 @@
 ﻿@model QL_KT_xa_sin_vien.Models.Phong
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Xóa phòng";
 }
 
-<h1>Delete</h1>
+<h2 class="mb-4 text-danger">Xóa phòng</h2>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Phong</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Tang)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Tang)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LoaiPhong)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LoaiPhong)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SucChua)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SucChua)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SoLuongDangO)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SoLuongDangO)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.GioiTinh)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GioiTinh)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TrangThai)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaToaNhaNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaToaNhaNavigation.MaToaNha)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="MaPhong" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="mb-3">Bạn có chắc chắn muốn xóa phòng này?</h5>
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>Tầng</th>
+                <td>@Model.Tang</td>
+            </tr>
+            <tr>
+                <th>Loại phòng</th>
+                <td>@Model.LoaiPhong</td>
+            </tr>
+            <tr>
+                <th>Sức chứa</th>
+                <td>@Model.SucChua</td>
+            </tr>
+            <tr>
+                <th>Số lượng đang ở</th>
+                <td>@Model.SoLuongDangO</td>
+            </tr>
+            <tr>
+                <th>Giới tính</th>
+                <td>@Model.GioiTinh</td>
+            </tr>
+            <tr>
+                <th>Trạng thái</th>
+                <td>@Model.TrangThai</td>
+            </tr>
+            <tr>
+                <th>Tòa nhà</th>
+                <td>@Model.MaToaNhaNavigation?.MaToaNha</td>
+            </tr>
+        </table>
+
+        <div class="mt-3">
+            <form asp-action="Delete" method="post" class="d-inline">
+                <input type="hidden" asp-for="MaPhong" />
+                <button type="submit" class="btn btn-danger me-2">Xóa</button>
+            </form>
+            <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+        </div>
+    </div>
 </div>

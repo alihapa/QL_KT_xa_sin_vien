@@ -106,13 +106,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @* Hiển thị 5 phản ánh mới nhất *@
                                 @foreach (var pa in Model.PhanAnhs.Take(5))
                                 {
                                     <tr>
                                         <td>@pa.MaSv</td>
                                         <td><span class="text-truncate d-inline-block" style="max-width: 200px;">@pa.MoTa</span></td>
-                                        <td><span class="badge bg-warning text-dark">Chờ xử lý</span></td>
+                                        <td>
+                                            @if (pa.TrangThai == "Hoàn thành")
+                                            {
+                                                <span class="badge bg-success">Hoàn thành</span>
+                                            }
+                                            else if (pa.TrangThai == "Đang xử lý")
+                                            {
+                                                <span class="badge bg-warning text-dark">Đang xử lý</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Khác</span>
+                                            }
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
