@@ -49,6 +49,10 @@
             <a asp-action="Edit" asp-route-id="@Model?.MaPhong" class="btn btn-warning me-2">Sửa</a>
         }
     }
+    @if (Model.MaPhong == "")
+    {
+        <a asp-action="Create" class="btn btn-success me-2">Đăng ký phòng</a>
+    }
     <a asp-controller="Home" asp-action="Index" class="btn btn-secondary me-2">Trở lại trang chủ</a>
     <a asp-action="Index" class="btn btn-info">Xem danh sách phòng</a>
 </div>

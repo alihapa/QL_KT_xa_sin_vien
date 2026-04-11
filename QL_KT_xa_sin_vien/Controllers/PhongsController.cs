@@ -32,9 +32,17 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Details(string id)
         {
+            var phongs = new Phong();
             if (id == null)
             {
-                return NotFound();
+                phongs.MaPhong = "";
+                phongs.MaToaNha = "";
+                phongs.Tang = 0;
+                phongs.LoaiPhong = "";
+                phongs.SucChua = 0;
+                phongs.SoLuongDangO = 0;
+                phongs.GioiTinh = "";
+                phongs.TrangThai = "";
             }
 
             var phong = await _context.Phongs
@@ -42,7 +50,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaPhong == id);
             if (phong == null)
             {
-                return NotFound();
+                phong = phongs;
             }
 
             return View(phong);

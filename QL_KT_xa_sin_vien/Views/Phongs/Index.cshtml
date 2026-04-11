@@ -31,13 +31,13 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.Tang</td>
-                        <td>@item.LoaiPhong</td>
-                        <td>@item.SucChua</td>
-                        <td>@item.SoLuongDangO</td>
-                        <td>@item.GioiTinh</td>
-                        <td>@item.TrangThai</td>
-                        <td>@item.MaToaNhaNavigation?.MaToaNha</td>
+                        <td>@item?.Tang</td>
+                        <td>@item?.LoaiPhong</td>
+                        <td>@item?.SucChua</td>
+                        <td>@item?.SoLuongDangO</td>
+                        <td>@item?.GioiTinh</td>
+                        <td>@item?.TrangThai</td>
+                        <td>@item?.MaToaNhaNavigation?.MaToaNha</td>
                         <td class="text-center">
                             @if(Context.Session.GetString("userRole") == "3")
                             {
