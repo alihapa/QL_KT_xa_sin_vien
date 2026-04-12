@@ -15,13 +15,28 @@
             </text>
         }
     </script>
+    <style>
+        .car_ds {
+        height: 100%;
+        }
+
+        .car_ds h3 {
+        margin-bottom: 15px;
+        color: #0066cc;
+        }
+
+        .car_ds p {
+        margin: 5px 0;
+        color: #444;
+        }
+    </style>
 }
 <link href="~/css/index.css" rel="stylesheet" />
 <div class="dashboard-box">
     <h2>TỔNG QUAN HỆ THỐNG KÝ TÚC XÁ</h2>
     <div class="grid">
         <div class="card">
-            <div class="cards">
+            <div class="car_ds">
                 <h3>Thông tin cá nhân</h3>
                 <p>Mã sinh viên: @Model.SinhVien.MaSv</p>
                 <p>Họ tên: @Model.SinhVien.HoTen</p>
@@ -31,15 +46,19 @@
         </div>
 
         <div class="card">
-            <div class="cards">
+            <div class="car_ds">
                 <h3>Phòng đang ở</h3>
                 <p>Tòa @Model.Phong.MaToaNha - Phòng @Model.Phong.MaPhong</p>
             </div>
             <a asp-action="Details" asp-controller="Phongs" asp-route-id="@Model.Phong.MaPhong" class="btn btn-primary">Xem chi tiết</a>
+            @if (Model.Phong.MaPhong == "chưa có phòng")
+            {
+                <a asp-action="DangKy" asp-controller="Phongs" asp-route-id="@Model.SinhVien.MaSv" class="btn btn-success">Đăng ký phòng</a>
+            }
         </div>
 
         <div class="card">
-            <div class="cards">
+            <div class="car_ds">
                 <h3>Hợp đồng</h3>
                 <p>Bắt đầu: @Model.HopDong.NgayBatDau?.ToString("dd/MM/yyyy")</p>
                 <p>Kết thúc: @Model.HopDong.NgayKetThuc?.ToString("dd/MM/yyyy")</p>
@@ -48,7 +67,7 @@
         </div>
 
         <div class="card">
-            <div class="cards">
+            <div class="car_ds">
                 <h3>Hóa đơn</h3>
                 @foreach (var hd in Model.HoaDons.Take(2))
                 {
@@ -70,12 +89,12 @@
                         </tr>
                     </table>
                 }
-                <a asp-action="Index" asp-controller="HoaDons" class="btn btn-primary">Xem tất cả</a>
             </div>
+            <a asp-action="Index" asp-controller="HoaDons" class="btn btn-primary">Xem tất cả</a>
         </div>
 
         <div class="card">
-            <div class="cards">
+            <div class="car_ds">
                 <h3>Phản ánh sự cố</h3>
                 <p>@Model.PhanAnhs.Count(pa => pa.TrangThai == "Đang xử lý") phản ánh đang xử lý</p>
                 <p>@Model.PhanAnhs.Count(pa => pa.TrangThai == "Hoàn thành") phản ánh đã hoàn thành</p>
@@ -85,7 +104,7 @@
         </div>
 
         <div class="card">
-            <div class="cards">
+            <div class="car_ds">
                 <h3>Thông báo</h3>
                 <p>@Model.ThongBaos.First().NoiDung</p>
                 <p>Ngày: @Model.ThongBaos.First().ThoiGianGui?.ToString("dd/MM/yyyy")</p>

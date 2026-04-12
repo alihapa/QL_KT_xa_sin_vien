@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Quên mật khẩu";
+}
+
+<link href="~/css/quenmatkhau.css" rel="stylesheet" />
+
+<div class="reset-box">
+    <h2>QUÊN MẬT KHẨU</h2>
+    <p class="text-center">Nhập email đã đăng ký để nhận hướng dẫn đặt lại mật khẩu</p>
+
+    <form asp-action="QuenMatKhau" method="post">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="vd: sv001@truong.edu.vn" required />
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <button type="submit" class="btn btn-warning">Gửi yêu cầu</button>
+            <a asp-action="DangNhap" class="btn btn-primary">Quay lại đăng nhập</a>
+        </div>
+    </form>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mt-3">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="forgot mt-3 text-center">
+        <a href="#">Tôi không nhận được email hướng dẫn</a>
+    </div>
+</div>

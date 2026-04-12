@@ -28,17 +28,4 @@
         transform: translateY(-5px);
     }
 
-.cards h3 {
-    margin-bottom: 15px;
-    color: #0066cc;
-}
 
-.cards p {
-    margin: 5px 0;
-    color: #444;
-}
-
-.btn {
-    margin-top: 15px;
-    display: inline-block;
-}

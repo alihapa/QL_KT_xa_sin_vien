@@ -27,6 +27,61 @@ namespace QL_KT_xa_sin_vien.Controllers
             var qLSinhVienContext = _context.Phongs.Include(p => p.MaToaNhaNavigation);
             return View(await qLSinhVienContext.ToListAsync());
         }
+        // GET: DangKy
+        [HttpGet]
+        public async Task<IActionResult> DangKy(string id)
+        {
+            var dk = new DangKyPhong
+            {
+                MaSv = id,
+                HoTen = "",
+
+                ToaNhaList = await _context.ToaNhas.Select(t => t.MaToaNha).ToListAsync(),
+                PhongList = new List<string>(), // sẽ load theo tòa nhà
+                GiuongList = new List<string>() // sẽ load theo phòng
+            };
+
+            return View(dk);
+        }
+
+        // POST: DangKy
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DangKy(DangKyPhong dk)
+        {
+            if (!ModelState.IsValid)
+            {
+                var dk1 = new DangKyPhong
+                {
+                    MaSv = dk.MaSv,
+                    HoTen = dk.HoTen,
+
+                    ToaNhaList = await _context.ToaNhas.Select(t => t.MaToaNha).ToListAsync(),
+                    PhongList = new List<string>(), // sẽ load theo tòa nhà
+                    GiuongList = new List<string>() // sẽ load theo phòng
+                };
+                return View(dk1);
+            }
+
+            // Tạo hợp đồng mới
+            var hopDong = new HopDong
+            {
+                MaHopDong = Guid.NewGuid().ToString(),
+                MaSv = dk.MaSv,
+                MaPhong = dk.SelectedPhong,
+                MaGiuong = dk.SelectedGiuong,
+                NgayBatDau = DateOnly.FromDateTime(DateTime.Now),
+                NgayKetThuc = DateOnly.FromDateTime(DateTime.Now.AddMonths(6)),
+                TrangThai = "Đang sử dụng",
+                DieuKhoan = "Theo quy định ký túc xá"
+            };
+
+            _context.HopDongs.Add(hopDong);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đăng ký phòng thành công!";
+            return RedirectToAction("Index");
+        }
 
         // GET: Phongs/Details/5
         [RoleAuthorize("1", "2", "3")]

@@ -1,0 +1,50 @@
+﻿@model QL_KT_xa_sin_vien.Models.DangKyPhong
+
+@{
+    ViewData["Title"] = "Đăng ký phòng";
+}
+
+<h2 class="mb-4">Đăng ký phòng ký túc xá</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="DangKy" method="post">
+            <div class="mb-3">
+                <label asp-for="MaSv" class="form-label"></label>
+                <input asp-for="MaSv" class="form-control" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="HoTen" class="form-label"></label>
+                <input asp-for="HoTen" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tòa nhà</label>
+                <select asp-for="SelectedToaNha" class="form-select"
+                        asp-items="@(new SelectList(Model.ToaNhaList))">
+                    <option value="">-- Chọn tòa nhà --</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phòng</label>
+                <select asp-for="SelectedPhong" class="form-select"
+                        asp-items="@(new SelectList(Model.PhongList))">
+                    <option value="">-- Chọn phòng --</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Giường</label>
+                <select asp-for="SelectedGiuong" class="form-select"
+                        asp-items="@(new SelectList(Model.GiuongList))">
+                    <option value="">-- Chọn giường --</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Đăng ký</button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">Quay lại</a>
+        </form>
+    </div>
+</div>
