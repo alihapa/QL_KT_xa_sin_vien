@@ -12,7 +12,7 @@ using QL_KT_xa_sin_vien.Models;
 namespace QL_KT_xa_sin_vien.Migrations
 {
     [DbContext(typeof(QLSinhVienContext))]
-    [Migration("20260405160125_lan1")]
+    [Migration("20260413084137_lan1")]
     partial class lan1
     {
         /// <inheritdoc />
@@ -325,6 +325,12 @@ namespace QL_KT_xa_sin_vien.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("maTaiKhoan");
+
+                    b.Property<string>("ResetToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ResetTokenExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SoCmnd")
                         .HasMaxLength(20)

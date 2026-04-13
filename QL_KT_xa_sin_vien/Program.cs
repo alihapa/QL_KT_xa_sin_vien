@@ -24,6 +24,9 @@ namespace QL_KT_xa_sin_vien
                 options.Cookie.HttpOnly = true;                 // bảo mật cookie
                 options.Cookie.IsEssential = true;              // bắt buộc cookie
             });
+            // Thêm dịch vụ smtp
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+
 
             var app = builder.Build();
             var supportedCultures = new[] { "vi-VN" };

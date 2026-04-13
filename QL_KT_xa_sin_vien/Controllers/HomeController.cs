@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QL_KT_xa_sin_vien.Models;
+using System.Configuration;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Mail;
@@ -10,12 +11,15 @@ namespace QL_KT_xa_sin_vien.Controllers
 {
     public class HomeController : Controller
     {
-        QLSinhVienContext db = new QLSinhVienContext();
+        private readonly QLSinhVienContext db = new QLSinhVienContext();
         private readonly ILogger<HomeController> _logger;
+        private readonly IConfiguration _configuration; // thêm dòng này
 
-        public HomeController(ILogger<HomeController> logger)
+        // Constructor: inject ILogger và IConfiguration
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration; // gán vào biến private
         }
 
         public async Task<IActionResult> Index()
@@ -400,7 +404,6 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return View();
             }
 
-            // Kiểm tra email có tồn tại trong hệ thống không
             var sv = await db.SinhViens.FirstOrDefaultAsync(s => s.Email == email);
             if (sv == null)
             {
@@ -408,30 +411,28 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return View();
             }
 
-            // Tạo token reset mật khẩu (ví dụ GUID)
             var token = Guid.NewGuid().ToString();
-
-            // Lưu token vào bảng (ví dụ: PasswordResetTokens) hoặc gắn vào SinhVien
-            // Ở đây minh họa đơn giản:
-            //sv.ResetToken = token;
-            //sv.ResetTokenExpiry = DateTime.Now.AddHours(1);
+            sv.ResetToken = token;
+            sv.ResetTokenExpiry = DateTime.Now.AddHours(1);
             await db.SaveChangesAsync();
 
-            // Gửi email
-            var resetLink = Url.Action("DatLaiMatKhau", "TaiKhoan", new { token = token }, Request.Scheme);
+            var resetLink = Url.Action("DatLaiMatKhau", "Home", new { token = token }, Request.Scheme);
 
             try
             {
-                var smtpClient = new SmtpClient("smtp.gmail.com")
+                // Lấy cấu hình SMTP từ appsettings + secrets
+                var smtpSettings = _configuration.GetSection("Smtp").Get<SmtpSettings>();
+
+                var smtpClient = new SmtpClient(smtpSettings.Host)
                 {
-                    Port = 587,
-                    Credentials = new NetworkCredential("your-email@gmail.com", "your-app-password"),
-                    EnableSsl = true,
+                    Port = smtpSettings.Port,
+                    Credentials = new NetworkCredential(smtpSettings.User, smtpSettings.Password),
+                    EnableSsl = smtpSettings.EnableSsl,
                 };
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress("your-email@gmail.com"),
+                    From = new MailAddress(smtpSettings.User),
                     Subject = "Đặt lại mật khẩu",
                     Body = $"Xin chào {sv.HoTen},\n\nVui lòng nhấn vào liên kết sau để đặt lại mật khẩu:\n{resetLink}\n\nLiên kết có hiệu lực trong 1 giờ.",
                     IsBodyHtml = false,
@@ -450,42 +451,57 @@ namespace QL_KT_xa_sin_vien.Controllers
             return View();
         }
 
-        // GET: DatLaiMatKhau
-        //[HttpGet]
-        //public IActionResult DatLaiMatKhau(string token)
-        //{
-        //    //var sv = db.SinhViens.FirstOrDefault(s => s.ResetToken == token && s.ResetTokenExpiry > DateTime.Now);
-        //    if (sv == null)
-        //    {
-        //        TempData["ErrorMessage"] = "Token không hợp lệ hoặc đã hết hạn.";
-        //        return RedirectToAction("QuenMatKhau");
-        //    }
 
-        //    return View(new DatLaiMatKhauViewModel { Token = token });
-        //}
+        //GET: DatLaiMatKhau
+        [HttpGet]
+        public IActionResult DatLaiMatKhau(string token)
+        {
+            var sv = db.SinhViens.FirstOrDefault(s => s.ResetToken == token && s.ResetTokenExpiry > DateTime.Now);
+            if (sv == null)
+            {
+                TempData["ErrorMessage"] = "Token không hợp lệ hoặc đã hết hạn.";
+                return RedirectToAction("QuenMatKhau");
+            }
+
+            return View(new DatLaiMatKhauViewModel { Token = token });
+        }
 
         // POST: DatLaiMatKhau
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DatLaiMatKhau(DatLaiMatKhauViewModel model)
-        //{
-        //    var sv = await db.SinhViens.FirstOrDefaultAsync(s => s.ResetToken == model.Token && s.ResetTokenExpiry > DateTime.Now);
-        //    if (sv == null)
-        //    {
-        //        TempData["ErrorMessage"] = "Token không hợp lệ hoặc đã hết hạn.";
-        //        return RedirectToAction("QuenMatKhau");
-        //    }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DatLaiMatKhau(DatLaiMatKhauViewModel model)
+        {
+            var sv = await db.SinhViens
+                .FirstOrDefaultAsync(s => s.ResetToken == model.Token && s.ResetTokenExpiry > DateTime.Now);
 
-        //    // Cập nhật mật khẩu mới (nhớ hash mật khẩu)
-        //    sv.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
-        //    sv.ResetToken = null;
-        //    sv.ResetTokenExpiry = null;
+            if (sv == null)
+            {
+                TempData["ErrorMessage"] = "Token không hợp lệ hoặc đã hết hạn.";
+                return RedirectToAction("QuenMatKhau");
+            }
 
-        //    await db.SaveChangesAsync();
+            // Lấy tài khoản từ mã sinh viên
+            var taiKhoan = await db.TaiKhoans.FirstOrDefaultAsync(t => t.MaTaiKhoan == sv.MaTaiKhoan);
+            if (taiKhoan == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy tài khoản.";
+                return RedirectToAction("QuenMatKhau");
+            }
 
-        //    TempData["SuccessMessage"] = "Mật khẩu đã được đặt lại thành công!";
-        //    return RedirectToAction("DangNhap");
-        //}
+            // Hash mật khẩu mới
+            var hasher = new PasswordHasher<TaiKhoan>();
+            taiKhoan.MatKhauMh = hasher.HashPassword(taiKhoan, model.NewPassword);
+
+            // Xóa token reset
+            sv.ResetToken = null;
+            sv.ResetTokenExpiry = null;
+
+            await db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Mật khẩu đã được đặt lại thành công!";
+            return RedirectToAction("DangNhap");
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

@@ -323,6 +323,12 @@ namespace QL_KT_xa_sin_vien.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("maTaiKhoan");
 
+                    b.Property<string>("ResetToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ResetTokenExpiry")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("SoCmnd")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")

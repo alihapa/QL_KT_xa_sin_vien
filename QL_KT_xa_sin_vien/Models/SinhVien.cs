@@ -16,7 +16,8 @@ public partial class SinhVien
     public string? SoCmnd { get; set; }
 
     public string? Email { get; set; }
-
+    public string? ResetToken { get; set; }
+    public DateTime? ResetTokenExpiry { get; set; }
     public string? MaTaiKhoan { get; set; }
 
     public virtual ICollection<Giuong> Giuongs { get; set; } = new List<Giuong>();
