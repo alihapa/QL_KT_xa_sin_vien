@@ -30,11 +30,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
                 return RedirectToAction("DangNhap");
             }
-            if (HttpContext.Session.GetString("userRole") == "3")
-            {
-                //Nếu là admin thì chuyển hướng đến trang quản lý
-                return RedirectToAction("IndexAdmin");
-            }
+           
             if (HttpContext.Items.ContainsKey("ErrorMessage"))
             {
                 TempData["ErrorMessage"] = HttpContext.Items["ErrorMessage"];
@@ -131,7 +127,7 @@ namespace QL_KT_xa_sin_vien.Controllers
 
             return View(vm);
         }
-
+        [RoleAuthorize("3")]
         public IActionResult IndexAdmin()
         {
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
@@ -293,6 +289,13 @@ namespace QL_KT_xa_sin_vien.Controllers
                     }
                     user.TrangThai = "1"; // Cập nhật trạng thái đăng nhập
                     db.SaveChanges();
+
+                    if (HttpContext.Session.GetString("userRole") == "3")
+                    {
+                        //Nếu là admin thì chuyển hướng đến trang quản lý
+                        return RedirectToAction("IndexAdmin");
+                    }
+
                     return RedirectToAction("Index");
                 }
             }
