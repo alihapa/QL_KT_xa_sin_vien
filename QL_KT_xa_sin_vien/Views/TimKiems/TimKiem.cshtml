@@ -1,0 +1,265 @@
+﻿@model List<dynamic>
+
+@{
+    ViewBag.Title = "Kết quả tìm kiếm";
+    var modelName = (Context.Request.Query["model"].ToString() ?? "").Trim();
+    var searchString = ViewBag.searchString ?? Context.Request.Query["searchString"];
+    var currentSort = ViewBag.kieuSapXep ?? Context.Request.Query["sortOrder"];
+    var page = (int?)(ViewBag.page ?? (Context.Request.Query["page"].Count > 0 ? int.Parse(Context.Request.Query["page"]) : 1)) ?? 1;
+    var totalPages = (int?)(ViewBag.totalPages ?? (Context.Request.Query["totalPages"].Count > 0 ? int.Parse(Context.Request.Query["totalPages"]) : 1)) ?? 1;
+    string BuildRoute(string newSort = null, int? newPage = null)
+    {
+        var q = new Dictionary<string, string>();
+        if (!string.IsNullOrEmpty(modelName)) q["model"] = modelName;
+        if (!string.IsNullOrEmpty(searchString)) q["searchString"] = searchString;
+        q["sortOrder"] = newSort ?? currentSort ?? "";
+        q["page"] = (newPage ?? page).ToString();
+        if (Context.Request.Query.ContainsKey("pageSize")) q["pageSize"] = Context.Request.Query["pageSize"];
+        return Url.Action("TimKiem", "TimKiems", q);
+    }
+}
+
+<h2>Kết quả tìm kiếm</h2>
+
+<form method="get" asp-action="TimKiem" asp-controller="TimKiems" class="mb-3">
+    <input type="hidden" name="model" value="@modelName" />
+    <input type="text" name="searchString" placeholder="Nhập từ khóa..." value="@searchString" />
+    <button type="submit">Tìm</button>
+</form>
+
+@if (string.IsNullOrEmpty(modelName))
+{
+    <div>Vui lòng chọn model để tìm kiếm.</div>
+}
+else
+{
+    <div>
+        <strong>Model:</strong> @modelName &nbsp; | &nbsp;
+        <strong>Từ khóa:</strong> @(string.IsNullOrEmpty(searchString) ? "Không" : searchString) &nbsp; | &nbsp;
+        <strong>Trang:</strong> @(page) / @totalPages
+    </div>
+
+    @switch (modelName)
+    {
+        case "SinhVien":
+            {
+                <table border="1" cellpadding="5" class="mt-2">
+                    <thead>
+                        <tr>
+                            <th>
+                                <a href="@BuildRoute(currentSort == "MaSv_desc" ? "MaSv_asc" : "MaSv_desc")">Mã SV</a>
+                            </th>
+                            <th>
+                                <a href="@BuildRoute(currentSort == "HoTen_desc" ? "HoTen_asc" : "HoTen_desc")">Họ tên</a>
+                            </th>
+                            <th>Lớp</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var s in Model)
+                            {
+                                <tr>
+                                    <td>@s.MaSv</td>
+                                    <td>@s.HoTen</td>
+                                    <td>@s.Lop</td>
+                                    <td>@s.Email</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4">Không có kết quả</td></tr>
+                        }
+                    </tbody>
+                </table>
+                break;
+            }
+        case "PhanAnh":
+            {
+                <table border="1" cellpadding="5" class="mt-2">
+                    <thead>
+                        <tr>
+                            <th><a href="@BuildRoute(currentSort == "MaPhanAnh_desc" ? "MaPhanAnh_asc" : "MaPhanAnh_desc")">Mã phản ánh</a></th>
+                            <th>Mã SV</th>
+                            <th>Trạng thái</th>
+                            <th>Thời gian</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var p in Model)
+                            {
+                                <tr>
+                                    <td>@p.MaPhanAnh</td>
+                                    <td>@p.MaSv</td>
+                                    <td>@p.TrangThai</td>
+                                    <td>@(p.ThoiGianTao != null ? ((DateTime)p.ThoiGianTao).ToString("dd/MM/yyyy HH:mm") : "")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4">Không có kết quả</td></tr>
+                        }
+                    </tbody>
+                </table>
+                break;
+            }
+        case "HopDong":
+            {
+                <table border="1" cellpadding="5" class="mt-2">
+                    <thead>
+                        <tr>
+                            <th>Mã hợp đồng</th>
+                            <th>Mã SV</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var h in Model)
+                            {
+                                <tr>
+                                    <td>@h.MaHopDong</td>
+                                    <td>@h.MaSv</td>
+                                    <td>@(h.NgayBatDau != null ? ((DateTime)h.NgayBatDau).ToString("dd/MM/yyyy") : "")</td>
+                                    <td>@(h.NgayKetThuc != null ? ((DateTime)h.NgayKetThuc).ToString("dd/MM/yyyy") : "")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4">Không có kết quả</td></tr>
+                        }
+                    </tbody>
+                </table>
+                break;
+            }
+        case "HoaDon":
+            {
+                <table border="1" cellpadding="5" class="mt-2">
+                    <thead>
+                        <tr>
+                            <th>Mã hóa đơn</th>
+                            <th>Mã hợp đồng</th>
+                            <th>Số tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var hd in Model)
+                            {
+                                <tr>
+                                    <td>@hd.MaHoaDon</td>
+                                    <td>@hd.MaHopDong</td>
+                                    <td>@String.Format("{0:N0}", hd.SoTien)</td>
+                                    <td>@hd.TrangThai</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4">Không có kết quả</td></tr>
+                        }
+                    </tbody>
+                </table>
+                break;
+            }
+        case "ThongBao":
+            {
+                <table border="1" cellpadding="5" class="mt-2">
+                    <thead>
+                        <tr>
+                            <th>Mã thông báo</th>
+                            <th>Người gửi</th>
+                            <th>Người nhận</th>
+                            <th>Nội dung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var tb in Model)
+                            {
+                                <tr>
+                                    <td>@tb.MaThongBao</td>
+                                    <td>@tb.NguoiGui</td>
+                                    <td>@tb.NguoiNhan</td>
+                                    <td>@tb.NoiDung</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4">Không có kết quả</td></tr>
+                        }
+                    </tbody>
+                </table>
+                break;
+            }
+        case "TaiKhoan":
+            {
+                <table border="1" cellpadding="5" class="mt-2">
+                    <thead>
+                        <tr>
+                            <th>Mã tài khoản</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Email</th>
+                            <th>Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var t in Model)
+                            {
+                                <tr>
+                                    <td>@t.MaTaiKhoan</td>
+                                    <td>@t.TenDangNhap</td>
+                                    <td>@t.Email</td>
+                                    <td>@t.VaiTro</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4">Không có kết quả</td></tr>
+                        }
+                    </tbody>
+                </table>
+                break;
+            }
+        default:
+            {
+                <div>Model chưa được hỗ trợ trong view này.</div>
+                break;
+            }
+    }
+
+    <!-- Pagination -->
+    <div class="mt-3">
+        @if (totalPages > 1)
+        {
+            for (int i = 1; i <= totalPages; i++)
+            {
+                if (i == page)
+                {
+                    <strong>@i</strong>
+                }
+                else
+                {
+                    <a href="@BuildRoute(null, i)">@i</a>
+                }
+                <text> </text>
+            }
+        }
+    </div>
+}

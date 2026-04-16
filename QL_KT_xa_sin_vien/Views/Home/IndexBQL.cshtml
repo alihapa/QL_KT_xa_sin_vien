@@ -20,7 +20,7 @@
                 <div class="card-body">
                     <h6 class="card-title">Sinh viên</h6>
                     <h3 class="card-text">@Model.SoLuongSinhVien</h3>
-                    <a asp-action="DanhSachSinhVien" class="stretched-link">Xem chi tiết</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="SinhVien" asp-route-searchString="" class="stretched-link">Xem chi tiết</a>
                 </div>
             </div>
         </div>
@@ -30,7 +30,7 @@
                 <div class="card-body">
                     <h6 class="card-title">Phản ánh</h6>
                     <h3 class="card-text">@Model.SoLuongPhanAnh</h3>
-                    <a asp-action="DanhSachPhanAnh" class="stretched-link">Xem chi tiết</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="PhanAnh" asp-route-searchString="" class="stretched-link">Xem chi tiết</a>
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@
                 <div class="card-body">
                     <h6 class="card-title">Hợp đồng</h6>
                     <h3 class="card-text">@Model.SoLuongHopDong</h3>
-                    <a asp-action="DanhSachHopDong" class="stretched-link">Xem chi tiết</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="HopDong" asp-route-searchString="" class="stretched-link">Xem chi tiết</a>
                 </div>
             </div>
         </div>
@@ -50,7 +50,7 @@
                 <div class="card-body">
                     <h6 class="card-title">Hóa đơn</h6>
                     <h3 class="card-text">@Model.SoLuongHoaDon</h3>
-                    <a asp-action="DanhSachHoaDon" class="stretched-link">Xem chi tiết</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="HoaDon" asp-route-searchString="" class="stretched-link">Xem chi tiết</a>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@
                             <tbody>
                                 @if (Model.Sinh_Vien != null && Model.Sinh_Vien.Any())
                                 {
-                                    foreach (var sv in Model.Sinh_Vien.Take(10))
+                                    foreach (var sv in Model.Sinh_Vien.Take(5))
                                     {
                                         <tr>
                                             <td>@sv.MaSv</td>
@@ -98,7 +98,7 @@
                     </div>
                 </div>
                 <div class="card-footer text-end">
-                    <a asp-action="DanhSachSinhVien" class="btn btn-sm btn-primary">Xem tất cả</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="SinhVien" asp-route-searchString="" class="btn btn-sm btn-primary">Xem tất cả</a>
                 </div>
             </div>
         </div>
@@ -122,7 +122,7 @@
                             <tbody>
                                 @if (Model.Phan_Anh != null && Model.Phan_Anh.Any())
                                 {
-                                    foreach (var pa in Model.Phan_Anh.OrderByDescending(p => p.ThoiGianTao).Take(10))
+                                    foreach (var pa in Model.Phan_Anh.OrderByDescending(p => p.ThoiGianTao).Take(5))
                                     {
                                         <tr>
                                             <td>@pa.MaPhanAnh</td>
@@ -143,7 +143,7 @@
                     </div>
                 </div>
                 <div class="card-footer text-end">
-                    <a asp-action="DanhSachPhanAnh" class="btn btn-sm btn-primary">Xem tất cả</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="PhanAnh" asp-route-searchString="" class="btn btn-sm btn-primary">Xem tất cả</a>
                 </div>
             </div>
         </div>
@@ -168,7 +168,7 @@
                             <tbody>
                                 @if (Model.Hop_Dong != null && Model.Hop_Dong.Any())
                                 {
-                                    foreach (var hd in Model.Hop_Dong.OrderByDescending(h => h.NgayBatDau).Take(10))
+                                    foreach (var hd in Model.Hop_Dong.OrderByDescending(h => h.NgayBatDau).Take(5))
                                     {
                                         <tr>
                                             <td>@hd.MaHopDong</td>
@@ -189,7 +189,7 @@
                     </div>
                 </div>
                 <div class="card-footer text-end">
-                    <a asp-action="DanhSachHopDong" class="btn btn-sm btn-primary">Xem tất cả</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="HopDong" asp-route-searchString="" class="btn btn-sm btn-primary">Xem tất cả</a>
                 </div>
             </div>
         </div>
@@ -211,7 +211,7 @@
                             <tbody>
                                 @if (Model.Hoa_Don != null && Model.Hoa_Don.Any())
                                 {
-                                    foreach (var hd in Model.Hoa_Don.OrderByDescending(h => h.NgayXuat).Take(10))
+                                    foreach (var hd in Model.Hoa_Don.OrderByDescending(h => h.NgayXuat).Take(5))
                                     {
                                         <tr>
                                             <td>@hd.MaHoaDon</td>
@@ -232,7 +232,7 @@
                     </div>
                 </div>
                 <div class="card-footer text-end">
-                    <a asp-action="DanhSachHoaDon" class="btn btn-sm btn-primary">Xem tất cả</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="HoaDon" asp-route-searchString="" class="btn btn-sm btn-primary">Xem tất cả</a>
                 </div>
             </div>
         </div>
@@ -247,7 +247,7 @@
                     @if (Model.Thong_Bao != null && Model.Thong_Bao.Any())
                     {
                         <ul class="list-group">
-                            @foreach (var tb in Model.Thong_Bao.OrderByDescending(t => t.ThoiGianGui).Take(10))
+                            @foreach (var tb in Model.Thong_Bao.OrderByDescending(t => t.ThoiGianGui).Take(5))
                             {
                                 <li class="list-group-item">
                                     <div class="d-flex justify-content-between">
@@ -267,7 +267,7 @@
                     }
                 </div>
                 <div class="card-footer text-end">
-                    <a asp-action="DanhSachThongBao" class="btn btn-sm btn-primary">Xem tất cả</a>
+                    <a asp-action="TimKiem" asp-controller="TimKiems" asp-route-model="ThongBao" asp-route-searchString="" class="btn btn-sm btn-primary">Xem tất cả</a>
                 </div>
             </div>
         </div>

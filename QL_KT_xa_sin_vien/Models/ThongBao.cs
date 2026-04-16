@@ -6,6 +6,7 @@ namespace QL_KT_xa_sin_vien.Models;
 public partial class ThongBao
 {
     public string MaThongBao { get; set; } = null!;
+    public string NguoiGui { get; set; } = null!;
 
     public string? NguoiNhan { get; set; }
 

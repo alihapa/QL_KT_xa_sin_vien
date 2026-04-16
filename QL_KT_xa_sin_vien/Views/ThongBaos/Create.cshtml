@@ -18,6 +18,11 @@
             </div>
 
             <div class="mb-3">
+                <label asp-for="NguoiGui" class="form-label"></label>
+                <input asp-for="NguoiGui" value="@Context.Session.GetString("userId")" class="form-control" readonly />
+            </div>
+
+            <div class="mb-3">
                 <label asp-for="NguoiNhan" class="form-label">Người nhận</label>
                 <select asp-for="NguoiNhan" class="form-select" asp-items="ViewBag.NguoiNhan"></select>
             </div>

@@ -233,7 +233,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             {
                 thongBaos = new List<ThongBao>
                 {
-                    new ThongBao { MaThongBao = "chưa có mã thông báo", NguoiNhan = "chưa có người nhận" ,LoaiThongBao = "chưa có loại thông báo", NoiDung = "chưa có nội dung", ThoiGianGui = null , TrangThai = "chưa có trạng thái" }
+                    new ThongBao { MaThongBao = "chưa có mã thông báo",NguoiGui ="Chưa có Người Gửi" , NguoiNhan = "chưa có người nhận" ,LoaiThongBao = "chưa có loại thông báo", NoiDung = "chưa có nội dung", ThoiGianGui = null , TrangThai = "chưa có trạng thái" }
                 };
             }
 
