@@ -1,18 +1,21 @@
-﻿<meta charset="utf-8" />
+﻿@using System.Text.Json
+
+<meta charset="utf-8" />
 @model QL_KT_xa_sin_vien.Models.DashboardViewModel
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         @if (TempData["ErrorMessage"] != null)
         {
-            <text>
+            <script>
+                var msg = @Html.Raw(JsonSerializer.Serialize(TempData["ErrorMessage"]?.ToString()));
                 Swal.fire({
                 icon: 'error',
                 title: 'Thông báo',
-                text: '@TempData["ErrorMessage"]',
+                text: msg,
                 confirmButtonText: 'OK'
                 });
-            </text>
+            </script>
         }
     </script>
     <style>

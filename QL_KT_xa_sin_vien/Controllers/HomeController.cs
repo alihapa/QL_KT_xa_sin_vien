@@ -251,6 +251,33 @@ namespace QL_KT_xa_sin_vien.Controllers
             return View(viewModel);
         }
 
+        public IActionResult IndexBQL()
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            {
+                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+                return RedirectToAction("DangNhap");
+            }
+            else if (HttpContext.Session.GetString("userRole") != "2")
+            {
+                // Nếu không phải nhân viên, chuyển hướng về trang chính
+                return RedirectToAction("Index");
+            }
+
+            var viewModel = new DashboardBQLViewModel();
+            viewModel.Sinh_Vien = db.SinhViens.Include(s => s.MaTaiKhoanNavigation).ToList();
+            viewModel.SoLuongSinhVien = viewModel.Sinh_Vien.Count;
+            viewModel.Phan_Anh = db.PhanAnhs.ToList();
+            viewModel.SoLuongPhanAnh = viewModel.Phan_Anh.Count;
+            viewModel.Hop_Dong = db.HopDongs.ToList();
+            viewModel.SoLuongHopDong = viewModel.Hop_Dong.Count;
+            viewModel.Hoa_Don = db.HoaDons.ToList();
+            viewModel.SoLuongHoaDon = viewModel.Hoa_Don.Count;
+            viewModel.Thong_Bao = db.ThongBaos.ToList();
+            viewModel.SoLuongThongBao = viewModel.Thong_Bao.Count;
+            return View(viewModel);
+        }
+
         [HttpGet]
         public IActionResult DangNhap()
         {
@@ -295,8 +322,16 @@ namespace QL_KT_xa_sin_vien.Controllers
                         //Nếu là admin thì chuyển hướng đến trang quản lý
                         return RedirectToAction("IndexAdmin");
                     }
-
-                    return RedirectToAction("Index");
+                    if(HttpContext.Session.GetString("userRole") == "2")
+                    {
+                        //Nếu là nhân viên thì chuyển hướng đến trang quản lý
+                        return RedirectToAction("IndexBQL");
+                    }
+                    if (HttpContext.Session.GetString("userRole") == "1")
+                    {
+                        //Nếu là sinh viên thì chuyển hướng đến trang chính
+                        return RedirectToAction("Index");
+                    }
                 }
             }
                 // Đăng nhập thất bại, hiển thị thông báo lỗi

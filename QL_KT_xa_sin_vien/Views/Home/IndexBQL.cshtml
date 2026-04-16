@@ -1,0 +1,281 @@
+﻿@model QL_KT_xa_sin_vien.Models.DashboardBQLViewModel
+
+@{
+    ViewData["Title"] = "Dashboard BQL";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Bảng điều khiển BQL</h2>
+        <div>
+            <a class="btn btn-outline-secondary" asp-action="Index">Trang chủ</a>
+            <a class="btn btn-outline-danger" asp-action="DangXuat">Đăng xuất</a>
+        </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Sinh viên</h6>
+                    <h3 class="card-text">@Model.SoLuongSinhVien</h3>
+                    <a asp-action="DanhSachSinhVien" class="stretched-link">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Phản ánh</h6>
+                    <h3 class="card-text">@Model.SoLuongPhanAnh</h3>
+                    <a asp-action="DanhSachPhanAnh" class="stretched-link">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Hợp đồng</h6>
+                    <h3 class="card-text">@Model.SoLuongHopDong</h3>
+                    <a asp-action="DanhSachHopDong" class="stretched-link">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Hóa đơn</h6>
+                    <h3 class="card-text">@Model.SoLuongHoaDon</h3>
+                    <a asp-action="DanhSachHoaDon" class="stretched-link">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed sections -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Danh sách Sinh viên</strong>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã SV</th>
+                                    <th>Họ tên</th>
+                                    <th>Lớp</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Sinh_Vien != null && Model.Sinh_Vien.Any())
+                                {
+                                    foreach (var sv in Model.Sinh_Vien.Take(10))
+                                    {
+                                        <tr>
+                                            <td>@sv.MaSv</td>
+                                            <td>@sv.HoTen</td>
+                                            <td>@sv.Lop</td>
+                                            <td>@sv.Email</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Không có sinh viên</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a asp-action="DanhSachSinhVien" class="btn btn-sm btn-primary">Xem tất cả</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Phản ánh gần đây</strong>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã phản ánh</th>
+                                    <th>Mã SV</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thời gian</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Phan_Anh != null && Model.Phan_Anh.Any())
+                                {
+                                    foreach (var pa in Model.Phan_Anh.OrderByDescending(p => p.ThoiGianTao).Take(10))
+                                    {
+                                        <tr>
+                                            <td>@pa.MaPhanAnh</td>
+                                            <td>@pa.MaSv</td>
+                                            <td>@pa.TrangThai</td>
+                                            <td>@pa.ThoiGianTao?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Không có phản ánh</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a asp-action="DanhSachPhanAnh" class="btn btn-sm btn-primary">Xem tất cả</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contracts and Invoices -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header"><strong>Hợp đồng</strong></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã hợp đồng</th>
+                                    <th>Mã SV</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Hop_Dong != null && Model.Hop_Dong.Any())
+                                {
+                                    foreach (var hd in Model.Hop_Dong.OrderByDescending(h => h.NgayBatDau).Take(10))
+                                    {
+                                        <tr>
+                                            <td>@hd.MaHopDong</td>
+                                            <td>@hd.MaSv</td>
+                                            <td>@hd.NgayBatDau?.ToString("dd/MM/yyyy")</td>
+                                            <td>@hd.NgayKetThuc?.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Không có hợp đồng</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a asp-action="DanhSachHopDong" class="btn btn-sm btn-primary">Xem tất cả</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header"><strong>Hóa đơn</strong></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã hóa đơn</th>
+                                    <th>Mã hợp đồng</th>
+                                    <th>Số tiền</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Hoa_Don != null && Model.Hoa_Don.Any())
+                                {
+                                    foreach (var hd in Model.Hoa_Don.OrderByDescending(h => h.NgayXuat).Take(10))
+                                    {
+                                        <tr>
+                                            <td>@hd.MaHoaDon</td>
+                                            <td>@hd.MaHopDong</td>
+                                            <td>@String.Format("{0:N0}", hd.SoTien)</td>
+                                            <td>@hd.TrangThai</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Không có hóa đơn</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a asp-action="DanhSachHoaDon" class="btn btn-sm btn-primary">Xem tất cả</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><strong>Thông báo</strong></div>
+                <div class="card-body">
+                    @if (Model.Thong_Bao != null && Model.Thong_Bao.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var tb in Model.Thong_Bao.OrderByDescending(t => t.ThoiGianGui).Take(10))
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>@tb.NoiDung</strong>
+                                            <div class="text-muted small">Người nhận: @tb.NguoiNhan</div>
+                                        </div>
+                                        <div class="text-muted small">@tb.ThoiGianGui?.ToString("dd/MM/yyyy HH:mm")</div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">Không có thông báo</div>
+                    }
+                </div>
+                <div class="card-footer text-end">
+                    <a asp-action="DanhSachThongBao" class="btn btn-sm btn-primary">Xem tất cả</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Placeholder: thêm script nếu cần (ví dụ: datatable, lọc, phân trang)
+    </script>
+}
