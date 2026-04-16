@@ -300,7 +300,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 }
             }
                 // Đăng nhập thất bại, hiển thị thông báo lỗi
-            ViewBag.ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng.";
+            TempData["ErrorMessage"] = "Tên đăng nhập hoặc mật khẩu không đúng!";
+            ViewBag.Username = username; // Giữ lại tên đăng nhập đã nhập để người dùng không phải gõ lại
             return View();
             
         }
