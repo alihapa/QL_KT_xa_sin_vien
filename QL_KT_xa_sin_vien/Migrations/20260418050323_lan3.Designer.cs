@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QL_KT_xa_sin_vien.Models;
 
@@ -11,9 +12,11 @@ using QL_KT_xa_sin_vien.Models;
 namespace QL_KT_xa_sin_vien.Migrations
 {
     [DbContext(typeof(QLSinhVienContext))]
-    partial class QLSinhVienContextModelSnapshot : ModelSnapshot
+    [Migration("20260418050323_lan3")]
+    partial class lan3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
