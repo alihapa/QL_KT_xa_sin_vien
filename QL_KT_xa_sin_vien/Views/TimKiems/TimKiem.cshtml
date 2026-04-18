@@ -1,12 +1,75 @@
-﻿@model List<dynamic>
+﻿@model IEnumerable<dynamic>
 
 @{
     ViewBag.Title = "Kết quả tìm kiếm";
-    var modelName = (Context.Request.Query["model"].ToString() ?? "").Trim();
-    var searchString = ViewBag.searchString ?? Context.Request.Query["searchString"];
-    var currentSort = ViewBag.kieuSapXep ?? Context.Request.Query["sortOrder"];
-    var page = (int?)(ViewBag.page ?? (Context.Request.Query["page"].Count > 0 ? int.Parse(Context.Request.Query["page"]) : 1)) ?? 1;
-    var totalPages = (int?)(ViewBag.totalPages ?? (Context.Request.Query["totalPages"].Count > 0 ? int.Parse(Context.Request.Query["totalPages"]) : 1)) ?? 1;
+    var modelName = (ViewBag.model ?? Context.Request.Query["model"].ToString() ?? "").Trim();
+    var searchString = (ViewBag.searchString ?? (Context.Request.Query.ContainsKey("searchString") ? Context.Request.Query["searchString"].ToString() : ""))?.ToString();
+    var currentSort = (ViewBag.kieuSapXep ?? (Context.Request.Query.ContainsKey("sortOrder") ? Context.Request.Query["sortOrder"].ToString() : ""))?.ToString();
+
+    int ParseQueryInt(string key, int defaultValue)
+    {
+        if (Context.Request.Query.ContainsKey(key) && int.TryParse(Context.Request.Query[key], out var v)) return v;
+        return defaultValue;
+    }
+
+    var page = (int?)(ViewBag.page ?? ParseQueryInt("page", 1)) ?? 1;
+    var totalPages = (int?)(ViewBag.totalPages ?? ParseQueryInt("totalPages", 1)) ?? 1;
+
+    string SortIndicator(string col)
+    {
+        if (string.IsNullOrEmpty(currentSort)) return "";
+        if (currentSort.StartsWith(col))
+        {
+            return currentSort.EndsWith("_desc") ? " ▼" : " ▲";
+        }
+        return "";
+    }
+
+    // Helper to format DateOnly/DateTime values safely when model is dynamic
+    string FormatDate(object? val, string fmt = "dd/MM/yyyy")
+    {
+        if (val == null) return "";
+        if (val is DateOnly d) return d.ToString(fmt);
+        if (val is DateTime dt) return dt.ToString(fmt);
+        // For nullable boxed values (e.g., DateOnly?) the runtime might present as boxed DateOnly
+        try
+        {
+            return val.ToString() ?? "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    var sessionRole = Context.Session.GetString("userRole");
+    string[] availableModels;
+    if (sessionRole == "3")
+    {
+        // Admin: show all models
+        availableModels = new[] { "SinhVien", "PhanAnh", "HopDong", "HoaDon", "ThongBao", "TaiKhoan", "NhatKy", "VaiTro", "Giuong", "Phong", "ToaNha" };
+    }
+    else if (sessionRole == "2")
+    {
+        // BQL: management models
+        availableModels = new[] { "SinhVien", "PhanAnh", "HopDong", "HoaDon", "ThongBao", "Giuong", "Phong", "ToaNha" };
+    }
+    else if (sessionRole == "4")
+    {
+        // KeToan: finance/contract models
+        availableModels = new[] { "HoaDon", "HopDong" };
+    }
+    else if (sessionRole == "1")
+    {
+        // SinhVien: limited models
+        availableModels = new[] { "SinhVien", "PhanAnh", "HopDong", "HoaDon", "ThongBao" };
+    }
+    else
+    {
+        availableModels = new[] { "SinhVien", "PhanAnh", "HopDong", "HoaDon", "ThongBao", "TaiKhoan" };
+    }
+    var pageSize = (ViewBag.pageSize ?? (Context.Request.Query.ContainsKey("pageSize") ? Context.Request.Query["pageSize"].ToString() : "10"))?.ToString();
+
     string BuildRoute(string newSort = null, int? newPage = null)
     {
         var q = new Dictionary<string, string>();
@@ -14,17 +77,56 @@
         if (!string.IsNullOrEmpty(searchString)) q["searchString"] = searchString;
         q["sortOrder"] = newSort ?? currentSort ?? "";
         q["page"] = (newPage ?? page).ToString();
-        if (Context.Request.Query.ContainsKey("pageSize")) q["pageSize"] = Context.Request.Query["pageSize"];
+        if (Context.Request.Query.ContainsKey("pageSize")) q["pageSize"] = Context.Request.Query["pageSize"].ToString();
         return Url.Action("TimKiem", "TimKiems", q);
     }
 }
 
 <h2>Kết quả tìm kiếm</h2>
 
-<form method="get" asp-action="TimKiem" asp-controller="TimKiems" class="mb-3">
-    <input type="hidden" name="model" value="@modelName" />
-    <input type="text" name="searchString" placeholder="Nhập từ khóa..." value="@searchString" />
-    <button type="submit">Tìm</button>
+<form method="get" asp-action="TimKiem" asp-controller="TimKiems" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <label class="form-label">Model</label>
+        <select name="model" class="form-select">
+            <option value="">-- Chọn model --</option>
+            @foreach (var m in availableModels)
+            {
+                if (m == modelName)
+                {
+                    <option value="@m" selected>@m</option>
+                }
+                else
+                {
+                    <option value="@m">@m</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-5">
+        <label class="form-label">Từ khóa</label>
+        <input type="text" name="searchString" class="form-control" placeholder="Nhập từ khóa..." value="@searchString" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Số hàng</label>
+        <select name="pageSize" class="form-select">
+            @{ var sizes = new[] { "10", "25", "50", "100" }; }
+            @foreach (var s in sizes)
+            {
+                if (s == pageSize)
+                {
+                    <option value="@s" selected>@s</option>
+                }
+                else
+                {
+                    <option value="@s">@s</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2 d-grid">
+        <label class="form-label">&nbsp;</label>
+        <button type="submit" class="btn btn-primary">Tìm</button>
+    </div>
 </form>
 
 @if (string.IsNullOrEmpty(modelName))
@@ -43,14 +145,14 @@ else
     {
         case "SinhVien":
             {
-                <table border="1" cellpadding="5" class="mt-2">
+                <table class="table table-striped table-bordered mt-2">
                     <thead>
                         <tr>
                             <th>
-                                <a href="@BuildRoute(currentSort == "MaSv_desc" ? "MaSv_asc" : "MaSv_desc")">Mã SV</a>
+                                <a href='@BuildRoute(currentSort == "MaSv_desc" ? "MaSv_asc" : "MaSv_desc")'>Mã SV @(SortIndicator("MaSv"))</a>
                             </th>
                             <th>
-                                <a href="@BuildRoute(currentSort == "HoTen_desc" ? "HoTen_asc" : "HoTen_desc")">Họ tên</a>
+                                <a href='@BuildRoute(currentSort == "HoTen_desc" ? "HoTen_asc" : "HoTen_desc")'>Họ tên @(SortIndicator("HoTen"))</a>
                             </th>
                             <th>Lớp</th>
                             <th>Email</th>
@@ -79,10 +181,10 @@ else
             }
         case "PhanAnh":
             {
-                <table border="1" cellpadding="5" class="mt-2">
+                <table class="table table-striped table-bordered mt-2">
                     <thead>
                         <tr>
-                            <th><a href="@BuildRoute(currentSort == "MaPhanAnh_desc" ? "MaPhanAnh_asc" : "MaPhanAnh_desc")">Mã phản ánh</a></th>
+                            <th><a href='@BuildRoute(currentSort == "MaPhanAnh_desc" ? "MaPhanAnh_asc" : "MaPhanAnh_desc")'>Mã phản ánh @(SortIndicator("MaPhanAnh"))</a></th>
                             <th>Mã SV</th>
                             <th>Trạng thái</th>
                             <th>Thời gian</th>
@@ -97,7 +199,7 @@ else
                                     <td>@p.MaPhanAnh</td>
                                     <td>@p.MaSv</td>
                                     <td>@p.TrangThai</td>
-                                    <td>@(p.ThoiGianTao != null ? ((DateTime)p.ThoiGianTao).ToString("dd/MM/yyyy HH:mm") : "")</td>
+                                <td>@FormatDate(p.ThoiGianTao, "dd/MM/yyyy HH:mm")</td>
                                 </tr>
                             }
                         }
@@ -111,7 +213,7 @@ else
             }
         case "HopDong":
             {
-                <table border="1" cellpadding="5" class="mt-2">
+                <table class="table table-striped table-bordered mt-2">
                     <thead>
                         <tr>
                             <th>Mã hợp đồng</th>
@@ -128,8 +230,8 @@ else
                                 <tr>
                                     <td>@h.MaHopDong</td>
                                     <td>@h.MaSv</td>
-                                    <td>@(h.NgayBatDau != null ? ((DateTime)h.NgayBatDau).ToString("dd/MM/yyyy") : "")</td>
-                                    <td>@(h.NgayKetThuc != null ? ((DateTime)h.NgayKetThuc).ToString("dd/MM/yyyy") : "")</td>
+                                    <td>@FormatDate(h.NgayBatDau, "dd/MM/yyyy")</td>
+                                    <td>@FormatDate(h.NgayKetThuc, "dd/MM/yyyy")</td>
                                 </tr>
                             }
                         }
@@ -143,7 +245,7 @@ else
             }
         case "HoaDon":
             {
-                <table border="1" cellpadding="5" class="mt-2">
+                <table class="table table-striped table-bordered mt-2">
                     <thead>
                         <tr>
                             <th>Mã hóa đơn</th>
@@ -175,7 +277,7 @@ else
             }
         case "ThongBao":
             {
-                <table border="1" cellpadding="5" class="mt-2">
+                <table class="table table-striped table-bordered mt-2">
                     <thead>
                         <tr>
                             <th>Mã thông báo</th>
@@ -207,7 +309,7 @@ else
             }
         case "TaiKhoan":
             {
-                <table border="1" cellpadding="5" class="mt-2">
+                <table class="table table-striped table-bordered mt-2">
                     <thead>
                         <tr>
                             <th>Mã tài khoản</th>

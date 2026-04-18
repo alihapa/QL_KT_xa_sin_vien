@@ -2,6 +2,15 @@
 
 @{
     ViewData["Title"] = "Danh sách hợp đồng";
+
+    // Helper to safely format DateOnly/DateTime values
+    string FormatDate(object? val, string fmt = "dd/MM/yyyy")
+    {
+        if (val == null) return "";
+        if (val is DateOnly d) return d.ToString(fmt);
+        if (val is DateTime dt) return dt.ToString(fmt);
+        try { return val.ToString() ?? ""; } catch { return ""; }
+    }
 }
 
 <h2 class="mb-4">Danh sách hợp đồng</h2>
@@ -30,8 +39,8 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.NgayBatDau.Value.ToString("dd/MM/yyyy")</td>
-                        <td>@item.NgayKetThuc.Value.ToString("dd/MM/yyyy")</td>
+                        <td>@FormatDate(item.NgayBatDau, "dd/MM/yyyy")</td>
+                        <td>@FormatDate(item.NgayKetThuc, "dd/MM/yyyy")</td>
                         <td>@item.TrangThai</td>
                         <td>@item.DieuKhoan</td>
                         <td>@item.MaGiuongNavigation?.MaGiuong</td>

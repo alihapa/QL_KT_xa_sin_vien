@@ -14,8 +14,15 @@
 
             <div class="mb-3">
                 <label asp-for="MaSv" class="form-label"></label>
-                <select asp-for="MaSv" class="form-select" asp-items="ViewBag.MaSv"></select>
+                @* Do not allow selecting MaSv / sender in any case — always fixed from session *@
+                <input type="hidden" asp-for="MaSv" value="@ViewBag.FixedMaSv" />
+                <input class="form-control" value="@ViewBag.FixedHoTen" readonly />
                 <span asp-validation-for="MaSv" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="anDanh" name="AnDanh" value="true" @(Model.AnDanh==true?"checked":"") />
+                <label class="form-check-label" for="anDanh">Ẩn danh (ẩn tên người gửi với sinh viên khác)</label>
             </div>
 
             <div class="mb-3">

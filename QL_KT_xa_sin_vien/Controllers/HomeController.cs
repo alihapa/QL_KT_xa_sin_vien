@@ -263,20 +263,22 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Thống kê đơn giản cho kế toán
-            var hoaDons = db.HoaDons.ToList();
-            var soLuong = hoaDons.Count;
-            var tongDoanhThu = hoaDons.Where(h => h.SoTien.HasValue).Sum(h => h.SoTien.Value);
+            // Thống kê cho kế toán: phân tách hóa đơn đã thanh toán và chưa thanh toán
+            var allHoaDons = db.HoaDons.ToList();
+            var paid = allHoaDons.Where(h => !string.IsNullOrEmpty(h.TrangThai) && h.TrangThai.Contains("Đã thanh toán")).OrderByDescending(h => h.NgayXuat).ToList();
+            var unpaid = allHoaDons.Where(h => string.IsNullOrEmpty(h.TrangThai) || h.TrangThai.Contains("Chưa thanh toán") || (!h.TrangThai.Contains("Đã thanh toán") && !string.IsNullOrEmpty(h.TrangThai))).OrderByDescending(h => h.NgayXuat).ToList();
 
-            // Lấy 10 hóa đơn gần nhất
-            var recent = db.HoaDons
-                .OrderByDescending(h => h.NgayXuat)
-                .Take(10)
-                .ToList();
+            ViewBag.SoLuongHoaDon = allHoaDons.Count;
+            ViewBag.SoLuongDaThanhToan = paid.Count;
+            ViewBag.SoLuongChuaThanhToan = unpaid.Count;
 
-            ViewBag.SoLuongHoaDon = soLuong;
+            // Tổng doanh thu tính theo các hóa đơn đã thanh toán
+            decimal tongDoanhThu = paid.Where(h => h.SoTien.HasValue).Sum(h => h.SoTien.Value);
             ViewBag.TongDoanhThu = tongDoanhThu;
-            ViewBag.RecentHoaDons = recent;
+
+            // Lấy 5 hóa đơn gần nhất mỗi nhóm để hiển thị
+            ViewBag.RecentPaid = paid.Take(5).ToList();
+            ViewBag.RecentUnpaid = unpaid.Take(5).ToList();
 
             return View();
         }
@@ -361,6 +363,11 @@ namespace QL_KT_xa_sin_vien.Controllers
                     {
                         //Nếu là sinh viên thì chuyển hướng đến trang chính
                         return RedirectToAction("Index");
+                    }
+                    if (HttpContext.Session.GetString("userRole") == "4")
+                    {
+                        //Nếu là kế toán thì chuyển hướng đến trang kế toán
+                        return RedirectToAction("KeToan");
                     }
                 }
             }

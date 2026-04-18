@@ -23,7 +23,22 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("1", "2", "3", "4")]
         public async Task<IActionResult> Index()
         {
-            var qLSinhVienContext = _context.HoaDons.Include(h => h.MaHopDongNavigation).Include(h => h.MaSvNavigation);
+            var qLSinhVienContext = _context.HoaDons.Include(h => h.MaHopDongNavigation).Include(h => h.MaSvNavigation).AsQueryable();
+            var role = HttpContext.Session.GetString("userRole");
+            if (role == "1")
+            {
+                var taiKhoanId = HttpContext.Session.GetString("userId");
+                var sv = _context.SinhViens.FirstOrDefault(s => s.MaTaiKhoan == taiKhoanId);
+                if (sv != null)
+                {
+                    qLSinhVienContext = qLSinhVienContext.Where(h => h.MaSv == sv.MaSv);
+                }
+                else
+                {
+                    qLSinhVienContext = qLSinhVienContext.Where(h => false);
+                }
+            }
+
             return View(await qLSinhVienContext.ToListAsync());
         }
 
@@ -43,6 +58,18 @@ namespace QL_KT_xa_sin_vien.Controllers
             if (hoaDon == null)
             {
                 return RedirectToAction(nameof(Index));
+            }
+
+            var role = HttpContext.Session.GetString("userRole");
+            if (role == "1")
+            {
+                var taiKhoanId = HttpContext.Session.GetString("userId");
+                var sv = _context.SinhViens.FirstOrDefault(s => s.MaTaiKhoan == taiKhoanId);
+                if (sv == null || hoaDon.MaSv != sv.MaSv)
+                {
+                    TempData["ErrorMessage"] = "Không có quyền xem hóa đơn này.";
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             return View(hoaDon);

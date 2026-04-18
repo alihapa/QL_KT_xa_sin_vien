@@ -99,8 +99,15 @@
         <div class="card">
             <div class="car_ds">
                 <h3>Phản ánh sự cố</h3>
-                <p>@Model.PhanAnhs.Count(pa => pa.TrangThai == "Đang xử lý") phản ánh đang xử lý</p>
-                <p>@Model.PhanAnhs.Count(pa => pa.TrangThai == "Hoàn thành") phản ánh đã hoàn thành</p>
+                @{
+                    var phans = Model.PhanAnhs ?? new List<QL_KT_xa_sin_vien.Models.PhanAnh>();
+                    int dangXacMinh = phans.Count(pa => !string.IsNullOrEmpty(pa.TrangThai) && pa.TrangThai.ToLowerInvariant().Contains("xác minh"));
+                    int dangXuLy = phans.Count(pa => !string.IsNullOrEmpty(pa.TrangThai) && pa.TrangThai.ToLowerInvariant().Contains("xử lý") && !pa.TrangThai.ToLowerInvariant().Contains("xác minh"));
+                    int hoanThanh = phans.Count(pa => !string.IsNullOrEmpty(pa.TrangThai) && pa.TrangThai.ToLowerInvariant().Contains("hoàn thành"));
+                }
+                <p>@dangXuLy phản ánh đang xử lý</p>
+                <p>@dangXacMinh phản ánh đang xác minh</p>
+                <p>@hoanThanh phản ánh đã hoàn thành</p>
             </div>
             @* <a asp-action="Create" asp-controller="PhanAnhs" class="btn btn-primary">Thêm phản ánh</a> *@
             <a asp-action="Index" asp-controller="PhanAnhs" class="btn btn-primary">Xem chi tiết</a>
@@ -109,8 +116,29 @@
         <div class="card">
             <div class="car_ds">
                 <h3>Thông báo</h3>
-                <p>@Model.ThongBaos.First().NoiDung</p>
-                <p>Ngày: @Model.ThongBaos.First().ThoiGianGui?.ToString("dd/MM/yyyy")</p>
+                @{ 
+                    var allTbs = Model.ThongBaos ?? new List<QL_KT_xa_sin_vien.Models.ThongBao>();
+                    var userIdTb = Context.Session.GetString("userId");
+                    var personal = allTbs.Where(t => !string.IsNullOrEmpty(t.NguoiNhan) && t.NguoiNhan == userIdTb);
+                    var common = allTbs.Where(t => string.IsNullOrEmpty(t.NguoiNhan));
+                    var showList = personal.Concat(common).OrderByDescending(t => t.ThoiGianGui).Take(3).ToList();
+                }
+                @if (showList.Any())
+                {
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var tb in showList)
+                        {
+                            <li class="mb-2">
+                                <strong>@tb.NoiDung</strong>
+                                <div class="small text-muted">@tb.ThoiGianGui?.ToString("dd/MM/yyyy HH:mm")</div>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Không có thông báo</p>
+                }
             </div>
             <a asp-action="Index" asp-controller="ThongBaos" class="btn btn-primary">Xem chi tiết</a>
         </div>

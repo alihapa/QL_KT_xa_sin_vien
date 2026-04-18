@@ -57,6 +57,19 @@ namespace QL_KT_xa_sin_vien.Controllers
                 };
             }
 
+            // If role 1 (student) ensure they can only view their own profile
+            var role = HttpContext.Session.GetString("userRole");
+            if (role == "1")
+            {
+                var taiKhoanId = HttpContext.Session.GetString("userId");
+                var currentSv = await _context.SinhViens.FirstOrDefaultAsync(s => s.MaTaiKhoan == taiKhoanId);
+                if (currentSv == null || currentSv.MaSv != id)
+                {
+                    TempData["ErrorMessage"] = "Không có quyền xem thông tin này.";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
             return View(sinhVien);
         }
 

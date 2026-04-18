@@ -13,19 +13,19 @@
             <input type="hidden" asp-for="MaThongBao" />
 
             <div class="mb-3">
-                <label asp-for="NguoiNhan" class="form-label">Người nhận</label>
-                <select asp-for="NguoiNhan" class="form-select" asp-items="ViewBag.NguoiNhan"></select>
-                <span asp-validation-for="NguoiNhan" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
                 <label asp-for="LoaiThongBao" class="form-label">Loại thông báo</label>
-                <select asp-for="LoaiThongBao" class="form-select">
+                <select asp-for="LoaiThongBao" class="form-select" id="LoaiThongBao">
                     <option value="Chung">Chung</option>
                     <option value="Khẩn">Khẩn</option>
                     <option value="Cá nhân">Cá nhân</option>
                 </select>
                 <span asp-validation-for="LoaiThongBao" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3" id="nguoiNhanGroup">
+                <label asp-for="NguoiNhan" class="form-label">Người nhận</label>
+                <select asp-for="NguoiNhan" class="form-select" asp-items="ViewBag.NguoiNhan"></select>
+                <span asp-validation-for="NguoiNhan" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
@@ -59,4 +59,20 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var loai = document.getElementById('LoaiThongBao');
+            var nguoiGroup = document.getElementById('nguoiNhanGroup');
+            function update() {
+                if (!loai) return;
+                if (loai.value === 'Chung') {
+                    nguoiGroup.style.display = 'none';
+                } else {
+                    nguoiGroup.style.display = '';
+                }
+            }
+            loai.addEventListener('change', update);
+            update();
+        });
+    </script>
 }

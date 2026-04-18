@@ -23,8 +23,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Index()
         {
-            var qLSinhVienContext = _context.ThongBaos.Include(t => t.NguoiNhanNavigation);
-            return View(await qLSinhVienContext.ToListAsync());
+            var qLSinhVienContext = _context.ThongBaos.Include(t => t.NguoiNhanNavigation).AsQueryable();
+            var role = HttpContext.Session.GetString("userRole");
+            if (role == "1")
+            {
+                var taiKhoanId = HttpContext.Session.GetString("userId");
+                qLSinhVienContext = qLSinhVienContext.Where(t => string.IsNullOrEmpty(t.NguoiNhan) || t.NguoiNhan == taiKhoanId);
+            }
+            return View(await qLSinhVienContext.OrderByDescending(t => t.ThoiGianGui).ToListAsync());
         }
 
         // GET: ThongBaos/Details/5
@@ -62,8 +68,31 @@ namespace QL_KT_xa_sin_vien.Controllers
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
          
-        public async Task<IActionResult> Create([Bind("MaThongBao,NguoiNhan,LoaiThongBao,NoiDung,TrangThai,ThoiGianGui")] ThongBao thongBao)
+        public async Task<IActionResult> Create([Bind("MaThongBao,NguoiNhan,LoaiThongBao,NoiDung,TrangThai,ThoiGianGui,NguoiGui")] ThongBao thongBao)
         {
+            // set sender from session
+            var taiKhoanId = HttpContext.Session.GetString("userId");
+            if (!string.IsNullOrEmpty(taiKhoanId))
+            {
+                thongBao.NguoiGui = taiKhoanId;
+            }
+
+            // if loại là 'Chung' -> clear recipient
+            if (!string.IsNullOrEmpty(thongBao.LoaiThongBao) && thongBao.LoaiThongBao.Equals("Chung", StringComparison.OrdinalIgnoreCase))
+            {
+                thongBao.NguoiNhan = null;
+            }
+
+            if (string.IsNullOrEmpty(thongBao.MaThongBao))
+            {
+                thongBao.MaThongBao = Guid.NewGuid().ToString();
+            }
+
+            if (!thongBao.ThoiGianGui.HasValue)
+            {
+                thongBao.ThoiGianGui = DateTime.Now;
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(thongBao);
@@ -99,11 +128,17 @@ namespace QL_KT_xa_sin_vien.Controllers
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
          
-        public async Task<IActionResult> Edit(string id, [Bind("MaThongBao,NguoiNhan,LoaiThongBao,NoiDung,TrangThai,ThoiGianGui")] ThongBao thongBao)
+        public async Task<IActionResult> Edit(string id, [Bind("MaThongBao,NguoiNhan,LoaiThongBao,NoiDung,TrangThai,ThoiGianGui,NguoiGui")] ThongBao thongBao)
         {
             if (id != thongBao.MaThongBao)
             {
                 return NotFound();
+            }
+
+            // if Loai is Chung -> clear recipient
+            if (!string.IsNullOrEmpty(thongBao.LoaiThongBao) && thongBao.LoaiThongBao.Equals("Chung", StringComparison.OrdinalIgnoreCase))
+            {
+                thongBao.NguoiNhan = null;
             }
 
             if (ModelState.IsValid)

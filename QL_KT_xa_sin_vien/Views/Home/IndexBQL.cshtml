@@ -28,6 +28,27 @@
                 </div>
             </div>
         </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <form method="get" asp-controller="TimKiems" asp-action="TimKiem" class="d-flex gap-2">
+                    <select name="model" class="form-select form-select-sm" style="max-width:200px">
+                        <option value="">Chọn model...</option>
+                        <option value="SinhVien">Sinh viên</option>
+                        <option value="PhanAnh">Phản ánh</option>
+                        <option value="HopDong">Hợp đồng</option>
+                        <option value="HoaDon">Hóa đơn</option>
+                        <option value="ThongBao">Thông báo</option>
+                        <option value="Phong">Phòng</option>
+                        <option value="Giuong">Giường</option>
+                        <option value="ToaNha">Tòa nhà</option>
+                        <option value="TaiKhoan">Tài khoản</option>
+                    </select>
+                    <input type="text" name="searchString" class="form-control form-control-sm" placeholder="Từ khóa tìm kiếm..." />
+                    <button type="submit" class="btn btn-sm btn-primary">Tìm</button>
+                </form>
+            </div>
+        </div>
     }
 
     <!-- Summary cards -->

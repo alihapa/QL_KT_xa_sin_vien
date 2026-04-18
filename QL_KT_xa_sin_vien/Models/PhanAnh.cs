@@ -4,12 +4,22 @@ using System.ComponentModel.DataAnnotations;
 
 namespace QL_KT_xa_sin_vien.Models;
 
-public partial class PhanAnh
-{
+    using System.ComponentModel.DataAnnotations.Schema;
+
+    public partial class PhanAnh
+    {
     [Required]
     public string MaPhanAnh { get; set; } = null!;
 
     public string? MaSv { get; set; }
+
+    // Tài khoản người gửi (MaTaiKhoan)
+    [NotMapped]
+    public string? NguoiGoi { get; set; }
+
+    // Nếu true thì ẩn danh với các user role = 1
+    [NotMapped]
+    public bool? AnDanh { get; set; }
 
     public string? MaPhong { get; set; }
 

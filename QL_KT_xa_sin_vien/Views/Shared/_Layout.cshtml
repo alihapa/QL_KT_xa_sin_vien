@@ -67,6 +67,13 @@
                                             <li><a class="dropdown-item" asp-controller="VaiTroes" asp-action="Index">Vai trò</a></li>
                                             <li><a class="dropdown-item" asp-controller="NhatKies" asp-action="Index">Nhật ký</a></li>
                                             <li><a class="dropdown-item" asp-controller="SinhViens" asp-action="Index">Sinh viên</a></li>
+                                            <li><a class="dropdown-item" asp-controller="ToaNhas" asp-action="Index">Tòa nhà</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Phongs" asp-action="Index">Phòng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Giuongs" asp-action="Index">Giường</a></li>
+                                            <li><a class="dropdown-item" asp-controller="HopDongs" asp-action="Index">Hợp đồng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="HoaDons" asp-action="Index">Hóa đơn</a></li>
+                                            <li><a class="dropdown-item" asp-controller="PhanAnhs" asp-action="Index">Phản ánh</a></li>
+                                            <li><a class="dropdown-item" asp-controller="ThongBaos" asp-action="Index">Thông báo</a></li>
                                             <li><a class="dropdown-item" asp-controller="TimKiems" asp-action="TimKiem">Tìm kiếm</a></li>
                                         </ul>
                                     </li>
@@ -93,7 +100,15 @@
 
                                 @if (Context.Session.GetString("userRole") == "4" || Context.Session.GetString("userRole") == "3")
                                 {
-                                    <li><a class="dropdown-item" asp-controller="Home" asp-action="KeToan">Kế toán</a></li>
+                                    <li class="dropend">
+                                        <a class="dropdown-item dropdown-toggle" href="javascript:void(0)" role="button">Kế toán</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" asp-controller="Home" asp-action="KeToan">Dashboard Kế toán</a></li>
+                                            <li><a class="dropdown-item" asp-controller="HoaDons" asp-action="Index">Hóa đơn</a></li>
+                                            <li><a class="dropdown-item" asp-controller="HopDongs" asp-action="Index">Hợp đồng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="TimKiems" asp-action="TimKiem">Tìm kiếm</a></li>
+                                        </ul>
+                                    </li>
                                 }
 
                                 @if (Context.Session.GetString("userRole") != null)

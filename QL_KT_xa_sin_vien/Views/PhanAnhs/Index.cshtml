@@ -36,8 +36,9 @@
                         <td>@item.ThoiGianTao</td>
                         <td>@item.ThoiGianCapNhat</td>
                         <td>@item.MaPhongNavigation?.MaPhong</td>
-                        <td>@item.MaSvNavigation?.MaSv</td>
+                        <td>@(item.MaSvNavigation != null ? item.MaSvNavigation.HoTen : item.MaSv)</td>
                         <td>@item.NguoiXuLyNavigation?.MaTaiKhoan</td>
+                        <td>@(ViewBag.SenderDisplay != null && ((System.Collections.Generic.Dictionary<string, string>)ViewBag.SenderDisplay).ContainsKey(item.MaPhanAnh) ? ((System.Collections.Generic.Dictionary<string, string>)ViewBag.SenderDisplay)[item.MaPhanAnh] : "")</td>
                         <td class="text-center">
                             <a asp-action="Details" asp-route-id="@item.MaPhanAnh" class="btn btn-info btn-sm me-1">Chi tiết</a>
                             @if(Context.Session.GetString("userRole") == "2" || Context.Session.GetString("userRole") == "3")

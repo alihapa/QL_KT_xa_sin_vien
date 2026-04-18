@@ -35,11 +35,19 @@
             </tr>
             <tr>
                 <th>Sinh viên</th>
-                <td>@Model.MaSvNavigation?.MaSv</td>
+                <td>@(Model.MaSvNavigation != null ? Model.MaSvNavigation.HoTen : Model.MaSv)</td>
             </tr>
             <tr>
                 <th>Người xử lý</th>
                 <td>@Model.NguoiXuLyNavigation?.MaTaiKhoan</td>
+            </tr>
+            <tr>
+                <th>Người gửi</th>
+                <td>@(ViewBag.SenderDisplay ?? (Model.MaSvNavigation != null ? Model.MaSvNavigation.HoTen : Model.MaSv))</td>
+            </tr>
+            <tr>
+                <th>Người gửi</th>
+                <td>@(ViewBag.SenderDisplay ?? "")</td>
             </tr>
         </table>
 

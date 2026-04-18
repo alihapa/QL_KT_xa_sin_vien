@@ -15,9 +15,16 @@
             <input type="hidden" asp-for="TrangThai" />
 
             <div class="mb-3">
-                <label asp-for="MaSv" class="form-label"></label>
-                <select asp-for="MaSv" class="form-select" asp-items="ViewBag.MaSv"></select>
+                <label asp-for="MaSv" class="form-label">Sinh viên</label>
+                @* Do not allow selecting MaSv / sender in any case — always fixed from session *@
+                <input type="hidden" asp-for="MaSv" value="@ViewBag.FixedMaSv" />
+                <input class="form-control" value="@ViewBag.FixedHoTen" readonly />
                 <span asp-validation-for="MaSv" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="anDanh" name="AnDanh" value="true" />
+                <label class="form-check-label" for="anDanh">Gửi ẩn danh (chỉ ẩn danh với sinh viên khác)</label>
             </div>
 
             <div class="mb-3">
@@ -33,7 +40,7 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="NguoiXuLy" class="form-label"></label>
+                <label asp-for="NguoiXuLy" class="form-label">Người xử lý</label>
                 <select asp-for="NguoiXuLy" asp-items="@(ViewData["NguoiXuLy"] as SelectList)" class="form-select"></select>
                 <span asp-validation-for="NguoiXuLy" class="text-danger"></span>
             </div>
