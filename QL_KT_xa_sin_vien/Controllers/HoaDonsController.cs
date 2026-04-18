@@ -33,7 +33,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             var hoaDon = await _context.HoaDons
@@ -42,7 +42,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaHoaDon == id);
             if (hoaDon == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             return View(hoaDon);
@@ -83,13 +83,13 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             var hoaDon = await _context.HoaDons.FindAsync(id);
             if (hoaDon == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
             ViewData["MaHopDong"] = new SelectList(_context.HopDongs, "MaHopDong", "MaHopDong", hoaDon.MaHopDong);
             ViewData["MaSv"] = new SelectList(_context.SinhViens, "MaSv", "MaSv", hoaDon.MaSv);
@@ -107,7 +107,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id != hoaDon.MaHoaDon)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)

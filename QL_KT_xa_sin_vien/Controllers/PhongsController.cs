@@ -144,13 +144,13 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             var phong = await _context.Phongs.FindAsync(id);
             if (phong == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
             ViewData["ToaNha"] = new SelectList(_context.ToaNhas, "MaToaNha", "MaToaNha", phong.MaToaNha);
             return View(phong);
@@ -167,7 +167,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id != phong.MaPhong)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -181,7 +181,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 {
                     if (!PhongExists(phong.MaPhong))
                     {
-                        return NotFound();
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -200,7 +200,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             var phong = await _context.Phongs
@@ -208,7 +208,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaPhong == id);
             if (phong == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             return View(phong);

@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Kế toán";
+}
+
+<h2 class="mb-4">Bảng điều khiển Kế toán</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card p-3">
+                    <h6>Số hóa đơn</h6>
+                    <h3>@(ViewBag.SoLuongHoaDon ?? "-")</h3>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card p-3">
+                    <h6>Tổng doanh thu</h6>
+                    <h3>@(ViewBag.TongDoanhThu != null ? string.Format("{0:N0}", ViewBag.TongDoanhThu) : "-")</h3>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mt-3">Hóa đơn gần đây</h5>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã hóa đơn</th>
+                        <th>Mã hợp đồng</th>
+                        <th>Mã SV</th>
+                        <th>Số tiền</th>
+                        <th>Ngày xuất</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.RecentHoaDons != null)
+                    {
+                        foreach (var hd in ViewBag.RecentHoaDons)
+                        {
+                            <tr>
+                                <td>@hd.MaHoaDon</td>
+                                <td>@hd.MaHopDong</td>
+                                <td>@hd.MaSv</td>
+                                <td>@(hd.SoTien.HasValue ? String.Format("{0:N0}", hd.SoTien.Value) : "-")</td>
+                                <td>@(hd.NgayXuat?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Quay lại</a>
+    </div>
+</div>

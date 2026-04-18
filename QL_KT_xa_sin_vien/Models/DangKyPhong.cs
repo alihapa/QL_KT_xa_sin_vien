@@ -1,8 +1,14 @@
-﻿namespace QL_KT_xa_sin_vien.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace QL_KT_xa_sin_vien.Models
 {
     public class DangKyPhong
     {
+        [Required]
         public string MaSv { get; set; } = null!;
+
+        [Required]
+        [StringLength(200)]
         public string HoTen { get; set; }
 
         // Giá trị được chọn

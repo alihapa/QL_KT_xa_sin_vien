@@ -86,8 +86,9 @@ namespace QL_KT_xa_sin_vien
 
             // Bật session trước khi dùng endpoints
             app.UseSession();
-            app.UseAuthorization();
+            // Register logging middleware after session is enabled so it can read session safely
             app.UseMiddleware<LoggingMiddleware>();
+            app.UseAuthorization();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -32,14 +32,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             var toaNha = await _context.ToaNhas
                 .FirstOrDefaultAsync(m => m.MaToaNha == id);
             if (toaNha == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             return View(toaNha);
@@ -76,13 +76,13 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
             var toaNha = await _context.ToaNhas.FindAsync(id);
             if (toaNha == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
             return View(toaNha);
         }

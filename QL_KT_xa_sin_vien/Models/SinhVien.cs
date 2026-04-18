@@ -1,20 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace QL_KT_xa_sin_vien.Models;
 
 public partial class SinhVien
 {
+    [Required]
     public string MaSv { get; set; } = null!;
 
+    [StringLength(200)]
     public string? HoTen { get; set; }
 
+    [StringLength(50)]
     public string? Lop { get; set; }
 
+    [StringLength(100)]
     public string? Khoa { get; set; }
 
+    [StringLength(20)]
     public string? SoCmnd { get; set; }
 
+    [EmailAddress]
     public string? Email { get; set; }
     public string? ResetToken { get; set; }
     public DateTime? ResetTokenExpiry { get; set; }

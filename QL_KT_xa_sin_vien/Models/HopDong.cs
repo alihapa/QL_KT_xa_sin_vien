@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace QL_KT_xa_sin_vien.Models;
 
 public partial class HopDong
 {
+    [Required]
     public string MaHopDong { get; set; } = null!;
 
     public string? MaSv { get; set; }

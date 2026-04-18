@@ -251,6 +251,36 @@ namespace QL_KT_xa_sin_vien.Controllers
             return View(viewModel);
         }
 
+        [RoleAuthorize("4")]
+        public IActionResult KeToan()
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
+            {
+                return RedirectToAction("DangNhap");
+            }
+            if (HttpContext.Session.GetString("userRole") != "4")
+            {
+                return RedirectToAction("Index");
+            }
+
+            // Thống kê đơn giản cho kế toán
+            var hoaDons = db.HoaDons.ToList();
+            var soLuong = hoaDons.Count;
+            var tongDoanhThu = hoaDons.Where(h => h.SoTien.HasValue).Sum(h => h.SoTien.Value);
+
+            // Lấy 10 hóa đơn gần nhất
+            var recent = db.HoaDons
+                .OrderByDescending(h => h.NgayXuat)
+                .Take(10)
+                .ToList();
+
+            ViewBag.SoLuongHoaDon = soLuong;
+            ViewBag.TongDoanhThu = tongDoanhThu;
+            ViewBag.RecentHoaDons = recent;
+
+            return View();
+        }
+
         public IActionResult IndexBQL()
         {
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
@@ -498,8 +528,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             var sv = db.SinhViens.FirstOrDefault(s => s.ResetToken == token && s.ResetTokenExpiry > DateTime.Now);
             if (sv == null)
             {
-                TempData["ErrorMessage"] = "Token không hợp lệ hoặc đã hết hạn.";
-                return RedirectToAction("QuenMatKhau");
+                return NotFound(); // Thay đổi từ RedirectToAction
             }
 
             return View(new DatLaiMatKhauViewModel { Token = token });

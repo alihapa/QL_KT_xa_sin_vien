@@ -1,18 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace QL_KT_xa_sin_vien.Models;
 
 public partial class TaiKhoan
 {
+    [Required]
     public string MaTaiKhoan { get; set; } = null!;
 
+    [Required]
+    [StringLength(100)]
     public string TenDangNhap { get; set; } = null!;
 
     public string? MatKhauMh { get; set; }
 
+    [EmailAddress]
+    [StringLength(256)]
     public string? Email { get; set; }
 
+    [Phone]
     public string? Sdt { get; set; }
 
     public string? VaiTro { get; set; }

@@ -8,7 +8,7 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <form asp-action="DangKy" method="post">
+        <form asp-action="DangKy" asp-controller="Phongs" method="post">
             <div class="mb-3">
                 <label asp-for="MaSv" class="form-label"></label>
                 <input asp-for="MaSv" class="form-control" readonly />
@@ -44,7 +44,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Đăng ký</button>
-            <a asp-action="Index" class="btn btn-secondary ms-2">Quay lại</a>
+            <a asp-action="Index" asp-controller="Phongs" class="btn btn-secondary ms-2">Quay lại</a>
         </form>
     </div>
 </div>

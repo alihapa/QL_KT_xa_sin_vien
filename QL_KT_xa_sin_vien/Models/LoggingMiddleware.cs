@@ -1,4 +1,7 @@
-﻿namespace QL_KT_xa_sin_vien.Models
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+
+namespace QL_KT_xa_sin_vien.Models
 {
     public class LoggingMiddleware
     {
@@ -11,7 +14,14 @@
 
         public async Task InvokeAsync(HttpContext context)
         {
-            var maTaiKhoan = context.Session.GetString("userId");
+            // Guard session access: check ISessionFeature to avoid InvalidOperationException when session middleware not configured
+            var sessionFeature = context.Features.Get<ISessionFeature>();
+            string maTaiKhoan = null;
+            if (sessionFeature?.Session != null)
+            {
+                maTaiKhoan = sessionFeature.Session.GetString("userId");
+            }
+
             await _next(context);
 
             var method = context.Request.Method;
@@ -42,6 +52,20 @@
             if (logContent.Length > 100)
             {
                 logContent = logContent.Substring(0, 100);
+            }
+
+            // Nếu không có maTaiKhoan hợp lệ thì bỏ qua ghi nhật ký để tránh vi phạm khóa ngoại
+            if (string.IsNullOrEmpty(maTaiKhoan))
+            {
+                return;
+            }
+
+            // Optionally verify the account exists to be safe
+            var taiKhoan = db.TaiKhoans.FirstOrDefault(t => t.MaTaiKhoan == maTaiKhoan);
+            if (taiKhoan == null)
+            {
+                // Nếu tài khoản không tồn tại, không ghi nhật ký để tránh lỗi FK
+                return;
             }
 
             var log = new NhatKy

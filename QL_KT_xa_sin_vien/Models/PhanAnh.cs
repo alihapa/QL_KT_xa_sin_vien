@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace QL_KT_xa_sin_vien.Models;
 
 public partial class PhanAnh
 {
+    [Required]
     public string MaPhanAnh { get; set; } = null!;
 
     public string? MaSv { get; set; }
 
     public string? MaPhong { get; set; }
 
+    [StringLength(1000)]
     public string? MoTa { get; set; }
 
     public string? MucDoUuTien { get; set; }
