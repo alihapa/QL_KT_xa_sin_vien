@@ -8,7 +8,7 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <form asp-action="Edit">
+        <form asp-action="Edit" method="post">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
             <input type="hidden" asp-for="MaTaiKhoan" />
 
@@ -19,9 +19,8 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="MatKhauMh" class="form-label">Mật khẩu</label>
-                <input asp-for="MatKhauMh" type="password" autocomplete="new-password" class="form-control" />
-                <span asp-validation-for="MatKhauMh" class="text-danger"></span>
+                <label class="form-label">Mật khẩu mới (để trống nếu không đổi)</label>
+                <input name="MatKhauMh" type="password" autocomplete="new-password" class="form-control" />
             </div>
 
             <div class="mb-3">
@@ -45,8 +44,8 @@
             <div class="mb-3">
                 <label asp-for="TrangThai" class="form-label"></label>
                 <select asp-for="TrangThai" class="form-select">
-                    <option value="Hoạt động">Hoạt động</option>
-                    <option value="Khóa">Khóa</option>
+                    <option value="1" selected="@(Model.TrangThai == "1")">Hoạt động</option>
+                    <option value="0" selected="@(Model.TrangThai == "0")">Khóa</option>
                 </select>
                 <span asp-validation-for="TrangThai" class="text-danger"></span>
             </div>

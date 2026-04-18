@@ -11,11 +11,7 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-            <div class="mb-3">
-                <label asp-for="MaTaiKhoan" class="form-label"></label>
-                <input asp-for="MaTaiKhoan" class="form-control" />
-                <span asp-validation-for="MaTaiKhoan" class="text-danger"></span>
-            </div>
+            <input asp-for="MaTaiKhoan" type="hidden" />
 
             <div class="mb-3">
                 <label asp-for="TenDangNhap" class="form-label"></label>
@@ -49,8 +45,8 @@
             <div class="mb-3">
                 <label asp-for="TrangThai" class="form-label"></label>
                 <select asp-for="TrangThai" class="form-select">
-                    <option value="Hoạt động">Hoạt động</option>
-                    <option value="Khóa">Khóa</option>
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Khóa</option>
                 </select>
                 <span asp-validation-for="TrangThai" class="text-danger"></span>
             </div>

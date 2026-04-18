@@ -10,35 +10,27 @@
 </head>
 <body>
     @using Microsoft.AspNetCore.Http.Features
-    <header>
+<header>
         <nav class="navbar navbar-expand-sm navbar-light bg-primary border-bottom shadow-sm mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand text-white fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
                     Quản Lý Kí Túc Xá Sinh Viên
                 </a>
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
                     <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="IndexAdmin">Admin</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="IndexBQL">BQL</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="KeToan">Kế toán</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="DangXuat">Đăng Xuất</a>
-                        </li>
+                        @* Thêm các link khác nếu cần *@
                     </ul>
-                    <span class="navbar-text text-white">
+
+                    <ul class="navbar-nav ms-auto">
                         @{
                             var sessionFeature = Context.Features.Get<ISessionFeature>();
                             var userDisplay = "Khách";
@@ -48,8 +40,72 @@
                                 if (!string.IsNullOrEmpty(u)) userDisplay = u;
                             }
                         }
-                        Xin chào, <strong>@userDisplay</strong>
-                    </span>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                Xin chào, <strong>@userDisplay</strong>
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                @* Common link for authenticated roles *@
+                                @if (Context.Session.GetString("userRole") == "1" || Context.Session.GetString("userRole") == "2" || Context.Session.GetString("userRole") == "3")
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Home" asp-action="Index">Trang chủ sinh viên</a></li>
+                                }
+
+                                @* Admin group (role 3) - implemented as a dropend submenu with JS support below *@
+                                @if (Context.Session.GetString("userRole") == "3")
+                                {
+                                    <li><hr class="dropdown-divider" /></li>
+
+                                    <li class="dropend">
+                                        <a class="dropdown-item dropdown-toggle" href="javascript:void(0)" role="button">Admin</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" asp-controller="Home" asp-action="IndexAdmin">Dashboard Admin</a></li>
+                                            <li><a class="dropdown-item" asp-controller="TaiKhoans" asp-action="Index">Người dùng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="VaiTroes" asp-action="Index">Vai trò</a></li>
+                                            <li><a class="dropdown-item" asp-controller="NhatKies" asp-action="Index">Nhật ký</a></li>
+                                            <li><a class="dropdown-item" asp-controller="SinhViens" asp-action="Index">Sinh viên</a></li>
+                                            <li><a class="dropdown-item" asp-controller="TimKiems" asp-action="TimKiem">Tìm kiếm</a></li>
+                                        </ul>
+                                    </li>
+                                }
+
+                                @* BQL group (role 2 or 3) *@
+                                @if (Context.Session.GetString("userRole") == "2" || Context.Session.GetString("userRole") == "3")
+                                {
+                                    <li class="dropend">
+                                        <a class="dropdown-item dropdown-toggle" href="javascript:void(0)" role="button">BQL</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" asp-controller="Home" asp-action="IndexBQL">Dashboard BQL</a></li>
+                                            <li><a class="dropdown-item" asp-controller="ToaNhas" asp-action="Index">Tòa nhà</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Phongs" asp-action="Index">Phòng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Giuongs" asp-action="Index">Giường</a></li>
+                                            <li><a class="dropdown-item" asp-controller="HopDongs" asp-action="Index">Hợp đồng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="HoaDons" asp-action="Index">Hóa đơn</a></li>
+                                            <li><a class="dropdown-item" asp-controller="PhanAnhs" asp-action="Index">Phản ánh</a></li>
+                                            <li><a class="dropdown-item" asp-controller="ThongBaos" asp-action="Index">Thông báo</a></li>
+                                            <li><a class="dropdown-item" asp-controller="TimKiems" asp-action="TimKiem">Tìm kiếm</a></li>
+                                        </ul>
+                                    </li>
+                                }
+
+                                @if (Context.Session.GetString("userRole") == "4" || Context.Session.GetString("userRole") == "3")
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Home" asp-action="KeToan">Kế toán</a></li>
+                                }
+
+                                @if (Context.Session.GetString("userRole") != null)
+                                {
+                                    <li><hr class="dropdown-divider" /></li>
+                                }
+
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="DangXuat">Đăng Xuất</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="DangNhap">Đăng Nhập</a></li>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
@@ -69,6 +125,52 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JS hỗ trợ dropdown lồng (submenu) cho Bootstrap 5 -->
+    <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Bật toggle cho các dropdown-toggle nằm trong dropdown-menu (submenu)
+                var submenuToggles = document.querySelectorAll('.dropdown-menu .dropdown-toggle');
+
+                submenuToggles.forEach(function (toggle) {
+                    toggle.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        var parentLi = toggle.parentElement;
+                        var subMenu = parentLi.querySelector('.dropdown-menu');
+
+                        // Đóng các submenu khác cùng cấp (tuỳ chọn)
+                        var siblings = parentLi.parentElement.querySelectorAll('.dropdown-menu.show');
+                        siblings.forEach(function (s) {
+                            if (s !== subMenu) s.classList.remove('show');
+                        });
+
+                        if (subMenu) {
+                            subMenu.classList.toggle('show');
+                        }
+                    });
+                });
+
+                // Đóng tất cả submenu khi click ra ngoài
+                document.addEventListener('click', function () {
+                    document.querySelectorAll('.dropdown-menu .dropdown-menu.show').forEach(function (sm) {
+                        sm.classList.remove('show');
+                    });
+                });
+
+                // Đóng submenu khi dropdown chính đóng
+                var mainDropdowns = document.querySelectorAll('.nav-item.dropdown');
+                mainDropdowns.forEach(function (dd) {
+                    dd.addEventListener('hidden.bs.dropdown', function () {
+                        dd.querySelectorAll('.dropdown-menu.show').forEach(function (sm) {
+                            sm.classList.remove('show');
+                        });
+                    });
+                });
+            });
+    </script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

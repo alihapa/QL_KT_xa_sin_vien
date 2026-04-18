@@ -251,14 +251,14 @@ namespace QL_KT_xa_sin_vien.Controllers
             return View(viewModel);
         }
 
-        [RoleAuthorize("4")]
+        [RoleAuthorize("4", "3")]
         public IActionResult KeToan()
         {
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
             {
                 return RedirectToAction("DangNhap");
             }
-            if (HttpContext.Session.GetString("userRole") != "4")
+            if (HttpContext.Session.GetString("userRole") != "4" && HttpContext.Session.GetString("userRole") != "3")
             {
                 return RedirectToAction("Index");
             }
@@ -288,7 +288,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
                 return RedirectToAction("DangNhap");
             }
-            else if (HttpContext.Session.GetString("userRole") != "2")
+            else if (HttpContext.Session.GetString("userRole") != "2" && HttpContext.Session.GetString("userRole") != "3")
             {
                 // Nếu không phải nhân viên, chuyển hướng về trang chính
                 return RedirectToAction("Index");

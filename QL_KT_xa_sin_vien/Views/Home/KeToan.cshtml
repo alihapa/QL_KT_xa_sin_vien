@@ -42,7 +42,7 @@
                                 <td>@hd.MaHoaDon</td>
                                 <td>@hd.MaHopDong</td>
                                 <td>@hd.MaSv</td>
-                                <td>@(hd.SoTien.HasValue ? String.Format("{0:N0}", hd.SoTien.Value) : "-")</td>
+                            <td>@(hd.SoTien != null ? String.Format("{0:N0}", hd.SoTien) : "-")</td>
                                 <td>@(hd.NgayXuat?.ToString("dd/MM/yyyy") ?? "-")</td>
                             </tr>
                         }

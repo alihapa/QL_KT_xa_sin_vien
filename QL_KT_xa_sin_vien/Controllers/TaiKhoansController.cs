@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QL_KT_xa_sin_vien.Models;
@@ -61,9 +63,21 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("3")]
-         
         public async Task<IActionResult> Create([Bind("MaTaiKhoan,TenDangNhap,MatKhauMh,Email,Sdt,VaiTro,TrangThai")] TaiKhoan taiKhoan)
         {
+            // ensure primary key
+            if (string.IsNullOrEmpty(taiKhoan.MaTaiKhoan))
+            {
+                taiKhoan.MaTaiKhoan = Guid.NewGuid().ToString();
+            }
+
+            // Hash password before saving
+            if (!string.IsNullOrEmpty(taiKhoan.MatKhauMh))
+            {
+                var hasher = new PasswordHasher<TaiKhoan>();
+                taiKhoan.MatKhauMh = hasher.HashPassword(taiKhoan, taiKhoan.MatKhauMh);
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(taiKhoan);
@@ -97,13 +111,34 @@ namespace QL_KT_xa_sin_vien.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RoleAuthorize( "3")]
-         
-        public async Task<IActionResult> Edit(string id, [Bind("MaTaiKhoan,TenDangNhap,MatKhauMh,Email,Sdt,VaiTro,TrangThai")] TaiKhoan taiKhoan)
+        [RoleAuthorize("3")]
+        public async Task<IActionResult> Edit(string id, Microsoft.AspNetCore.Http.IFormCollection form)
         {
-            if (id != taiKhoan.MaTaiKhoan)
+            // Bind form values manually to avoid exposing hashed password back to the view
+            var tenDangNhap = form["TenDangNhap"].ToString();
+            var newPassword = form["MatKhauMh"].ToString(); // may be empty if no change
+            var email = form["Email"].ToString();
+            var sdt = form["Sdt"].ToString();
+            var vaiTro = form["VaiTro"].ToString();
+            var trangThai = form["TrangThai"].ToString();
+
+            if (id == null) return NotFound();
+
+            var taiKhoan = await _context.TaiKhoans.FindAsync(id);
+            if (taiKhoan == null) return NotFound();
+
+            // update fields
+            taiKhoan.TenDangNhap = tenDangNhap;
+            taiKhoan.Email = email;
+            taiKhoan.Sdt = sdt;
+            taiKhoan.VaiTro = vaiTro;
+            taiKhoan.TrangThai = trangThai;
+
+            // if new password provided, hash and update
+            if (!string.IsNullOrEmpty(newPassword))
             {
-                return NotFound();
+                var hasher = new PasswordHasher<TaiKhoan>();
+                taiKhoan.MatKhauMh = hasher.HashPassword(taiKhoan, newPassword);
             }
 
             if (ModelState.IsValid)
@@ -126,6 +161,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["VaiTro"] = new SelectList(_context.VaiTros, "MaVaiTro", "MaVaiTro", taiKhoan.VaiTro);
             return View(taiKhoan);
         }
