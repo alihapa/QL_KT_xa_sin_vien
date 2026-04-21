@@ -6,6 +6,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Mail;
+using QL_KT_xa_sin_vien.Services;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
@@ -14,12 +15,189 @@ namespace QL_KT_xa_sin_vien.Controllers
         private readonly QLSinhVienContext db = new QLSinhVienContext();
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _configuration; // thêm dòng này
+        private readonly Microsoft.AspNetCore.DataProtection.IDataProtector _protector;
 
         // Constructor: inject ILogger và IConfiguration
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dataProtectionProvider)
         {
             _logger = logger;
             _configuration = configuration; // gán vào biến private
+            _protector = dataProtectionProvider.CreateProtector("AccountActivationProtector");
+        }
+
+        [HttpGet]
+        public IActionResult KichHoatConfirm()
+        {
+            var email = TempData["ActivationEmail"] as string;
+            var username = TempData["ActivationUsername"] as string;
+            var vm = new KichHoatViewModel { MaTaiKhoan = null, Token = null };
+            ViewBag.Email = email;
+            ViewBag.Username = username;
+            return View("KichHoatConfirm", vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> KichHoatConfirm(string email, string code, string? username)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
+            {
+                TempData["ErrorMessage"] = "Vui lòng nhập email và mã kích hoạt.";
+                return RedirectToAction("KichHoatConfirm");
+            }
+
+            var (ok, msg) = ActivationService.VerifyCode(email, code, username);
+            if (!ok)
+            {
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("KichHoatConfirm");
+            }
+
+            // find account and activate
+            TaiKhoan? taiKhoan;
+            if (!string.IsNullOrEmpty(username))
+            {
+                taiKhoan = db.TaiKhoans.FirstOrDefault(t => t.Email == email && t.TenDangNhap == username);
+            }
+            else
+            {
+                // if only one account exists with the email, activate that; if multiple exist this branch should not be used
+                taiKhoan = db.TaiKhoans.FirstOrDefault(t => t.Email == email);
+            }
+            if (taiKhoan == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy tài khoản tương ứng.";
+                return RedirectToAction("DangNhap");
+            }
+            taiKhoan.TrangThai = "1";
+            await db.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Kích hoạt thành công. Bạn có thể đăng nhập bây giờ.";
+            return RedirectToAction("DangNhap");
+        }
+
+        // GET: KichHoatTaiKhoan
+        [HttpGet]
+        public IActionResult KichHoatTaiKhoan(string? token, string? id)
+        {
+            // If token and account id provided (from activation email link), show confirmation view
+            if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(id))
+            {
+                var vm = new Models.KichHoatViewModel { Token = token, MaTaiKhoan = id };
+                return View("KichHoatTaiKhoan", vm);
+            }
+
+            return View("KichHoatRequest", new Models.KichHoatRequestModel());
+        }
+
+        // POST: KichHoatTaiKhoan (request activation link by email)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult KichHoatTaiKhoan(Models.KichHoatRequestModel model)
+        {
+            var email = model?.Email;
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["ErrorMessage"] = "Vui lòng nhập email để nhận liên kết kích hoạt.";
+                return View(new Models.KichHoatRequestModel());
+            }
+
+            try
+            {
+                // find accounts by email
+                var accounts = db.TaiKhoans.Where(t => t.Email == email).ToList();
+                if (accounts == null || !accounts.Any())
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy tài khoản tương ứng với email này.";
+                    return View(new Models.KichHoatRequestModel());
+                }
+
+                // if multiple accounts share the email and no username was chosen, prompt user to pick
+                if (accounts.Count > 1 && string.IsNullOrEmpty(model?.SelectedUsername))
+                {
+                    var vm = new Models.KichHoatRequestModel
+                    {
+                        Email = email,
+                        Usernames = accounts.Select(a => a.TenDangNhap).ToList()
+                    };
+                    TempData["ErrorMessage"] = "Có nhiều tài khoản sử dụng email này. Vui lòng chọn tên đăng nhập để gửi mã.";
+                    return View("KichHoatRequest", vm);
+                }
+
+                var chosenUsername = model?.SelectedUsername;
+
+                // send 6-digit activation code via ActivationService, include username when available
+                var (success, message, wait, code) = ActivationService.TrySendCode(email, TimeSpan.FromMinutes(15), 10, 30, chosenUsername);
+                if (!success)
+                {
+                    TempData["ErrorMessage"] = message + (wait > 0 ? $" Vui lòng chờ {wait}s." : "");
+                    return View("KichHoatRequest", new Models.KichHoatRequestModel { Email = email, SelectedUsername = chosenUsername });
+                }
+
+                var smtpSettings = _configuration.GetSection("Smtp").Get<SmtpSettings>();
+                var smtpClient = new SmtpClient(smtpSettings.Host)
+                {
+                    Port = smtpSettings.Port,
+                    Credentials = new NetworkCredential(smtpSettings.User, smtpSettings.Password),
+                    EnableSsl = smtpSettings.EnableSsl,
+                };
+
+                var mail = new MailMessage
+                {
+                    From = new MailAddress(smtpSettings.User),
+                    Subject = "Mã kích hoạt tài khoản",
+                    Body = $"Mã kích hoạt của bạn là: {code}\nMã có hiệu lực trong 15 phút.",
+                    IsBodyHtml = false,
+                };
+                mail.To.Add(email);
+                smtpClient.Send(mail);
+
+                TempData["SuccessMessage"] = "Mã kích hoạt đã được gửi tới email. Vui lòng kiểm tra hộp thư và nhập mã.";
+                TempData["ActivationEmail"] = email;
+                if (!string.IsNullOrEmpty(model?.SelectedUsername))
+                    TempData["ActivationUsername"] = model.SelectedUsername;
+                TempData["ResendSeconds"] = wait;
+                return RedirectToAction("KichHoatConfirm");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Không thể gửi email kích hoạt. Lỗi: " + ex.Message;
+            }
+
+            return View(new Models.KichHoatRequestModel());
+        }
+
+        // POST: KichHoatTaiKhoan/Confirm
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> KichHoatTaiKhoanConfirm(string token, string maTaiKhoan)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(maTaiKhoan))
+            {
+                TempData["ErrorMessage"] = "Liên kết kích hoạt không hợp lệ.";
+                return RedirectToAction("DangNhap");
+            }
+
+            var sv = await db.SinhViens.FirstOrDefaultAsync(s => s.ResetToken == token && s.ResetTokenExpiry > DateTime.Now && s.MaTaiKhoan == maTaiKhoan);
+            if (sv == null)
+            {
+                TempData["ErrorMessage"] = "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.";
+                return RedirectToAction("DangNhap");
+            }
+
+            var taiKhoan = await db.TaiKhoans.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
+            if (taiKhoan == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy tài khoản.";
+                return RedirectToAction("DangNhap");
+            }
+
+            taiKhoan.TrangThai = "1"; // activate
+            sv.ResetToken = null;
+            sv.ResetTokenExpiry = null;
+            await db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Kích hoạt thành công. Bạn có thể đăng nhập bây giờ.";
+            return RedirectToAction("DangNhap");
         }
 
         public async Task<IActionResult> Index()
@@ -313,9 +491,11 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpGet]
         public IActionResult DangNhap()
         {
-            if (HttpContext.Items.ContainsKey("ErrorMessage"))
+            // If middleware set an error message in session, move it to TempData for the view
+            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("ErrorMessage")))
             {
-                TempData["ErrorMessage"] = HttpContext.Items["ErrorMessage"];
+                TempData["ErrorMessage"] = HttpContext.Session.GetString("ErrorMessage");
+                HttpContext.Session.Remove("ErrorMessage");
             }
             return View();
         }
@@ -332,42 +512,60 @@ namespace QL_KT_xa_sin_vien.Controllers
 
                 if (result == PasswordVerificationResult.Success)
                 {
-                    var userId = user.MaTaiKhoan;
-                    if (!string.IsNullOrEmpty(userId))
+                    // Respect account status values:
+                    // "1" = active, "0" = not activated (awaiting email confirmation), "-1" = banned
+                    if (user.TrangThai == "-1")
                     {
-                        var tenSinhVien = db.SinhViens
-                            .Where(s => s.MaTaiKhoan == userId)
-                            .Select(s => s.HoTen)
-                            .FirstOrDefault();
-                        if (tenSinhVien == null)
-                            tenSinhVien = "chưa có tên";
-                        // tenSinhVien có thể null nếu chưa có sinh viên liên kết
-                        HttpContext.Session.SetString("users", tenSinhVien);
-                        HttpContext.Session.SetString("userId", userId); // Lưu MaTaiKhoan vào session để sử dụng sau này
-                        HttpContext.Session.SetString("userRole", user.VaiTro); // Lưu vai trò vào session nếu cần thiết
+                        TempData["ErrorMessage"] = "Tài khoản đã bị cấm. Vui lòng liên hệ quản trị viên.";
+                        ViewBag.Username = username;
+                        return View();
                     }
-                    user.TrangThai = "1"; // Cập nhật trạng thái đăng nhập
-                    db.SaveChanges();
 
-                    if (HttpContext.Session.GetString("userRole") == "3")
+                    if (user.TrangThai == "0")
                     {
-                        //Nếu là admin thì chuyển hướng đến trang quản lý
-                        return RedirectToAction("IndexAdmin");
+                        TempData["ErrorMessage"] = "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để kích hoạt tài khoản hoặc <a href=\"/Home/KichHoatTaiKhoan\">yêu cầu gửi lại liên kết</a>.";
+                        ViewBag.Username = username;
+                        return View();
                     }
-                    if(HttpContext.Session.GetString("userRole") == "2")
+
+                    // Only allow login when TrangThai == "1"
+                    if (user.TrangThai == "1")
                     {
-                        //Nếu là nhân viên thì chuyển hướng đến trang quản lý
-                        return RedirectToAction("IndexBQL");
-                    }
-                    if (HttpContext.Session.GetString("userRole") == "1")
-                    {
-                        //Nếu là sinh viên thì chuyển hướng đến trang chính
-                        return RedirectToAction("Index");
-                    }
-                    if (HttpContext.Session.GetString("userRole") == "4")
-                    {
-                        //Nếu là kế toán thì chuyển hướng đến trang kế toán
-                        return RedirectToAction("KeToan");
+                        var userId = user.MaTaiKhoan;
+                        if (!string.IsNullOrEmpty(userId))
+                        {
+                            var tenSinhVien = db.SinhViens
+                                .Where(s => s.MaTaiKhoan == userId)
+                                .Select(s => s.HoTen)
+                                .FirstOrDefault();
+                            if (tenSinhVien == null)
+                                tenSinhVien = "chưa có tên";
+                            // tenSinhVien có thể null nếu chưa có sinh viên liên kết
+                            HttpContext.Session.SetString("users", tenSinhVien);
+                            HttpContext.Session.SetString("userId", userId); // Lưu MaTaiKhoan vào session để sử dụng sau này
+                            HttpContext.Session.SetString("userRole", user.VaiTro); // Lưu vai trò vào session nếu cần thiết
+                        }
+
+                        if (HttpContext.Session.GetString("userRole") == "3")
+                        {
+                            //Nếu là admin thì chuyển hướng đến trang quản lý
+                            return RedirectToAction("IndexAdmin");
+                        }
+                        if(HttpContext.Session.GetString("userRole") == "2")
+                        {
+                            //Nếu là nhân viên thì chuyển hướng đến trang quản lý
+                            return RedirectToAction("IndexBQL");
+                        }
+                        if (HttpContext.Session.GetString("userRole") == "1")
+                        {
+                            //Nếu là sinh viên thì chuyển hướng đến trang chính
+                            return RedirectToAction("Index");
+                        }
+                        if (HttpContext.Session.GetString("userRole") == "4")
+                        {
+                            //Nếu là kế toán thì chuyển hướng đến trang kế toán
+                            return RedirectToAction("KeToan");
+                        }
                     }
                 }
             }
@@ -426,9 +624,77 @@ namespace QL_KT_xa_sin_vien.Controllers
             if (ModelState.IsValid)
             {
                 db.TaiKhoans.Add(taikhoan);
-                db.SaveChanges();
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+                {
+                    var msg = ex.InnerException?.Message ?? ex.Message;
+                    if (msg != null && (msg.Contains("UQ_TaiKhoan_tenDangNhap") || msg.Contains("duplicate key") || msg.Contains("tenDangNhap")))
+                    {
+                        ModelState.AddModelError("TenDangNhap", "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.");
+                        return View(taikhoan);
+                    }
+                    // unknown db error: rethrow
+                    throw;
+                }
 
-                return RedirectToAction("DangNhap");
+                // After creating account, create an activation token and send activation email
+                try
+                {
+                    // Try to find a linked SinhVien by email; if none exists create a minimal SinhVien linked to this account
+                    var sv = db.SinhViens.FirstOrDefault(s => s.Email == taikhoan.Email);
+                    var token = Guid.NewGuid().ToString();
+                    if (sv == null)
+                    {
+                        sv = new SinhVien
+                        {
+                            MaSv = Guid.NewGuid().ToString(),
+                            HoTen = "chưa có tên",
+                            Email = taikhoan.Email,
+                            MaTaiKhoan = taikhoan.MaTaiKhoan,
+                            ResetToken = token,
+                            ResetTokenExpiry = DateTime.Now.AddDays(1)
+                        };
+                        db.SinhViens.Add(sv);
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        sv.ResetToken = token;
+                        sv.ResetTokenExpiry = DateTime.Now.AddDays(1);
+                        db.SaveChanges();
+                    }
+
+                    var activationLink = Url.Action("KichHoatTaiKhoan", "Home", new { token = token, id = taikhoan.MaTaiKhoan }, Request.Scheme);
+
+                    var smtpSettings = _configuration.GetSection("Smtp").Get<SmtpSettings>();
+                    var smtpClient = new SmtpClient(smtpSettings.Host)
+                    {
+                        Port = smtpSettings.Port,
+                        Credentials = new NetworkCredential(smtpSettings.User, smtpSettings.Password),
+                        EnableSsl = smtpSettings.EnableSsl,
+                    };
+
+                    var mail = new MailMessage
+                    {
+                        From = new MailAddress(smtpSettings.User),
+                        Subject = "Kích hoạt tài khoản",
+                        Body = $"Xin chào,\n\nVui lòng nhấp vào liên kết sau để kích hoạt tài khoản của bạn:\n{activationLink}\n\nLiên kết có hiệu lực trong 24 giờ.",
+                        IsBodyHtml = false,
+                    };
+                    if (!string.IsNullOrEmpty(taikhoan.Email))
+                        mail.To.Add(taikhoan.Email);
+
+                    smtpClient.Send(mail);
+                }
+                catch
+                {
+                    // ignore email send failures for now; user can request activation resend
+                }
+
+                return RedirectToAction("KichHoatTaiKhoan");
             }
             else {
                 // Ghi log hoặc lấy chi tiết lỗi để hiển thị
@@ -451,10 +717,10 @@ namespace QL_KT_xa_sin_vien.Controllers
             var user = db.TaiKhoans.FirstOrDefault(u => u.MaTaiKhoan == HttpContext.Session.GetString("userId"));
             if (user != null)
             {
-                user.TrangThai = "0"; // Cập nhật trạng thái đăng xuất
-                db.SaveChanges();
+                // Do not change account activation status on logout.
+                // Previously this set TrangThai = "0" which incorrectly deactivated accounts.
             }
-            HttpContext.Session.Remove("user");
+            HttpContext.Session.Remove("users");
             HttpContext.Session.Remove("userId");
             HttpContext.Session.Remove("userRole");
             SignOut();
@@ -466,37 +732,89 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpGet]
         public IActionResult QuenMatKhau()
         {
-            return View();
+            // Use the same simple request model as activation flow so we can prompt for username when email maps to multiple accounts
+            return View(new Models.KichHoatRequestModel());
         }
 
         // POST: QuenMatKhau
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> QuenMatKhau(string email)
+        public async Task<IActionResult> QuenMatKhau(Models.KichHoatRequestModel model)
         {
+            var email = model?.Email;
+            var selectedUsername = model?.SelectedUsername;
+
             if (string.IsNullOrEmpty(email))
             {
                 TempData["ErrorMessage"] = "Vui lòng nhập email.";
-                return View();
+                return View(new Models.KichHoatRequestModel());
             }
 
-            var sv = await db.SinhViens.FirstOrDefaultAsync(s => s.Email == email);
-            if (sv == null)
+            var sinhViens = await db.SinhViens.Where(s => s.Email == email).ToListAsync();
+            if (sinhViens == null || !sinhViens.Any())
             {
                 TempData["ErrorMessage"] = "Email không tồn tại trong hệ thống.";
-                return View();
+                return View(new Models.KichHoatRequestModel());
+            }
+
+            // If multiple students share same email, require the user to choose the corresponding account (username)
+            if (sinhViens.Count > 1 && string.IsNullOrEmpty(selectedUsername))
+            {
+                var usernames = new List<string>();
+                foreach (var sv in sinhViens)
+                {
+                    if (!string.IsNullOrEmpty(sv.MaTaiKhoan))
+                    {
+                        var acc = await db.TaiKhoans.FirstOrDefaultAsync(t => t.MaTaiKhoan == sv.MaTaiKhoan);
+                        if (acc != null && !string.IsNullOrEmpty(acc.TenDangNhap)) usernames.Add(acc.TenDangNhap);
+                        else usernames.Add(sv.MaSv ?? sv.HoTen ?? "(không xác định)");
+                    }
+                    else
+                    {
+                        usernames.Add(sv.MaSv ?? sv.HoTen ?? "(không xác định)");
+                    }
+                }
+
+                var vm = new Models.KichHoatRequestModel
+                {
+                    Email = email,
+                    Usernames = usernames
+                };
+                TempData["ErrorMessage"] = "Có nhiều tài khoản liên kết với email này. Vui lòng chọn tên đăng nhập để tiếp tục.";
+                return View("QuenMatKhau", vm);
+            }
+
+            // locate the exact SinhVien to reset
+            SinhVien svTarget = null;
+            if (!string.IsNullOrEmpty(selectedUsername))
+            {
+                var account = await db.TaiKhoans.FirstOrDefaultAsync(t => t.TenDangNhap == selectedUsername);
+                if (account != null)
+                {
+                    svTarget = await db.SinhViens.FirstOrDefaultAsync(s => s.MaTaiKhoan == account.MaTaiKhoan && s.Email == email);
+                }
+            }
+
+            if (svTarget == null)
+            {
+                svTarget = await db.SinhViens.FirstOrDefaultAsync(s => s.Email == email);
+            }
+
+            if (svTarget == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên để đặt lại mật khẩu.";
+                return View(new Models.KichHoatRequestModel());
             }
 
             var token = Guid.NewGuid().ToString();
-            sv.ResetToken = token;
-            sv.ResetTokenExpiry = DateTime.Now.AddHours(1);
+            svTarget.ResetToken = token;
+            svTarget.ResetTokenExpiry = DateTime.Now.AddHours(1);
             await db.SaveChangesAsync();
 
             var resetLink = Url.Action("DatLaiMatKhau", "Home", new { token = token }, Request.Scheme);
 
             try
             {
-                // Lấy cấu hình SMTP từ appsettings + secrets
                 var smtpSettings = _configuration.GetSection("Smtp").Get<SmtpSettings>();
 
                 var smtpClient = new SmtpClient(smtpSettings.Host)
@@ -510,7 +828,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 {
                     From = new MailAddress(smtpSettings.User),
                     Subject = "Đặt lại mật khẩu",
-                    Body = $"Xin chào {sv.HoTen},\n\nVui lòng nhấn vào liên kết sau để đặt lại mật khẩu:\n{resetLink}\n\nLiên kết có hiệu lực trong 1 giờ.",
+                    Body = $"Xin chào {svTarget.HoTen},\n\nVui lòng nhấn vào liên kết sau để đặt lại mật khẩu:\n{resetLink}\n\nLiên kết có hiệu lực trong 1 giờ.",
                     IsBodyHtml = false,
                 };
                 mailMessage.To.Add(email);
@@ -524,7 +842,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 TempData["ErrorMessage"] = "Không thể gửi email. Lỗi: " + ex.Message;
             }
 
-            return View();
+            return View(new Models.KichHoatRequestModel());
         }
 
 

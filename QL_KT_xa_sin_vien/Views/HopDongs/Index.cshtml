@@ -28,11 +28,16 @@
                     <th>@Html.DisplayNameFor(model => model.NgayBatDau)</th>
                     <th>@Html.DisplayNameFor(model => model.NgayKetThuc)</th>
                     <th>@Html.DisplayNameFor(model => model.TrangThai)</th>
-                    <th>@Html.DisplayNameFor(model => model.DieuKhoan)</th>
-                    <th>@Html.DisplayNameFor(model => model.MaGiuongNavigation)</th>
-                    <th>@Html.DisplayNameFor(model => model.MaPhongNavigation)</th>
-                    <th>@Html.DisplayNameFor(model => model.MaSvNavigation)</th>
+                    <th>Điều khoản</th>
+                    <th>PDF</th>
+                    <th>Giường</th>
+                    <th>Phòng</th>
+                    <th>Sinh viên</th>
                     <th class="text-center">Thao tác</th>
+                    @if (Context.Session.GetString("userRole") == "2" || Context.Session.GetString("userRole") == "3")
+                    {
+                        <th></th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -41,8 +46,14 @@
                     <tr>
                         <td>@FormatDate(item.NgayBatDau, "dd/MM/yyyy")</td>
                         <td>@FormatDate(item.NgayKetThuc, "dd/MM/yyyy")</td>
-                        <td>@item.TrangThai</td>
+                        <td>@(item.TrangThai == "1" ? "Đang sử dụng" : item.TrangThai == "0" ? "Chờ duyệt" : item.TrangThai == "-1" ? "Hết hạn" : item.TrangThai == "2" ? "Đã từ chối" : item.TrangThai)</td>
                         <td>@item.DieuKhoan</td>
+                        <td>
+                            @if(!string.IsNullOrEmpty(item.DieuKhoanPdf))
+                            {
+                                <a href="@item.DieuKhoanPdf" target="_blank">Xem PDF</a>
+                            }
+                        </td>
                         <td>@item.MaGiuongNavigation?.MaGiuong</td>
                         <td>@item.MaPhongNavigation?.MaPhong</td>
                         <td>@item.MaSvNavigation?.MaSv</td>
@@ -54,9 +65,39 @@
                                 <a asp-action="Delete" asp-route-id="@item.MaHopDong" class="btn btn-danger btn-sm">Xóa</a>
                             }
                         </td>
+                        @if(Context.Session.GetString("userRole") == "2" || Context.Session.GetString("userRole") == "3")
+                        {
+                            <td>
+                                <form asp-action="ChangeStatus" method="post" class="d-inline" onsubmit="return requireReason(this)">
+                                    <input type="hidden" name="id" value="@item.MaHopDong" />
+                                    <select name="newStatus" class="form-select d-inline w-auto">
+                                        <option value="1">Đã xét duyệt</option>
+                                        <option value="0" selected="@(item.TrangThai == "0" ? "selected" : null)">Chờ xét duyệt</option>
+                                        <option value="-1">Hết hạn</option>
+                                        <option value="2">Từ chối</option>
+                                    </select>
+                                    <input type="text" name="reason" placeholder="Lý do (nếu từ chối)" class="form-control d-inline w-50 ms-1" />
+                                    <button type="submit" class="btn btn-success btn-sm ms-1">Cập nhật</button>
+                                </form>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    function requireReason(form) {
+        var select = form.querySelector('select[name="newStatus"]');
+        var reason = form.querySelector('input[name="reason"]');
+        if (select && select.value === '2') {
+            if (!reason || !reason.value.trim()) {
+                alert('Vui lòng nhập lý do khi từ chối.');
+                return false;
+            }
+        }
+        return true;
+    }
+</script>

@@ -24,7 +24,8 @@ public partial class TaiKhoan
 
     public string? VaiTro { get; set; }
 
-    public string? TrangThai { get; set; }
+    // account status: "1" = active, "0" = pending activation, "-1" = banned
+    public string? TrangThai { get; set; } = "0";
 
     public virtual ICollection<NhatKy> NhatKies { get; set; } = new List<NhatKy>();
 
@@ -35,4 +36,7 @@ public partial class TaiKhoan
     public virtual ICollection<ThongBao> ThongBaos { get; set; } = new List<ThongBao>();
 
     public virtual VaiTro? VaiTroNavigation { get; set; }
+
+    // account expiration date (nullable). When reached, account will be cleaned up automatically.
+    public DateTime? ThoiHan { get; set; }
 }

@@ -8,7 +8,7 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <form asp-action="DangKy" asp-controller="Phongs" method="post">
+        <form asp-action="DangKy" asp-controller="Phongs" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label asp-for="MaSv" class="form-label"></label>
                 <input asp-for="MaSv" class="form-control" readonly />
@@ -21,7 +21,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Tòa nhà</label>
-                <select asp-for="SelectedToaNha" class="form-select"
+                <select asp-for="SelectedToaNha" id="selectedToaNha" class="form-select"
                         asp-items="@(new SelectList(Model.ToaNhaList))">
                     <option value="">-- Chọn tòa nhà --</option>
                 </select>
@@ -29,19 +29,91 @@
 
             <div class="mb-3">
                 <label class="form-label">Phòng</label>
-                <select asp-for="SelectedPhong" class="form-select"
-                        asp-items="@(new SelectList(Model.PhongList))">
+                <select asp-for="SelectedPhong" id="selectedPhong" class="form-select">
                     <option value="">-- Chọn phòng --</option>
+                    @foreach (var p in Model.PhongList)
+                    {
+                        <option value="@p" selected="@(p == Model.SelectedPhong ? "selected" : null)">@p</option>
+                    }
                 </select>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Giường</label>
-                <select asp-for="SelectedGiuong" class="form-select"
-                        asp-items="@(new SelectList(Model.GiuongList))">
+                <select asp-for="SelectedGiuong" id="selectedGiuong" class="form-select">
                     <option value="">-- Chọn giường --</option>
+                    @foreach (var g in Model.GiuongList)
+                    {
+                        <option value="@g" selected="@(g == Model.SelectedGiuong ? "selected" : null)">@g</option>
+                    }
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label asp-for="LyDo" class="form-label">Lý do đăng ký</label>
+                <input asp-for="LyDo" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Đồng ý điều khoản</label>
+                <select asp-for="Agree" class="form-select">
+                    <option value="1">Đồng ý</option>
+                    <option value="2">Không đồng ý</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tải lên file điều khoản (PDF) (tùy chọn)</label>
+                <input asp-for="DieuKhoanPdfFile" type="file" accept="application/pdf" class="form-control" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="NgayBatDau" class="form-label">Ngày bắt đầu (tùy chọn)</label>
+                    <input asp-for="NgayBatDau" class="form-control" type="date" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="NgayKetThuc" class="form-label">Ngày kết thúc (tùy chọn)</label>
+                    <input asp-for="NgayKetThuc" class="form-control" type="date" />
+                </div>
+            </div>
+
+@section Scripts {
+    <script>
+        async function fetchJson(url) {
+            const resp = await fetch(url);
+            if (!resp.ok) return [];
+            return resp.json();
+        }
+
+        document.getElementById('selectedToaNha').addEventListener('change', async function () {
+            const toa = this.value;
+            const phSelect = document.getElementById('selectedPhong');
+            const giuSelect = document.getElementById('selectedGiuong');
+            // clear
+            phSelect.innerHTML = '<option value="">-- Chọn phòng --</option>';
+            giuSelect.innerHTML = '<option value="">-- Chọn giường --</option>';
+            if (!toa) return;
+            const phongs = await fetchJson(`/Phongs/GetPhongs?toaNha=${encodeURIComponent(toa)}`);
+            phongs.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p; opt.text = p; phSelect.appendChild(opt);
+            });
+        });
+
+        document.getElementById('selectedPhong').addEventListener('change', async function () {
+            const phong = this.value;
+            const giuSelect = document.getElementById('selectedGiuong');
+            giuSelect.innerHTML = '<option value="">-- Chọn giường --</option>';
+            if (!phong) return;
+            const giuongs = await fetchJson(`/Phongs/GetGiuongs?phong=${encodeURIComponent(phong)}`);
+            giuongs.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g; opt.text = g; giuSelect.appendChild(opt);
+            });
+        });
+    </script>
+}
 
             <button type="submit" class="btn btn-primary">Đăng ký</button>
             <a asp-action="Index" asp-controller="Phongs" class="btn btn-secondary ms-2">Quay lại</a>

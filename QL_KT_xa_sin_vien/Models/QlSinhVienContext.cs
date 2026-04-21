@@ -33,6 +33,8 @@ public partial class QLSinhVienContext : DbContext
 
     public virtual DbSet<ThongBao> ThongBaos { get; set; }
 
+    public virtual DbSet<DonGia> DonGias { get; set; }
+
     public virtual DbSet<ToaNha> ToaNhas { get; set; }
 
     public virtual DbSet<VaiTro> VaiTros { get; set; }
@@ -72,6 +74,19 @@ public partial class QLSinhVienContext : DbContext
             entity.HasOne(d => d.OccupiedByNavigation).WithMany(p => p.Giuongs)
                 .HasForeignKey(d => d.OccupiedBy)
                 .HasConstraintName("FK_Giuong_SinhVien");
+        });
+
+        modelBuilder.Entity<DonGia>(entity =>
+        {
+            entity.HasKey(e => e.MaDonGia);
+            entity.ToTable("DonGia");
+            entity.Property(e => e.MaDonGia).HasMaxLength(50).HasColumnName("maDonGia");
+            entity.Property(e => e.DonGiaDien).HasColumnType("decimal(12,2)").HasColumnName("donGiaDien");
+            entity.Property(e => e.DonGiaNuoc).HasColumnType("decimal(12,2)").HasColumnName("donGiaNuoc");
+            entity.Property(e => e.DonGiaPhong).HasColumnType("decimal(12,2)").HasColumnName("donGiaPhong");
+            entity.Property(e => e.DienUsageDefault).HasColumnType("decimal(12,2)").HasColumnName("dienUsageDefault");
+            entity.Property(e => e.NuocUsageDefault).HasColumnType("decimal(12,2)").HasColumnName("nuocUsageDefault");
+            entity.Property(e => e.NgayHieuLuc).HasColumnType("datetime").HasColumnName("ngayHieuLuc");
         });
 
         modelBuilder.Entity<HoaDon>(entity =>

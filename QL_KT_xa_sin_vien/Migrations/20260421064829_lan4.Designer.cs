@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QL_KT_xa_sin_vien.Models;
 
@@ -11,9 +12,11 @@ using QL_KT_xa_sin_vien.Models;
 namespace QL_KT_xa_sin_vien.Migrations
 {
     [DbContext(typeof(QLSinhVienContext))]
-    partial class QLSinhVienContextModelSnapshot : ModelSnapshot
+    [Migration("20260421064829_lan4")]
+    partial class lan4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,42 +24,6 @@ namespace QL_KT_xa_sin_vien.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("QL_KT_xa_sin_vien.Models.DonGia", b =>
-                {
-                    b.Property<string>("MaDonGia")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("maDonGia");
-
-                    b.Property<decimal?>("DienUsageDefault")
-                        .HasColumnType("decimal(12,2)")
-                        .HasColumnName("dienUsageDefault");
-
-                    b.Property<decimal?>("DonGiaDien")
-                        .HasColumnType("decimal(12,2)")
-                        .HasColumnName("donGiaDien");
-
-                    b.Property<decimal?>("DonGiaNuoc")
-                        .HasColumnType("decimal(12,2)")
-                        .HasColumnName("donGiaNuoc");
-
-                    b.Property<decimal?>("DonGiaPhong")
-                        .HasColumnType("decimal(12,2)")
-                        .HasColumnName("donGiaPhong");
-
-                    b.Property<DateTime?>("NgayHieuLuc")
-                        .HasColumnType("datetime")
-                        .HasColumnName("ngayHieuLuc");
-
-                    b.Property<decimal?>("NuocUsageDefault")
-                        .HasColumnType("decimal(12,2)")
-                        .HasColumnName("nuocUsageDefault");
-
-                    b.HasKey("MaDonGia");
-
-                    b.ToTable("DonGia", (string)null);
-                });
 
             modelBuilder.Entity("QL_KT_xa_sin_vien.Models.Giuong", b =>
                 {
@@ -251,14 +218,6 @@ namespace QL_KT_xa_sin_vien.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("maSV");
 
-                    b.Property<string>("MediaPath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("MediaType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("MoTa")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)")
@@ -421,9 +380,6 @@ namespace QL_KT_xa_sin_vien.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("tenDangNhap");
-
-                    b.Property<DateTime?>("ThoiHan")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("TrangThai")
                         .HasMaxLength(50)

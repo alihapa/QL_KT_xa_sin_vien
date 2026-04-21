@@ -19,11 +19,20 @@
             </tr>
             <tr>
                 <th>Trạng thái</th>
-                <td>@Model.TrangThai</td>
+                <td>@(Model.TrangThai == "1" ? "Đang sử dụng" : Model.TrangThai == "0" ? "Chờ duyệt" : Model.TrangThai == "-1" ? "Hết hạn" : Model.TrangThai == "2" ? "Đã từ chối" : Model.TrangThai)</td>
             </tr>
             <tr>
                 <th>Điều khoản</th>
-                <td>@Model.DieuKhoan</td>
+                <td>
+                    <div>@Model.DieuKhoan</div>
+                    @if(!string.IsNullOrEmpty(Model.DieuKhoanPdf))
+                    {
+                        <div class="mt-2">
+                            <embed src="@Model.DieuKhoanPdf" type="application/pdf" width="100%" height="600px" />
+                            <div class="mt-2"><a href="@Model.DieuKhoanPdf" target="_blank" class="btn btn-link">Mở file trong tab mới</a></div>
+                        </div>
+                    }
+                </td>
             </tr>
             <tr>
                 <th>Giường</th>

@@ -43,31 +43,7 @@
     }
 
     var sessionRole = Context.Session.GetString("userRole");
-    string[] availableModels;
-    if (sessionRole == "3")
-    {
-        // Admin: show all models
-        availableModels = new[] { "SinhVien", "PhanAnh", "HopDong", "HoaDon", "ThongBao", "TaiKhoan", "NhatKy", "VaiTro", "Giuong", "Phong", "ToaNha" };
-    }
-    else if (sessionRole == "2")
-    {
-        // BQL: management models
-        availableModels = new[] { "SinhVien", "PhanAnh", "HopDong", "HoaDon", "ThongBao", "Giuong", "Phong", "ToaNha" };
-    }
-    else if (sessionRole == "4")
-    {
-        // KeToan: finance/contract models
-        availableModels = new[] { "HoaDon", "HopDong" };
-    }
-    else if (sessionRole == "1")
-    {
-        // SinhVien: limited models
-        availableModels = new[] { "SinhVien", "PhanAnh", "HopDong", "HoaDon", "ThongBao" };
-    }
-    else
-    {
-        availableModels = new[] { "SinhVien", "PhanAnh", "HopDong", "HoaDon", "ThongBao", "TaiKhoan" };
-    }
+    string[] availableModels = ViewBag.availableModels as string[] ?? new string[0];
     var pageSize = (ViewBag.pageSize ?? (Context.Request.Query.ContainsKey("pageSize") ? Context.Request.Query["pageSize"].ToString() : "10"))?.ToString();
 
     string BuildRoute(string newSort = null, int? newPage = null)

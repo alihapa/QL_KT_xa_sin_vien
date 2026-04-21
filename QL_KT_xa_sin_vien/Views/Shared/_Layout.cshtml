@@ -118,7 +118,12 @@
 
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="DangXuat">Đăng Xuất</a></li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="DangNhap">Đăng Nhập</a></li>
-                            </ul>
+                                @if (Context.Session.GetString("userRole") == null)
+                                    {
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="KichHoatTaiKhoan">Kích Hoạt tài khoản</a></li>
+                                    }
+                                </ul>
                         </li>
                     </ul>
                 </div>

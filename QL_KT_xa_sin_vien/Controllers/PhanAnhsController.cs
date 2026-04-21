@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QL_KT_xa_sin_vien.Models;
@@ -66,6 +67,17 @@ namespace QL_KT_xa_sin_vien.Controllers
             }
 
             ViewBag.SenderDisplay = senders;
+
+            // prepare status mapping for display (e.g., numeric codes to text)
+            var statusMap = new Dictionary<string, string>
+            {
+                { "1", "Đã xử lý" },
+                { "2", "Đã từ chối" },
+                { "0", "Chưa xử lý" },
+                { "đang xác minh", "Đang xác minh" }
+            };
+            ViewBag.StatusMap = statusMap;
+
             return View(phanAnhs);
         }
 
@@ -201,10 +213,53 @@ namespace QL_KT_xa_sin_vien.Controllers
                 }
             }
 
+            var mediaFile = Request.Form.Files.FirstOrDefault();
+            // handle media file if present
+            if (mediaFile != null && mediaFile.Length > 0)
+            {
+                // enforce max video length check client-side; on server we trust file size ~ limit to 50MB
+                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploads)) Directory.CreateDirectory(uploads);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(mediaFile.FileName);
+                var filePath = Path.Combine(uploads, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await mediaFile.CopyToAsync(stream);
+                }
+                phanAnh.MediaPath = "/uploads/" + fileName;
+                var contentType = mediaFile.ContentType ?? "";
+                if (contentType.StartsWith("image/")) phanAnh.MediaType = "image";
+                else if (contentType.StartsWith("video/")) phanAnh.MediaType = "video";
+                else phanAnh.MediaType = "text";
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(phanAnh);
                 await _context.SaveChangesAsync();
+
+                // notify all accounts about new phản ánh
+                try
+                {
+                    var allAccounts = _context.TaiKhoans.Select(t => t.MaTaiKhoan).ToList();
+                    foreach (var acc in allAccounts)
+                    {
+                        var tb = new ThongBao
+                        {
+                            MaThongBao = Guid.NewGuid().ToString(),
+                            NguoiGui = phanAnh.NguoiGoi ?? "System",
+                            NguoiNhan = acc,
+                            LoaiThongBao = "PhanAnhMoi",
+                            NoiDung = $"Có phản ánh mới: {phanAnh.MoTa}",
+                            TrangThai = "Chưa đọc",
+                            ThoiGianGui = DateTime.Now
+                        };
+                        _context.ThongBaos.Add(tb);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+                catch { }
+
                 return RedirectToAction("Index", "Home");
             }
 
@@ -276,11 +331,58 @@ namespace QL_KT_xa_sin_vien.Controllers
             var taiKhoanId = HttpContext.Session.GetString("userId");
             if (!string.IsNullOrEmpty(taiKhoanId)) phanAnh.NguoiGoi = taiKhoanId;
 
+            var existing = await _context.PhanAnhs.AsNoTracking().FirstOrDefaultAsync(p => p.MaPhanAnh == phanAnh.MaPhanAnh);
+            if (existing == null) return NotFound();
+
+            // handle media file
+            var mediaFile = Request.Form.Files.FirstOrDefault();
+            if (mediaFile != null && mediaFile.Length > 0)
+            {
+                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploads)) Directory.CreateDirectory(uploads);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(mediaFile.FileName);
+                var filePath = Path.Combine(uploads, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await mediaFile.CopyToAsync(stream);
+                }
+                phanAnh.MediaPath = "/uploads/" + fileName;
+                var contentType = mediaFile.ContentType ?? "";
+                if (contentType.StartsWith("image/")) phanAnh.MediaType = "image";
+                else if (contentType.StartsWith("video/")) phanAnh.MediaType = "video";
+                else phanAnh.MediaType = "text";
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(phanAnh);
+
+                    // if status changed, notify all accounts
+                    if (!string.Equals(existing.TrangThai, phanAnh.TrangThai))
+                    {
+                        try
+                        {
+                            var allAccounts = _context.TaiKhoans.Select(t => t.MaTaiKhoan).ToList();
+                            foreach (var acc in allAccounts)
+                            {
+                                var tb = new ThongBao
+                                {
+                                    MaThongBao = Guid.NewGuid().ToString(),
+                                    NguoiGui = phanAnh.NguoiGoi ?? HttpContext.Session.GetString("userId") ?? "System",
+                                    NguoiNhan = acc,
+                                    LoaiThongBao = "PhanAnhTrangThai",
+                                    NoiDung = $"Phản ánh {phanAnh.MaPhanAnh} thay đổi trạng thái từ '{existing.TrangThai}' sang '{phanAnh.TrangThai}'.",
+                                    TrangThai = "Chưa đọc",
+                                    ThoiGianGui = DateTime.Now
+                                };
+                                _context.ThongBaos.Add(tb);
+                            }
+                        }
+                        catch { }
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

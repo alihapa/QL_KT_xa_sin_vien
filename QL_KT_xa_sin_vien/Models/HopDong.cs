@@ -22,6 +22,13 @@ public partial class HopDong
     public string? TrangThai { get; set; }
 
     public string? DieuKhoan { get; set; }
+    // If contract includes a PDF link or acceptance flag
+    [StringLength(500)]
+    public string? DieuKhoanPdf { get; set; }
+
+    // Agreement: "1" agree, "2" disagree
+    [StringLength(10)]
+    public string? Agree { get; set; }
 
     public virtual ICollection<HoaDon> HoaDons { get; set; } = new List<HoaDon>();
 

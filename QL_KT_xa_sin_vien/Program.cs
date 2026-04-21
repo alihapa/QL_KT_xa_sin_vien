@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
+using QL_KT_xa_sin_vien.Middleware;
 using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien
@@ -16,6 +17,10 @@ namespace QL_KT_xa_sin_vien
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            // register invoice background worker
+            builder.Services.AddHostedService<QL_KT_xa_sin_vien.Services.InvoiceBackgroundService>();
+            // register account expiry cleanup worker
+            builder.Services.AddHostedService<QL_KT_xa_sin_vien.Services.AccountExpiryBackgroundService>();
             // Thêm cache và session
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
@@ -62,7 +67,7 @@ namespace QL_KT_xa_sin_vien
                         Email = "admin@example.com",
                         Sdt = "0123456789",
                         VaiTro = "3", // Admin
-                        TrangThai = "Active"
+                        TrangThai = "1"
                     };
 
                     db.TaiKhoans.Add(tk);
@@ -87,7 +92,9 @@ namespace QL_KT_xa_sin_vien
             // Bật session trước khi dùng endpoints
             app.UseSession();
             // Register logging middleware after session is enabled so it can read session safely
-            app.UseMiddleware<LoggingMiddleware>();
+            app.UseMiddleware<QL_KT_xa_sin_vien.Middleware.LoggingMiddleware>();
+            // Register account status middleware to enforce account activation/banned rules across all requests
+            app.UseMiddleware<QL_KT_xa_sin_vien.Middleware.AccountStatusMiddleware>();
             app.UseAuthorization();
             app.MapControllerRoute(
                 name: "default",

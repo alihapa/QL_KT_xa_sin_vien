@@ -44,8 +44,32 @@
             <div class="mb-3">
                 <label asp-for="TrangThai" class="form-label"></label>
                 <select asp-for="TrangThai" class="form-select">
-                    <option value="1" selected="@(Model.TrangThai == "1")">Hoạt động</option>
-                    <option value="0" selected="@(Model.TrangThai == "0")">Khóa</option>
+                    @if (Model.TrangThai == "1")
+                    {
+                        <option value="1" selected>Hoạt động</option>
+                    }
+                    else
+                    {
+                        <option value="1">Hoạt động</option>
+                    }
+
+                    @if (Model.TrangThai == "0")
+                    {
+                        <option value="0" selected>Chưa kích hoạt</option>
+                    }
+                    else
+                    {
+                        <option value="0">Chưa kích hoạt</option>
+                    }
+
+                    @if (Model.TrangThai == "-1")
+                    {
+                        <option value="-1" selected>Bị cấm</option>
+                    }
+                    else
+                    {
+                        <option value="-1">Bị cấm</option>
+                    }
                 </select>
                 <span asp-validation-for="TrangThai" class="text-danger"></span>
             </div>

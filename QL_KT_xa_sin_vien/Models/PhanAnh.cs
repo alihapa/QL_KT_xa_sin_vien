@@ -41,4 +41,12 @@ namespace QL_KT_xa_sin_vien.Models;
     public virtual SinhVien? MaSvNavigation { get; set; }
 
     public virtual TaiKhoan? NguoiXuLyNavigation { get; set; }
+
+    // Optional media attachment (image/video). Stored as relative path under wwwroot/uploads
+    [StringLength(500)]
+    public string? MediaPath { get; set; }
+
+    // media type like "image", "video", "text"
+    [StringLength(50)]
+    public string? MediaType { get; set; }
 }

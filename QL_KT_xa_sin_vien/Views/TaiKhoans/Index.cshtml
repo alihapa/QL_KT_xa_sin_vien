@@ -8,7 +8,17 @@
 
 <p>
     <a asp-action="Create" class="btn btn-success mb-3">+ Thêm tài khoản mới</a>
+    <a asp-action="BulkEdit" class="btn btn-outline-primary mb-3 ms-2">Chỉnh sửa hàng loạt (CSV)</a>
 </p>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
 
 <div class="card shadow-sm">
     <div class="card-body">
@@ -31,17 +41,17 @@
                         <td>@item.Email</td>
                         <td>@item.Sdt</td>
                         <td>
-                            @if (item.TrangThai == "Hoạt động")
+                            @if (item.TrangThai == "1")
                             {
                                 <span class="badge bg-success">Hoạt động</span>
                             }
-                            else if (item.TrangThai == "Khóa")
+                            else if (item.TrangThai == "-1")
                             {
-                                <span class="badge bg-danger">Khóa</span>
+                                <span class="badge bg-danger">Bị cấm</span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary">@item.TrangThai</span>
+                                <span class="badge bg-secondary">Chờ kích hoạt</span>
                             }
                         </td>
                         <td>@item.VaiTroNavigation?.MaVaiTro</td>

@@ -20,6 +20,126 @@ namespace QL_KT_xa_sin_vien.Controllers
             _context = context;
         }
 
+        // GET: SinhViens/BulkImport
+        [RoleAuthorize("3")]
+        public IActionResult BulkImport()
+        {
+            return View();
+        }
+
+        // GET: SinhViens/DownloadSample
+        [RoleAuthorize("3")]
+        public IActionResult DownloadSample()
+        {
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("MaSv,HoTen,Lop,Email");
+            csv.AppendLine("sv001,Nguyen Van A,20CT1,a@example.com");
+            csv.AppendLine("sv002,Tran Thi B,20CT1,b@example.com");
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", "sinh_vien_mau.csv");
+        }
+
+        // POST: SinhViens/BulkImport
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RoleAuthorize("3")]
+        public async Task<IActionResult> BulkImport(Microsoft.AspNetCore.Http.IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                TempData["ErrorMessage"] = "Vui lòng chọn file CSV.";
+                return RedirectToAction(nameof(BulkImport));
+            }
+
+            var processed = 0;
+            var errors = new List<string>();
+            using (var stream = file.OpenReadStream())
+            using (var reader = new System.IO.StreamReader(stream, System.Text.Encoding.UTF8))
+            {
+                var header = await reader.ReadLineAsync();
+                if (string.IsNullOrWhiteSpace(header))
+                {
+                    TempData["ErrorMessage"] = "File CSV rỗng hoặc định dạng không hợp lệ.";
+                    return RedirectToAction(nameof(BulkImport));
+                }
+
+                while (!reader.EndOfStream)
+                {
+                    var line = await reader.ReadLineAsync();
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    var maSv = parts.Length > 0 ? parts[0].Trim() : Guid.NewGuid().ToString();
+                    var hoTen = parts.Length > 1 ? parts[1].Trim() : "";
+                    var lop = parts.Length > 2 ? parts[2].Trim() : "";
+                    var email = parts.Length > 3 ? parts[3].Trim() : "";
+
+                    if (string.IsNullOrEmpty(maSv) || string.IsNullOrEmpty(hoTen))
+                    {
+                        errors.Add($"Dòng không hợp lệ: {line}");
+                        continue;
+                    }
+
+                    if (_context.SinhViens.Any(s => s.MaSv == maSv))
+                    {
+                        errors.Add($"Mã sinh viên đã tồn tại: {maSv}");
+                        continue;
+                    }
+
+                    // create account for student
+                    var tk = new TaiKhoan
+                    {
+                        MaTaiKhoan = Guid.NewGuid().ToString(),
+                        TenDangNhap = maSv,
+                        Email = email,
+                        VaiTro = "1",
+                        TrangThai = "0"
+                    };
+                    // default password is student id (hashed)
+                    var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<TaiKhoan>();
+                    tk.MatKhauMh = hasher.HashPassword(tk, maSv);
+                    _context.TaiKhoans.Add(tk);
+
+                    var sv = new SinhVien
+                    {
+                        MaSv = maSv,
+                        HoTen = hoTen,
+                        Lop = lop,
+                        Email = email,
+                        MaTaiKhoan = tk.MaTaiKhoan
+                    };
+                    _context.SinhViens.Add(sv);
+
+                    // log creation
+                    var log = new NhatKy
+                    {
+                        MaLog = Guid.NewGuid().ToString(),
+                        NguoiThucHien = HttpContext.Session.GetString("userId"),
+                        HanhDong = "BulkImportSinhVien",
+                        DoiTuong = sv.MaSv,
+                        GiaTriTruoc = null,
+                        GiaTriSau = System.Text.Json.JsonSerializer.Serialize(sv),
+                        ThoiGian = DateTime.Now
+                    };
+                    _context.NhatKies.Add(log);
+
+                    processed++;
+                }
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi lưu dữ liệu: " + ex.Message;
+                return RedirectToAction(nameof(BulkImport));
+            }
+
+            TempData["SuccessMessage"] = $"Đã xử lý {processed} sinh viên." + (errors.Any() ? " Có lỗi: " + string.Join("; ", errors.Take(5)) : string.Empty);
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: SinhViens
         [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Index()

@@ -8,7 +8,7 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
             <input type="hidden" asp-for="MaHopDong" />
 
@@ -52,6 +52,23 @@
                 <label asp-for="DieuKhoan" class="form-label"></label>
                 <textarea asp-for="DieuKhoan" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="DieuKhoan" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Đồng ý điều khoản</label>
+                <select asp-for="Agree" class="form-select">
+                    <option value="1" selected="@(Model.Agree=="1"?"selected":null)">Đồng ý</option>
+                    <option value="2" selected="@(Model.Agree=="2"?"selected":null)">Không đồng ý</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Upload file điều khoản (PDF)</label>
+                <input type="file" name="DieuKhoanPdfFile" accept="application/pdf" class="form-control" />
+                @if(!string.IsNullOrEmpty(Model.DieuKhoanPdf))
+                {
+                    <a href="@Model.DieuKhoanPdf" target="_blank">Xem file hiện có</a>
+                }
             </div>
 
             <div class="mt-3">

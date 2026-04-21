@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Chỉnh sửa hàng loạt tài khoản";
+}
+
+<h2 class="mb-4">Chỉnh sửa / Xóa tài khoản hàng loạt</h2>
+
+<div class="card">
+    <div class="card-body">
+        <p>Tải lên file CSV có cấu trúc: <strong>MaTaiKhoan,TenDangNhap,TrangThai,Delete</strong></p>
+        <p>Giá trị TrangThai: <code>1</code> = Hoạt động, <code>0</code> = Chờ kích hoạt, <code>-1</code> = Bị cấm. Delete = 1 để xóa.</p>
+
+        <form asp-action="BulkEdit" asp-controller="TaiKhoans" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <input type="file" name="file" accept=".csv" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Tải lên và xử lý</button>
+                <a asp-action="DownloadSample" class="btn btn-outline-secondary ms-2">Tải file mẫu</a>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -15,9 +15,11 @@
         <table class="table table-striped table-bordered align-middle">
             <thead class="table-dark">
                 <tr>
+                    <th>Người gửi</th>
                     <th>@Html.DisplayNameFor(model => model.MoTa)</th>
                     <th>@Html.DisplayNameFor(model => model.MucDoUuTien)</th>
-                    <th>@Html.DisplayNameFor(model => model.TrangThai)</th>
+                    <th>Đính kèm</th>
+                    <th>Trạng thái</th>
                     <th>@Html.DisplayNameFor(model => model.ThoiGianTao)</th>
                     <th>@Html.DisplayNameFor(model => model.ThoiGianCapNhat)</th>
                     <th>@Html.DisplayNameFor(model => model.MaPhongNavigation)</th>
@@ -30,15 +32,46 @@
                 @foreach (var item in Model)
                 {
                     <tr>
+                        <td>
+                            @(ViewBag.SenderDisplay != null && ((System.Collections.Generic.Dictionary<string, string>)ViewBag.SenderDisplay).ContainsKey(item.MaPhanAnh) ? ((System.Collections.Generic.Dictionary<string, string>)ViewBag.SenderDisplay)[item.MaPhanAnh] : "")
+                        </td>
                         <td>@item.MoTa</td>
                         <td>@item.MucDoUuTien</td>
-                        <td>@item.TrangThai</td>
+                        <td>
+                            @if(!string.IsNullOrEmpty(item.MediaPath))
+                            {
+                                if(item.MediaType == "image")
+                                {
+                                    <img src="@item.MediaPath" style="max-width:120px; max-height:90px" />
+                                }
+                                else if(item.MediaType == "video")
+                                {
+                                    <video src="@item.MediaPath" controls style="max-width:160px; max-height:90px"></video>
+                                }
+                                else
+                                {
+                                    <a href="@item.MediaPath">Tệp đính kèm</a>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var map = ViewBag.StatusMap as System.Collections.Generic.Dictionary<string,string>;
+                                if(map != null && !string.IsNullOrEmpty(item.TrangThai) && map.ContainsKey(item.TrangThai))
+                                {
+                                    @map[item.TrangThai]
+                                }
+                                else
+                                {
+                                    @item.TrangThai
+                                }
+                            }
+                        </td>
                         <td>@item.ThoiGianTao</td>
                         <td>@item.ThoiGianCapNhat</td>
                         <td>@item.MaPhongNavigation?.MaPhong</td>
                         <td>@(item.MaSvNavigation != null ? item.MaSvNavigation.HoTen : item.MaSv)</td>
                         <td>@item.NguoiXuLyNavigation?.MaTaiKhoan</td>
-                        <td>@(ViewBag.SenderDisplay != null && ((System.Collections.Generic.Dictionary<string, string>)ViewBag.SenderDisplay).ContainsKey(item.MaPhanAnh) ? ((System.Collections.Generic.Dictionary<string, string>)ViewBag.SenderDisplay)[item.MaPhanAnh] : "")</td>
                         <td class="text-center">
                             <a asp-action="Details" asp-route-id="@item.MaPhanAnh" class="btn btn-info btn-sm me-1">Chi tiết</a>
                             @if(Context.Session.GetString("userRole") == "2" || Context.Session.GetString("userRole") == "3")

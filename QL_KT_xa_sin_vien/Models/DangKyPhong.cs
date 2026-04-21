@@ -16,6 +16,20 @@ namespace QL_KT_xa_sin_vien.Models
         public string? SelectedPhong { get; set; }
         public string? SelectedGiuong { get; set; }
 
+        [StringLength(500)]
+        public string? LyDo { get; set; }
+
+        // Agreement to terms: "1" = agree, "2" = disagree
+        public string? Agree { get; set; }
+
+        // Uploaded PDF file for terms (bound in the form)
+        [System.Text.Json.Serialization.JsonIgnore]
+        public Microsoft.AspNetCore.Http.IFormFile? DieuKhoanPdfFile { get; set; }
+
+        // Optional start/end dates for the contract
+        public DateOnly? NgayBatDau { get; set; }
+        public DateOnly? NgayKetThuc { get; set; }
+
         // Danh sách để hiển thị trong select
         public List<string> ToaNhaList { get; set; } = new();
         public List<string> PhongList { get; set; } = new();

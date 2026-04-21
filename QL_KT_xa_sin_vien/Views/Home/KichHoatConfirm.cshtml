@@ -1,0 +1,91 @@
+@model QL_KT_xa_sin_vien.Models.KichHoatViewModel
+
+@{
+    ViewData["Title"] = "Xác nhận mã kích hoạt";
+}
+
+<h2>Xác nhận mã kích hoạt</h2>
+
+<div class="card">
+    <div class="card-body">
+        <div id="message">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+            }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+        </div>
+
+        <form asp-action="KichHoatConfirm" method="post">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input id="email" name="email" type="email" class="form-control" value="@(ViewBag.Email ?? "")" readonly />
+            </div>
+            @if (!string.IsNullOrEmpty(ViewBag.Username as string))
+            {
+                <div class="mb-3">
+                    <label for="username" class="form-label">Tên đăng nhập</label>
+                    <input id="username" name="username" type="text" class="form-control" value="@(ViewBag.Username)" readonly />
+                </div>
+            }
+            <div class="mb-3">
+                <label for="code" class="form-label">Mã 6 ký tự</label>
+                <input id="code" name="code" type="text" maxlength="6" class="form-control" required />
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Xác nhận</button>
+                <button id="resendBtn" type="button" class="btn btn-secondary">Gửi lại mã</button>
+                <span id="resendInfo" class="align-self-center"></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let cooldown = 30;
+        let timer = null;
+        function startCooldown(seconds) {
+            cooldown = seconds;
+            document.getElementById('resendBtn').disabled = true;
+            document.getElementById('resendInfo').innerText = ` (${cooldown}s)`;
+            timer = setInterval(() => {
+                cooldown--;
+                document.getElementById('resendInfo').innerText = ` (${cooldown}s)`;
+                if (cooldown <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('resendBtn').disabled = false;
+                    document.getElementById('resendInfo').innerText = '';
+                }
+            }, 1000);
+        }
+
+        document.getElementById('resendBtn').addEventListener('click', function () {
+            const email = document.getElementById('email').value;
+            const usernameEl = document.getElementById('username');
+            const username = usernameEl ? usernameEl.value : '';
+            if (!email) return alert('Email không hợp lệ');
+            fetch('/Home/KichHoatTaiKhoan', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `Email=${encodeURIComponent(email)}&SelectedUsername=${encodeURIComponent(username)}` })
+                .then(response => {
+                    if (!response.ok) throw new Error('Lỗi');
+                    return response.text();
+                })
+                .then(html => {
+                    alert('Nếu email tồn tại, mã đã được gửi.');
+                    startCooldown(30);
+                }).catch(e => {
+                    alert('Không thể gửi mã.');
+                });
+        });
+
+        // start cooldown if server provided seconds
+        (function() {
+            var s = '@(TempData["ResendSeconds"] ?? "0")';
+            var sec = parseInt(s, 10);
+            if (!isNaN(sec) && sec > 0) startCooldown(sec);
+        })();
+    </script>
+}

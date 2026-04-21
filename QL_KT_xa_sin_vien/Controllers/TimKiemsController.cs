@@ -13,13 +13,6 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
         public IActionResult TimKiem(string searchString, string model, string sortOrder, int page = 1, int pageSize = 5)
         {
-            // Validate model
-            if (string.IsNullOrWhiteSpace(model))
-            {
-                ViewData["ErrorMessage"] = "Vui lòng chọn model để tìm kiếm.";
-                return View();
-            }
-
             // Normalize search string (allow empty to mean 'all')
             searchString = searchString ?? string.Empty;
             var userRole = HttpContext.Session.GetString("userRole");
@@ -47,6 +40,25 @@ namespace QL_KT_xa_sin_vien.Controllers
             else
             {
                 allowedModels = Array.Empty<string>();
+            }
+
+            // expose available models to view so it shows correct options
+            ViewBag.availableModels = allowedModels;
+            ViewBag.model = model;
+            ViewBag.searchString = searchString;
+            ViewBag.kieuSapXep = sortOrder;
+
+            // Validate model selection
+            if (string.IsNullOrWhiteSpace(model))
+            {
+                ViewData["ErrorMessage"] = "Vui lòng chọn model để tìm kiếm.";
+                return View();
+            }
+
+            if (!allowedModels.Contains(model))
+            {
+                ViewData["ErrorMessage"] = "Bạn không có quyền truy cập model này hoặc model không hợp lệ.";
+                return View();
             }
 
             // SinhVien

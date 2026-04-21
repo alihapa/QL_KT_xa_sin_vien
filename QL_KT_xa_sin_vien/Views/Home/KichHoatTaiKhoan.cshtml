@@ -1,0 +1,21 @@
+@model QL_KT_xa_sin_vien.Models.KichHoatViewModel
+
+@{
+    ViewData["Title"] = "Kích hoạt tài khoản";
+}
+
+<h2>Kích hoạt tài khoản</h2>
+
+@if (!string.IsNullOrEmpty(Model?.Token) && !string.IsNullOrEmpty(Model?.MaTaiKhoan))
+{
+    <p>Bạn sắp kích hoạt tài khoản. Nhấn nút bên dưới để xác nhận.</p>
+    <form asp-action="KichHoatTaiKhoanConfirm" method="post">
+        <input type="hidden" name="token" value="@Model.Token" />
+        <input type="hidden" name="maTaiKhoan" value="@Model.MaTaiKhoan" />
+        <button type="submit" class="btn btn-primary">Xác nhận kích hoạt</button>
+    </form>
+}
+else
+{
+    <p>Đã gửi liên kết kích hoạt đến email của bạn (nếu có). Vui lòng kiểm tra email để hoàn tất kích hoạt.</p>
+}

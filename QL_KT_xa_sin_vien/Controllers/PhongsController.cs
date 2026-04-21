@@ -29,19 +29,60 @@ namespace QL_KT_xa_sin_vien.Controllers
         }
         // GET: DangKy
         [HttpGet]
-        public async Task<IActionResult> DangKy(string id)
+        public async Task<IActionResult> DangKy(string id, string? selectedToaNha = null, string? selectedPhong = null)
         {
             var dk = new DangKyPhong
             {
                 MaSv = id,
                 HoTen = "",
-
                 ToaNhaList = await _context.ToaNhas.Select(t => t.MaToaNha).ToListAsync(),
-                PhongList = new List<string>(), // sẽ load theo tòa nhà
-                GiuongList = new List<string>() // sẽ load theo phòng
+                PhongList = new List<string>(), // sẽ load theo tòa nhà nếu có
+                GiuongList = new List<string>() // sẽ load theo phòng nếu có
             };
 
+            if (!string.IsNullOrEmpty(selectedToaNha))
+            {
+                dk.SelectedToaNha = selectedToaNha;
+                dk.PhongList = await _context.Phongs
+                    .Where(p => p.MaToaNha == selectedToaNha)
+                    .Select(p => p.MaPhong)
+                    .ToListAsync();
+            }
+
+            if (!string.IsNullOrEmpty(selectedPhong))
+            {
+                dk.SelectedPhong = selectedPhong;
+                dk.GiuongList = await _context.Giuongs
+                    .Where(g => g.MaPhong == selectedPhong)
+                    .Select(g => g.MaGiuong)
+                    .ToListAsync();
+            }
+
             return View(dk);
+        }
+
+        // Return rooms for a building (AJAX)
+        [HttpGet]
+        public async Task<JsonResult> GetPhongs(string toaNha)
+        {
+            if (string.IsNullOrEmpty(toaNha)) return Json(new List<string>());
+            var phongs = await _context.Phongs
+                .Where(p => p.MaToaNha == toaNha)
+                .Select(p => p.MaPhong)
+                .ToListAsync();
+            return Json(phongs);
+        }
+
+        // Return beds for a room (AJAX)
+        [HttpGet]
+        public async Task<JsonResult> GetGiuongs(string phong)
+        {
+            if (string.IsNullOrEmpty(phong)) return Json(new List<string>());
+            var giuongs = await _context.Giuongs
+                .Where(g => g.MaPhong == phong)
+                .Select(g => g.MaGiuong)
+                .ToListAsync();
+            return Json(giuongs);
         }
 
         // POST: DangKy
@@ -56,6 +97,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                     MaSv = dk.MaSv,
                     HoTen = dk.HoTen,
 
+                    LyDo = dk.LyDo,
+
                     ToaNhaList = await _context.ToaNhas.Select(t => t.MaToaNha).ToListAsync(),
                     PhongList = new List<string>(), // sẽ load theo tòa nhà
                     GiuongList = new List<string>() // sẽ load theo phòng
@@ -63,23 +106,106 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return View(dk1);
             }
 
-            // Tạo hợp đồng mới
+            // Ensure we have a SinhVien record to reference in HopDong.MaSv
+            var accountId = HttpContext.Session.GetString("userId");
+            // prefer explicit MaSv from form, otherwise try to find by accountId
+            SinhVien? sv = null;
+            if (!string.IsNullOrEmpty(dk.MaSv))
+            {
+                sv = await _context.SinhViens.FirstOrDefaultAsync(s => s.MaSv == dk.MaSv);
+            }
+            if (sv == null && !string.IsNullOrEmpty(accountId))
+            {
+                sv = await _context.SinhViens.FirstOrDefaultAsync(s => s.MaTaiKhoan == accountId || s.MaSv == accountId);
+            }
+            // if still null, create a minimal SinhVien using accountId as MaSv (so FK will succeed)
+            if (sv == null)
+            {
+                var newMaSv = !string.IsNullOrEmpty(dk.MaSv) ? dk.MaSv : (accountId ?? Guid.NewGuid().ToString());
+                sv = new SinhVien
+                {
+                    MaSv = newMaSv,
+                    HoTen = dk.HoTen ?? "chưa có tên",
+                    Email = null,
+                    MaTaiKhoan = accountId
+                };
+                _context.SinhViens.Add(sv);
+                await _context.SaveChangesAsync();
+            }
+
+            // check if student already has active or pending contract
+            var existing = _context.HopDongs.Any(h => h.MaSv == sv.MaSv && (h.TrangThai == "1" || h.TrangThai == "0"));
+            if (existing)
+            {
+                TempData["ErrorMessage"] = "Bạn đã có hợp đồng đang hoạt động hoặc chờ xét duyệt. Không thể đăng ký thêm.";
+                return RedirectToAction("Index");
+            }
+
+            // check if bed is already occupied
+            if (!string.IsNullOrEmpty(dk.SelectedGiuong))
+            {
+                var bed = await _context.Giuongs.FindAsync(dk.SelectedGiuong);
+                if (bed != null && (!string.IsNullOrEmpty(bed.OccupiedBy) || (bed.TrangThai != null && bed.TrangThai.Contains("chiếm", StringComparison.OrdinalIgnoreCase))))
+                {
+                    TempData["ErrorMessage"] = "Giường đã bị chiếm. Vui lòng chọn giường khác.";
+                    return RedirectToAction("Index");
+                }
+            }
+
+            // Handle uploaded PDF (if any) and save to wwwroot/uploads
+            string? pdfPath = null;
+            if (dk.DieuKhoanPdfFile != null && dk.DieuKhoanPdfFile.Length > 0)
+            {
+                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploads)) Directory.CreateDirectory(uploads);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dk.DieuKhoanPdfFile.FileName);
+                var filePath = Path.Combine(uploads, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dk.DieuKhoanPdfFile.CopyToAsync(stream);
+                }
+                pdfPath = "/uploads/" + fileName;
+            }
+
+            // Tạo hợp đồng mới nhưng ở trạng thái chờ duyệt
             var hopDong = new HopDong
             {
                 MaHopDong = Guid.NewGuid().ToString(),
-                MaSv = dk.MaSv,
+                MaSv = sv.MaSv,
                 MaPhong = dk.SelectedPhong,
                 MaGiuong = dk.SelectedGiuong,
-                NgayBatDau = DateOnly.FromDateTime(DateTime.Now),
-                NgayKetThuc = DateOnly.FromDateTime(DateTime.Now.AddMonths(6)),
-                TrangThai = "Đang sử dụng",
-                DieuKhoan = "Theo quy định ký túc xá"
+                // Ly do và thời gian sẽ được gán theo yêu cầu
+                NgayBatDau = dk.NgayBatDau ?? DateOnly.FromDateTime(DateTime.Now),
+                NgayKetThuc = dk.NgayKetThuc ?? DateOnly.FromDateTime(DateTime.Now.AddMonths(6)),
+                // use status codes: "0" = chờ xét duyệt
+                TrangThai = "0",
+                DieuKhoan = string.IsNullOrEmpty(dk.LyDo) ? "Theo quy định ký túc xá" : dk.LyDo,
+                Agree = dk.Agree,
+                DieuKhoanPdf = pdfPath
             };
 
             _context.HopDongs.Add(hopDong);
+            // tạo thông báo cho tất cả BQL (vai trò 2)
+            var bqls = _context.TaiKhoans.Where(t => t.VaiTro == "2").ToList();
+            var sender = HttpContext.Session.GetString("userId") ?? "System";
+            foreach (var b in bqls)
+            {
+                var tb = new ThongBao
+                {
+                    MaThongBao = Guid.NewGuid().ToString(),
+                    NguoiGui = sender,
+                    NguoiNhan = b.MaTaiKhoan,
+                    LoaiThongBao = "DuyetDangKy",
+                    NoiDung = $"Yêu cầu đăng ký phòng: HopDong={hopDong.MaHopDong}, Phong={hopDong.MaPhong}, Giuong={hopDong.MaGiuong}, Người đăng ký={hopDong.MaSv}",
+                    TrangThai = "Chưa đọc",
+                    ThoiGianGui = DateTime.Now
+                };
+                _context.ThongBaos.Add(tb);
+            }
+
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Đăng ký phòng thành công!";
+            TempData["SuccessMessage"] = "Yêu cầu đăng ký đã được gửi tới BQL. Vui lòng chờ xét duyệt.";
             return RedirectToAction("Index");
         }
 

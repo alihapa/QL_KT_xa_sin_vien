@@ -1,46 +1,10 @@
-﻿@model QL_KT_xa_sin_vien.Models.TaiKhoan
-
-<div class="card shadow-sm mt-4">
+﻿<div class="card shadow-sm mt-4">
     <div class="card-body">
-        <h3 class="mb-3 text-primary">Tạo tài khoản mới</h3>
-
-        <form asp-action="TaoTaiKhoan" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-            <input type="hidden" asp-for="MaTaiKhoan" />
-
-            <div class="mb-3">
-                <label asp-for="TenDangNhap" class="form-label">Tên đăng nhập</label>
-                <input asp-for="TenDangNhap" class="form-control" />
-                <span asp-validation-for="TenDangNhap" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="MatKhauMh" class="form-label">Mật khẩu</label>
-                <input asp-for="MatKhauMh" type="password" autocomplete="new-password" class="form-control" />
-                <span asp-validation-for="MatKhauMh" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">Email</label>
-                <input asp-for="Email" type="email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Sdt" class="form-label">Số điện thoại</label>
-                <input asp-for="Sdt" type="tel" class="form-control" />
-                <span asp-validation-for="Sdt" class="text-danger"></span>
-            </div>
-
-            <div class="mt-3">
-                <button type="submit" class="btn btn-primary me-2">Tạo tài khoản</button>
-                <a asp-action="DangNhap" class="btn btn-secondary">Đăng nhập</a>
-            </div>
-        </form>
+        <h3 class="mb-3 text-primary">Đăng ký tài khoản</h3>
+        <div class="alert alert-info">
+            Hệ thống đã vô hiệu hóa đăng ký thủ công. Sinh viên sẽ được tạo tài khoản bởi Admin hoặc qua chức năng nhập hàng loạt.
+            Khi sinh viên đăng nhập lần đầu, họ sẽ được yêu cầu kích hoạt tài khoản qua email nếu có. Nếu bạn là Admin và cần thêm sinh viên, hãy dùng chức năng "Nhập hàng loạt" trong phần Quản lý Sinh viên.
+        </div>
+        <a asp-action="DangNhap" class="btn btn-primary">Trở về đăng nhập</a>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
