@@ -79,66 +79,75 @@ namespace QL_KT_xa_sin_vien.Controllers
                     return RedirectToAction(nameof(BulkEdit));
                 }
 
-                var row = 2;
-                while (true)
-                {
-                    var ten = ws.Cells[row, 2].GetValue<string>()?.Trim();
-                    if (string.IsNullOrEmpty(ten)) break;
-                    var ma = ws.Cells[row, 1].GetValue<string>()?.Trim();
-                    var trangThai = ws.Cells[row, 3].GetValue<string>()?.Trim();
-                    var thoiHanStr = ws.Cells[row, 4].GetValue<string>()?.Trim();
-                    var del = ws.Cells[row, 5].GetValue<string>()?.Trim();
-
-                    TaiKhoan tk = null;
-                    if (!string.IsNullOrEmpty(ma)) tk = _context.TaiKhoans.FirstOrDefault(t => t.MaTaiKhoan == ma);
-                    if (tk == null && !string.IsNullOrEmpty(ten)) tk = _context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == ten);
-                    if (tk == null)
+                    // read rows until an empty TenDangNhap is found in column B
+                    var row = 2;
+                    while (true)
                     {
-                        errors.Add($"Không tìm thấy tài khoản: Ma='{ma}' TenDangNhap='{ten}' (row {row})");
-                        row++;
-                        continue;
-                    }
+                        var ten = ws.Cells[row, 2].GetValue<string>()?.Trim();
+                        if (string.IsNullOrEmpty(ten)) break;
+                        var ma = ws.Cells[row, 1].GetValue<string>()?.Trim();
+                        var trangThai = ws.Cells[row, 3].GetValue<string>()?.Trim();
+                        var thoiHanStr = ws.Cells[row, 4].GetValue<string>()?.Trim();
+                        var del = ws.Cells[row, 5].GetValue<string>()?.Trim();
 
-                    var before = tk.TrangThai;
-                    try
-                    {
+                        TaiKhoan tk = null;
+                        if (!string.IsNullOrEmpty(ma)) tk = _context.TaiKhoans.FirstOrDefault(t => t.MaTaiKhoan == ma);
+                        if (tk == null && !string.IsNullOrEmpty(ten)) tk = _context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == ten);
+                        if (tk == null)
+                        {
+                            errors.Add($"Không tìm thấy tài khoản: Ma='{ma}' TenDangNhap='{ten}' (row {row})");
+                            row++;
+                            continue;
+                        }
+
+                        var before = tk.TrangThai;
+                        try
+                        {
                         if (del == "1" || del?.Equals("true", StringComparison.OrdinalIgnoreCase) == true)
                         {
+                            // clear any SinhVien references to this account to avoid FK constraint
+                            var linked = _context.SinhViens.Where(s => s.MaTaiKhoan == tk.MaTaiKhoan).ToList();
+                            if (linked.Any())
+                            {
+                                foreach (var s in linked) s.MaTaiKhoan = null;
+                                _context.SinhViens.UpdateRange(linked);
+                            }
+
                             _context.TaiKhoans.Remove(tk);
                             _context.NhatKies.Add(new NhatKy { MaLog = Guid.NewGuid().ToString(), NguoiThucHien = HttpContext.Session.GetString("userId"), HanhDong = "BulkDelete", DoiTuong = tk.TenDangNhap ?? tk.MaTaiKhoan, GiaTriTruoc = before, GiaTriSau = "(deleted)", ThoiGian = DateTime.Now });
                         }
-                        else
-                        {
-                            if (!string.IsNullOrEmpty(trangThai))
+                            else
                             {
-                                var allowed = new[] { "1", "0", "-1" };
-                                if (!allowed.Contains(trangThai))
+                                if (!string.IsNullOrEmpty(trangThai))
                                 {
-                                    errors.Add($"Giá trị trạng thái không hợp lệ cho {tk.TenDangNhap} (row {row}): '{trangThai}'");
+                                    var allowed = new[] { "1", "0", "-1" };
+                                    if (!allowed.Contains(trangThai))
+                                    {
+                                        errors.Add($"Giá trị trạng thái không hợp lệ cho {tk.TenDangNhap} (row {row}): '{trangThai}'");
+                                    }
+                                    else
+                                    {
+                                        tk.TrangThai = trangThai;
+                                    }
                                 }
-                                else
+
+                                if (!string.IsNullOrEmpty(thoiHanStr) && DateTime.TryParse(thoiHanStr, out var th))
                                 {
-                                    tk.TrangThai = trangThai;
+                                    tk.ThoiHan = th;
                                 }
-                            }
 
-                            if (!string.IsNullOrEmpty(thoiHanStr) && DateTime.TryParse(thoiHanStr, out var th))
-                            {
-                                tk.ThoiHan = th;
+                                _context.TaiKhoans.Update(tk);
+                                _context.NhatKies.Add(new NhatKy { MaLog = Guid.NewGuid().ToString(), NguoiThucHien = HttpContext.Session.GetString("userId"), HanhDong = "BulkUpdateStatusOrExpiry", DoiTuong = tk.TenDangNhap ?? tk.MaTaiKhoan, GiaTriTruoc = before, GiaTriSau = tk.TrangThai + "|" + (tk.ThoiHan?.ToString("o") ?? ""), ThoiGian = DateTime.Now });
                             }
-
-                            _context.TaiKhoans.Update(tk);
-                            _context.NhatKies.Add(new NhatKy { MaLog = Guid.NewGuid().ToString(), NguoiThucHien = HttpContext.Session.GetString("userId"), HanhDong = "BulkUpdateStatusOrExpiry", DoiTuong = tk.TenDangNhap ?? tk.MaTaiKhoan, GiaTriTruoc = before, GiaTriSau = tk.TrangThai + "|" + (tk.ThoiHan?.ToString("o") ?? ""), ThoiGian = DateTime.Now });
+                            processed++;
                         }
-                        processed++;
-                    }
-                    catch (Exception ex)
-                    {
-                        errors.Add($"Lỗi xử lý tài khoản {tk.TenDangNhap} (row {row}): {ex.Message}");
-                    }
+                        catch (Exception ex)
+                        {
+                            errors.Add($"Lỗi xử lý tài khoản {tk.TenDangNhap} (row {row}): {ex.Message}");
+                        }
 
-                    row++;
-                }
+                        row++;
+                    }
             }
             else
             {
@@ -177,6 +186,14 @@ namespace QL_KT_xa_sin_vien.Controllers
                     {
                         if (del == "1" || del.Equals("true", StringComparison.OrdinalIgnoreCase))
                         {
+                            // clear any SinhVien references to this account to avoid FK constraint
+                            var linked = _context.SinhViens.Where(s => s.MaTaiKhoan == tk.MaTaiKhoan).ToList();
+                            if (linked.Any())
+                            {
+                                foreach (var s in linked) s.MaTaiKhoan = null;
+                                _context.SinhViens.UpdateRange(linked);
+                            }
+
                             _context.TaiKhoans.Remove(tk);
                             _context.NhatKies.Add(new NhatKy { MaLog = Guid.NewGuid().ToString(), NguoiThucHien = HttpContext.Session.GetString("userId"), HanhDong = "BulkDelete", DoiTuong = tk.TenDangNhap ?? tk.MaTaiKhoan, GiaTriTruoc = before, GiaTriSau = "(deleted)", ThoiGian = DateTime.Now });
                         }
@@ -427,10 +444,66 @@ namespace QL_KT_xa_sin_vien.Controllers
             var taiKhoan = await _context.TaiKhoans.FindAsync(id);
             if (taiKhoan != null)
             {
+                // 0) collect students linked to this account (do this first)
+                var students = _context.SinhViens.Where(s => s.MaTaiKhoan == id).ToList();
+
+                // 1) Remove logs created by this account
+                var logs = _context.NhatKies.Where(n => n.NguoiThucHien == id).ToList();
+                if (logs.Any()) _context.NhatKies.RemoveRange(logs);
+
+                // 2) Remove notifications sent to or from this account
+                var tbs = _context.ThongBaos.Where(t => t.NguoiNhan == id || t.NguoiGui == id).ToList();
+                if (tbs.Any()) _context.ThongBaos.RemoveRange(tbs);
+
+                // 3) Remove any PhanAnh entries where this account was the processor
+                var phanAnhsByProcessor = _context.PhanAnhs.Where(p => p.NguoiXuLy == id).ToList();
+                if (phanAnhsByProcessor.Any()) _context.PhanAnhs.RemoveRange(phanAnhsByProcessor);
+
+                // 4) For any SinhVien linked to this account, remove related data then remove the student
+                foreach (var sv in students)
+                {
+                    // delete HoaDons for student
+                    var hoaDons = _context.HoaDons.Where(h => h.MaSv == sv.MaSv).ToList();
+                    if (hoaDons.Any()) _context.HoaDons.RemoveRange(hoaDons);
+
+                    // delete HopDongs for student
+                    var hopDongs = _context.HopDongs.Where(h => h.MaSv == sv.MaSv).ToList();
+                    if (hopDongs.Any()) _context.HopDongs.RemoveRange(hopDongs);
+
+                    // delete PhanAnhs created by student
+                    var phanAnhs = _context.PhanAnhs.Where(p => p.MaSv == sv.MaSv).ToList();
+                    if (phanAnhs.Any()) _context.PhanAnhs.RemoveRange(phanAnhs);
+
+                    // clear Giuong occupiedBy references
+                    var occupiedBeds = _context.Giuongs.Where(g => g.OccupiedBy == sv.MaSv).ToList();
+                    if (occupiedBeds.Any())
+                    {
+                        foreach (var bed in occupiedBeds) bed.OccupiedBy = null;
+                        _context.Giuongs.UpdateRange(occupiedBeds);
+                    }
+
+                    // finally remove the student
+                    _context.SinhViens.Remove(sv);
+                }
+
+                // 5) Defensive: remove any remaining PhanAnhs that reference this account in other ways
+                var phanAnhsLeft = _context.PhanAnhs.Where(p => p.NguoiXuLy == id).ToList();
+                if (phanAnhsLeft.Any()) _context.PhanAnhs.RemoveRange(phanAnhsLeft);
+
+                // 6) Remove the account
                 _context.TaiKhoans.Remove(taiKhoan);
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi xóa tài khoản: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

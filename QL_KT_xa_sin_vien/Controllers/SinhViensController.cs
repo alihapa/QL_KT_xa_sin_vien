@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -31,12 +32,29 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("3")]
         public IActionResult DownloadSample()
         {
-            var csv = new System.Text.StringBuilder();
-            csv.AppendLine("MaSv,HoTen,Lop,Email");
-            csv.AppendLine("sv001,Nguyen Van A,20CT1,a@example.com");
-            csv.AppendLine("sv002,Tran Thi B,20CT1,b@example.com");
-            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-            return File(bytes, "text/csv", "sinh_vien_mau.csv");
+            OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            using var package = new OfficeOpenXml.ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("Mau");
+            ws.Cells[1, 1].Value = "MaSv";
+            ws.Cells[1, 2].Value = "HoTen";
+            ws.Cells[1, 3].Value = "Lop";
+            ws.Cells[1, 4].Value = "Khoa";
+            ws.Cells[1, 5].Value = "Email";
+
+            ws.Cells[2, 1].Value = "sv001";
+            ws.Cells[2, 2].Value = "Nguyen Van A";
+            ws.Cells[2, 3].Value = "20CT1";
+            ws.Cells[2, 4].Value = "Computer Science";
+            ws.Cells[2, 5].Value = "a@example.com";
+
+            ws.Cells[3, 1].Value = "sv002";
+            ws.Cells[3, 2].Value = "Tran Thi B";
+            ws.Cells[3, 3].Value = "20CT1";
+            ws.Cells[3, 4].Value = "Information Technology";
+            ws.Cells[3, 5].Value = "b@example.com";
+
+            var bytes = package.GetAsByteArray();
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "sinh_vien_mau.xlsx");
         }
 
         // POST: SinhViens/BulkImport
@@ -53,48 +71,76 @@ namespace QL_KT_xa_sin_vien.Controllers
 
             var processed = 0;
             var errors = new List<string>();
-            using (var stream = file.OpenReadStream())
-            using (var reader = new System.IO.StreamReader(stream, System.Text.Encoding.UTF8))
+
+            if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
             {
-                var header = await reader.ReadLineAsync();
-                if (string.IsNullOrWhiteSpace(header))
+                TempData["ErrorMessage"] = "Vui lòng tải lên file Excel (.xlsx).";
+                return RedirectToAction(nameof(BulkImport));
+            }
+
+            OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            using (var stream = file.OpenReadStream())
+            using (var package = new OfficeOpenXml.ExcelPackage(stream))
+            {
+                var ws = package.Workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
                 {
-                    TempData["ErrorMessage"] = "File CSV rỗng hoặc định dạng không hợp lệ.";
+                    TempData["ErrorMessage"] = "Không tìm thấy sheet trong file Excel.";
                     return RedirectToAction(nameof(BulkImport));
                 }
 
-                while (!reader.EndOfStream)
+                var row = 2;
+                while (true)
                 {
-                    var line = await reader.ReadLineAsync();
-                    if (string.IsNullOrWhiteSpace(line)) continue;
-                    var parts = line.Split(',');
-                    var maSv = parts.Length > 0 ? parts[0].Trim() : Guid.NewGuid().ToString();
-                    var hoTen = parts.Length > 1 ? parts[1].Trim() : "";
-                    var lop = parts.Length > 2 ? parts[2].Trim() : "";
-                    var email = parts.Length > 3 ? parts[3].Trim() : "";
+                    var maSv = ws.Cells[row, 1].GetValue<string>()?.Trim();
+                    var hoTen = ws.Cells[row, 2].GetValue<string>()?.Trim();
+                    var lop = ws.Cells[row, 3].GetValue<string>()?.Trim();
+                    var khoa = ws.Cells[row, 4].GetValue<string>()?.Trim();
+                    var email = ws.Cells[row, 5].GetValue<string>()?.Trim();
+
+                    // stop when no MaSv and no HoTen
+                    if (string.IsNullOrEmpty(maSv) && string.IsNullOrEmpty(hoTen)) break;
+
+                    if (string.IsNullOrEmpty(maSv)) maSv = Guid.NewGuid().ToString();
 
                     if (string.IsNullOrEmpty(maSv) || string.IsNullOrEmpty(hoTen))
                     {
-                        errors.Add($"Dòng không hợp lệ: {line}");
+                        errors.Add($"Dòng {row} không hợp lệ: MaSv hoặc HoTen bị thiếu.");
+                        row++;
                         continue;
                     }
 
                     if (_context.SinhViens.Any(s => s.MaSv == maSv))
                     {
-                        errors.Add($"Mã sinh viên đã tồn tại: {maSv}");
+                        errors.Add($"Mã sinh viên đã tồn tại: {maSv} (dòng {row})");
+                        row++;
                         continue;
                     }
 
                     // create account for student
+                    string baseUsername = null;
+                    if (!string.IsNullOrEmpty(email) && email.Contains("@"))
+                    {
+                        baseUsername = email.Split('@')[0].Trim();
+                    }
+                    if (string.IsNullOrEmpty(baseUsername)) baseUsername = maSv;
+
+                    var username = baseUsername;
+                    var suffix = 1;
+                    while (_context.TaiKhoans.Any(t => t.TenDangNhap == username))
+                    {
+                        username = baseUsername + suffix.ToString();
+                        suffix++;
+                    }
+
                     var tk = new TaiKhoan
                     {
                         MaTaiKhoan = Guid.NewGuid().ToString(),
-                        TenDangNhap = maSv,
+                        TenDangNhap = username,
                         Email = email,
                         VaiTro = "1",
                         TrangThai = "0"
                     };
-                    // default password is student id (hashed)
                     var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<TaiKhoan>();
                     tk.MatKhauMh = hasher.HashPassword(tk, maSv);
                     _context.TaiKhoans.Add(tk);
@@ -104,12 +150,12 @@ namespace QL_KT_xa_sin_vien.Controllers
                         MaSv = maSv,
                         HoTen = hoTen,
                         Lop = lop,
+                        Khoa = khoa,
                         Email = email,
                         MaTaiKhoan = tk.MaTaiKhoan
                     };
                     _context.SinhViens.Add(sv);
 
-                    // log creation
                     var log = new NhatKy
                     {
                         MaLog = Guid.NewGuid().ToString(),
@@ -117,12 +163,18 @@ namespace QL_KT_xa_sin_vien.Controllers
                         HanhDong = "BulkImportSinhVien",
                         DoiTuong = sv.MaSv,
                         GiaTriTruoc = null,
-                        GiaTriSau = System.Text.Json.JsonSerializer.Serialize(sv),
+                        // Use ReferenceHandler.Preserve to avoid possible object cycles when serializing EF entities
+                        GiaTriSau = System.Text.Json.JsonSerializer.Serialize(sv, new JsonSerializerOptions
+                        {
+                            ReferenceHandler = ReferenceHandler.Preserve,
+                            MaxDepth = 128
+                        }),
                         ThoiGian = DateTime.Now
                     };
                     _context.NhatKies.Add(log);
 
                     processed++;
+                    row++;
                 }
             }
 
@@ -346,6 +398,41 @@ namespace QL_KT_xa_sin_vien.Controllers
             var sinhVien = await _context.SinhViens.FindAsync(id);
             if (sinhVien != null)
             {
+                // Remove or update related entities to avoid FK constraint errors
+
+                // 1) Delete HoaDons related to this student
+                var hoaDons = _context.HoaDons.Where(h => h.MaSv == id).ToList();
+                if (hoaDons.Any())
+                {
+                    _context.HoaDons.RemoveRange(hoaDons);
+                }
+
+                // 2) Delete HopDongs that reference this student
+                var hopDongs = _context.HopDongs.Where(h => h.MaSv == id).ToList();
+                if (hopDongs.Any())
+                {
+                    _context.HopDongs.RemoveRange(hopDongs);
+                }
+
+                // 3) Delete PhanAnhs submitted by this student
+                var phanAnhs = _context.PhanAnhs.Where(p => p.MaSv == id).ToList();
+                if (phanAnhs.Any())
+                {
+                    _context.PhanAnhs.RemoveRange(phanAnhs);
+                }
+
+                // 4) Clear any Giuong references that occupy this student
+                var occupiedBeds = _context.Giuongs.Where(g => g.OccupiedBy == id).ToList();
+                if (occupiedBeds.Any())
+                {
+                    foreach (var bed in occupiedBeds)
+                    {
+                        bed.OccupiedBy = null;
+                    }
+                    _context.Giuongs.UpdateRange(occupiedBeds);
+                }
+
+                // Finally remove the student
                 _context.SinhViens.Remove(sinhVien);
             }
 
