@@ -1,9 +1,33 @@
+@using System.Text.Json
 @model QL_KT_xa_sin_vien.Models.KichHoatRequestModel
 
 @{
     ViewData["Title"] = "Gửi mã kích hoạt";
 }
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        var msg = @Html.Raw(JsonSerializer.Serialize(TempData["ErrorMessage"]?.ToString()));
+        Swal.fire({
+        icon: 'error',
+        title: 'Thông báo',
+        html: msg,
+        confirmButtonText: 'OK'
+        });
+    </script>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        var msg = @Html.Raw(JsonSerializer.Serialize(TempData["SuccessMessage"]?.ToString()));
+        Swal.fire({
+        icon: 'success',
+        title: 'Thông báo',
+        html: msg,
+        confirmButtonText: 'OK'
+        });
+    </script>
+}
 <h2>Gửi mã kích hoạt</h2>
 
 <div class="card">

@@ -4,7 +4,6 @@
 @model QL_KT_xa_sin_vien.Models.DashboardViewModel
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
         @if (TempData["ErrorMessage"] != null)
         {
             <script>
@@ -12,12 +11,23 @@
                 Swal.fire({
                 icon: 'error',
                 title: 'Thông báo',
-                text: msg,
+                html: msg,
                 confirmButtonText: 'OK'
                 });
             </script>
         }
-    </script>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <script>
+                var msg = @Html.Raw(JsonSerializer.Serialize(TempData["SuccessMessage"]?.ToString()));
+                Swal.fire({
+                icon: 'success',
+                title: 'Thông báo',
+                html: msg,
+                confirmButtonText: 'OK'
+                });
+            </script>
+        }
     <style>
         .car_ds {
         height: 100%;

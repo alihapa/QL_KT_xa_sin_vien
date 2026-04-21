@@ -129,53 +129,17 @@ namespace QL_KT_xa_sin_vien.Controllers
             _context.ThongBaos.Add(tb);
 
             // log into NhatKy
-            try
+            var nk = new NhatKy
             {
-                var nk = new NhatKy
-                {
-                    MaLog = Guid.NewGuid().ToString(),
-                    NguoiThucHien = HttpContext.Session.GetString("userId"),
-                    HanhDong = "Thay doi trang thai hop dong",
-                    DoiTuong = hopDong.MaHopDong,
-                    GiaTriTruoc = prevStatus,
-                    GiaTriSau = newStatus,
-                    ThoiGian = DateTime.Now
-                };
-                _context.NhatKies.Add(nk);
-            }
-            catch
-            {
-                // ignore logging failures
-            }
-
-            // send email notification if student's email exists
-            try
-            {
-                var svEmail = await _context.SinhViens.Where(s => s.MaSv == hopDong.MaSv).Select(s => s.Email).FirstOrDefaultAsync();
-                if (!string.IsNullOrEmpty(svEmail))
-                {
-                    var smtpSettings = _configuration.GetSection("Smtp").Get<SmtpSettings>();
-                    var client = new System.Net.Mail.SmtpClient(smtpSettings.Host)
-                    {
-                        Port = smtpSettings.Port,
-                        EnableSsl = smtpSettings.EnableSsl,
-                        Credentials = new System.Net.NetworkCredential(smtpSettings.User, smtpSettings.Password)
-                    };
-                    var mail = new System.Net.Mail.MailMessage
-                    {
-                        From = new System.Net.Mail.MailAddress(smtpSettings.User),
-                        Subject = "Cập nhật trạng thái đăng ký phòng",
-                        Body = tb.NoiDung,
-                        IsBodyHtml = false
-                    };
-                    mail.To.Add(svEmail);
-                    client.Send(mail);
-                }
-            }
-            catch
-            {
-                // ignore email failures
-            }
+                MaLog = Guid.NewGuid().ToString(),
+                NguoiThucHien = HttpContext.Session.GetString("userId"),
+                HanhDong = "Thay doi trang thai hop dong",
+                DoiTuong = hopDong.MaHopDong,
+                GiaTriTruoc = prevStatus,
+                GiaTriSau = newStatus,
+                ThoiGian = DateTime.Now
+            };
+            _context.NhatKies.Add(nk);
 
             // Note: HopDong model no longer stores TrangThai; we keep other changes if any
             await _context.SaveChangesAsync();

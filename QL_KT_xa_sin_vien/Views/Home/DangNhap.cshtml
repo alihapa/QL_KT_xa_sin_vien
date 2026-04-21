@@ -9,7 +9,19 @@
             Swal.fire({
             icon: 'error',
             title: 'Thông báo',
-            text: msg,
+            html: msg,
+            confirmButtonText: 'OK'
+            });
+        </script>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            var msg = @Html.Raw(JsonSerializer.Serialize(TempData["SuccessMessage"]?.ToString()));
+            Swal.fire({
+            icon: 'success',
+            title: 'Thông báo',
+            html: msg,
             confirmButtonText: 'OK'
             });
         </script>

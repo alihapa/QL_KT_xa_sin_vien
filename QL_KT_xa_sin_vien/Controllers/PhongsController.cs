@@ -137,9 +137,48 @@ namespace QL_KT_xa_sin_vien.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // check if student already has any contract
-            var existing = _context.HopDongs.Any(h => h.MaSv == sv.MaSv);
-            if (existing)
+            // check if student already has any active or pending contract
+            var studentContracts = await _context.HopDongs.Where(h => h.MaSv == sv.MaSv).ToListAsync();
+            var hasActiveOrPending = false;
+            foreach (var c in studentContracts)
+            {
+                // treat contracts with end date in the future as active
+                if (c.NgayKetThuc.HasValue && c.NgayKetThuc.Value.ToDateTime(TimeOnly.MinValue) >= DateTime.Now.Date)
+                {
+                    hasActiveOrPending = true;
+                    break;
+                }
+
+                // if contract references a bed, check bed occupancy to determine approved/pending
+                if (!string.IsNullOrEmpty(c.MaGiuong))
+                {
+                    var bed = await _context.Giuongs.FindAsync(c.MaGiuong);
+                    if (bed != null)
+                    {
+                        // approved if the bed is occupied by this student
+                        if (!string.IsNullOrEmpty(bed.OccupiedBy) && bed.OccupiedBy == sv.MaSv)
+                        {
+                            hasActiveOrPending = true;
+                            break;
+                        }
+
+                        // if bed exists but not yet occupied, treat as a pending request
+                        if (string.IsNullOrEmpty(bed.OccupiedBy))
+                        {
+                            hasActiveOrPending = true;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        // bed record missing: be conservative and treat as pending/active
+                        hasActiveOrPending = true;
+                        break;
+                    }
+                }
+            }
+
+            if (hasActiveOrPending)
             {
                 TempData["ErrorMessage"] = "Bạn đã có hợp đồng đang hoạt động hoặc chờ xét duyệt. Không thể đăng ký thêm.";
                 return RedirectToAction("Index");
@@ -182,6 +221,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 NgayBatDau = dk.NgayBatDau ?? DateOnly.FromDateTime(DateTime.Now),
                 NgayKetThuc = dk.NgayKetThuc ?? DateOnly.FromDateTime(DateTime.Now.AddMonths(6)),
                 Agree = dk.Agree,
+                TrangThai = "0", // 0 = chờ duyệt, 1 = đã duyệt, 2 = từ chối
                 DieuKhoanPdf = pdfPath
             };
 
