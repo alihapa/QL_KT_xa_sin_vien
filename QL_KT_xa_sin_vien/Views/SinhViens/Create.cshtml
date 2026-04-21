@@ -30,6 +30,17 @@
             </div>
 
             <div class="mb-3">
+                <label asp-for="GioiTinh" class="form-label">Giới tính</label>
+                <select asp-for="GioiTinh" class="form-select">
+                    <option value="">-- Chọn --</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                </select>
+                <span asp-validation-for="GioiTinh" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
                 <label asp-for="Khoa" class="form-label"></label>
                 <input asp-for="Khoa" class="form-control" />
                 <span asp-validation-for="Khoa" class="text-danger"></span>
@@ -49,7 +60,8 @@
 
             <div class="mb-3">
                 <label asp-for="MaTaiKhoan" class="form-label"></label>
-                <select asp-for="MaTaiKhoan" class="form-select" asp-items="ViewBag.MaTaiKhoan"></select>
+               <input asp-for="MaTaiKhoan" class="form-control" readonly/>
+                <span asp-validation-for="MaTaiKhoan" class="text-danger"></span>
             </div>
 
             <div class="mt-3">

@@ -131,7 +131,7 @@
                     var userIdTb = Context.Session.GetString("userId");
                     var personal = allTbs.Where(t => !string.IsNullOrEmpty(t.NguoiNhan) && t.NguoiNhan == userIdTb);
                     var common = allTbs.Where(t => string.IsNullOrEmpty(t.NguoiNhan));
-                    var showList = personal.Concat(common).OrderByDescending(t => t.ThoiGianGui).Take(3).ToList();
+                    var showList = personal.Concat(common).OrderByDescending(t => t.ThoiGianGui).Take(1).ToList();
                 }
                 @if (showList.Any())
                 {

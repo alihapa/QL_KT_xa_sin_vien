@@ -39,7 +39,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy thông báo.";
+                return View();
             }
 
             var thongBao = await _context.ThongBaos
@@ -47,7 +48,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaThongBao == id);
             if (thongBao == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy thông báo.";
+                return View();
             }
 
             return View(thongBao);
@@ -109,13 +111,15 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy thông báo.";
+                return View();
             }
 
             var thongBao = await _context.ThongBaos.FindAsync(id);
             if (thongBao == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy thông báo.";
+                return View();
             }
             ViewData["NguoiNhan"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan", thongBao.NguoiNhan);
             return View(thongBao);
@@ -132,7 +136,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id != thongBao.MaThongBao)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy thông báo.";
+                return View();
             }
 
             // if Loai is Chung -> clear recipient
@@ -152,7 +157,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 {
                     if (!ThongBaoExists(thongBao.MaThongBao))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Không tìm thấy thông báo.";
+                        return View();
                     }
                     else
                     {
@@ -171,7 +177,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy thông báo.";
+                return View("Index");
             }
 
             var thongBao = await _context.ThongBaos
@@ -179,7 +186,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaThongBao == id);
             if (thongBao == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy thông báo.";
+                return View("Index");
             }
 
             return View(thongBao);

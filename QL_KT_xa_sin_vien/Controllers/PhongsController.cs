@@ -20,6 +20,121 @@ namespace QL_KT_xa_sin_vien.Controllers
             _context = context;
         }
 
+        // GET: Phongs/ChuyenPhong
+        [HttpGet]
+        public async Task<IActionResult> ChuyenPhong(string id, string? selectedToaNha = null, string? selectedPhong = null)
+        {
+            var sv = await _context.SinhViens.FirstOrDefaultAsync(s => s.MaSv == id || s.MaTaiKhoan == id);
+            if (sv == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên";
+                return View();
+            }
+
+            var dk = new DangKyPhong
+            {
+                MaSv = sv.MaSv,
+                HoTen = sv.HoTen ?? "",
+                ToaNhaList = await _context.ToaNhas.Select(t => t.MaToaNha).ToListAsync(),
+                PhongList = new List<string>(),
+                GiuongList = new List<string>()
+            };
+
+            if (!string.IsNullOrEmpty(selectedToaNha))
+            {
+                dk.SelectedToaNha = selectedToaNha;
+                dk.PhongList = await _context.Phongs
+                    .Where(p => p.MaToaNha == selectedToaNha)
+                    .Select(p => p.MaPhong)
+                    .ToListAsync();
+            }
+
+            if (!string.IsNullOrEmpty(selectedPhong))
+            {
+                dk.SelectedPhong = selectedPhong;
+                dk.GiuongList = await _context.Giuongs
+                    .Where(g => g.MaPhong == selectedPhong)
+                    .Select(g => g.MaGiuong)
+                    .ToListAsync();
+            }
+            // student's MaSv and HoTen were set above from the validated 'sv'
+            return View(dk);
+        }
+
+        // POST: Phongs/ChuyenPhong
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChuyenPhong(DangKyPhong dk)
+        {
+            if (!ModelState.IsValid)
+            {
+                dk.ToaNhaList = await _context.ToaNhas.Select(t => t.MaToaNha).ToListAsync();
+                dk.PhongList = new List<string>();
+                dk.GiuongList = new List<string>();
+                return View(dk);
+            }
+
+            // resolve SinhVien
+            var accountId = HttpContext.Session.GetString("userId");
+            SinhVien? sv = null;
+            if (!string.IsNullOrEmpty(dk.MaSv)) sv = await _context.SinhViens.FirstOrDefaultAsync(s => s.MaSv == dk.MaSv);
+            if (sv == null && !string.IsNullOrEmpty(accountId)) sv = await _context.SinhViens.FirstOrDefaultAsync(s => s.MaTaiKhoan == accountId || s.MaSv == accountId);
+            if (sv == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên.";
+                return View(dk);
+            }
+
+            // check target bed available
+            if (!string.IsNullOrEmpty(dk.SelectedGiuong))
+            {
+                var bed = await _context.Giuongs.FindAsync(dk.SelectedGiuong);
+                if (bed != null && (!string.IsNullOrEmpty(bed.OccupiedBy) || (bed.TrangThai != null && bed.TrangThai.Contains("chiếm", StringComparison.OrdinalIgnoreCase))))
+                {
+                    TempData["ErrorMessage"] = "Giường đã bị chiếm. Vui lòng chọn giường khác.";
+                    return View(dk);
+                }
+            }
+
+            // create a HopDong request representing transfer; BQL will approve
+            var hopDong = new HopDong
+            {
+                MaHopDong = Guid.NewGuid().ToString(),
+                MaSv = sv.MaSv,
+                MaPhong = dk.SelectedPhong,
+                MaGiuong = dk.SelectedGiuong,
+                NgayBatDau = DateOnly.FromDateTime(DateTime.Now),
+                NgayKetThuc = DateOnly.FromDateTime(DateTime.Now.AddMonths(6)),
+                Agree = "1",
+                TrangThai = "0",
+                DieuKhoanPdf = null
+            };
+
+            _context.HopDongs.Add(hopDong);
+
+            // notify BQL
+            var bqls = _context.TaiKhoans.Where(t => t.VaiTro == "2").ToList();
+            var sender = HttpContext.Session.GetString("userId") ?? "System";
+            foreach (var b in bqls)
+            {
+                var tb = new ThongBao
+                {
+                    MaThongBao = Guid.NewGuid().ToString(),
+                    NguoiGui = sender,
+                    NguoiNhan = b.MaTaiKhoan,
+                    LoaiThongBao = "DuyetChuyenPhong",
+                    NoiDung = $"Yêu cầu chuyển phòng: HopDong={hopDong.MaHopDong}, Phong={hopDong.MaPhong}, Giuong={hopDong.MaGiuong}, Người yêu cầu={hopDong.MaSv}",
+                    TrangThai = "Chưa đọc",
+                    ThoiGianGui = DateTime.Now
+                };
+                _context.ThongBaos.Add(tb);
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Yêu cầu chuyển phòng đã được gửi tới BQL. Vui lòng chờ xét duyệt.";
+            return RedirectToAction("Index", "Phongs");
+        }
+
         // GET: Phongs
         [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Index()
@@ -122,19 +237,11 @@ namespace QL_KT_xa_sin_vien.Controllers
             {
                 sv = await _context.SinhViens.FirstOrDefaultAsync(s => s.MaTaiKhoan == accountId || s.MaSv == accountId);
             }
-            // if still null, create a minimal SinhVien using accountId as MaSv (so FK will succeed)
             if (sv == null)
             {
-                var newMaSv = !string.IsNullOrEmpty(dk.MaSv) ? dk.MaSv : (accountId ?? Guid.NewGuid().ToString());
-                sv = new SinhVien
-                {
-                    MaSv = newMaSv,
-                    HoTen = dk.HoTen ?? "chưa có tên",
-                    Email = null,
-                    MaTaiKhoan = accountId
-                };
-                _context.SinhViens.Add(sv);
-                await _context.SaveChangesAsync();
+                // Thay vì tạo mới, trả về thông báo lỗi
+                TempData["ErrorMessage"] = "Không tìm thấy thông tin sinh viên. Vui lòng kiểm tra lại dữ liệu đầu vào.";
+                return RedirectToAction("DangKy"); 
             }
 
             // check if student already has any active or pending contract
@@ -181,7 +288,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             if (hasActiveOrPending)
             {
                 TempData["ErrorMessage"] = "Bạn đã có hợp đồng đang hoạt động hoặc chờ xét duyệt. Không thể đăng ký thêm.";
-                return RedirectToAction("Index");
+                return RedirectToAction("DangKy");
             }
 
             // check if bed is already occupied
@@ -191,7 +298,18 @@ namespace QL_KT_xa_sin_vien.Controllers
                 if (bed != null && (!string.IsNullOrEmpty(bed.OccupiedBy) || (bed.TrangThai != null && bed.TrangThai.Contains("chiếm", StringComparison.OrdinalIgnoreCase))))
                 {
                     TempData["ErrorMessage"] = "Giường đã bị chiếm. Vui lòng chọn giường khác.";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("DangKy");
+                }
+            }
+
+            // Prevent multiple pending/approved requests for the same bed
+            if (!string.IsNullOrEmpty(dk.SelectedGiuong))
+            {
+                var existing = await _context.HopDongs.AnyAsync(h => h.MaGiuong == dk.SelectedGiuong && (h.TrangThai == "0" || h.TrangThai == "1"));
+                if (existing)
+                {
+                    TempData["ErrorMessage"] = "Giường đã có yêu cầu hoặc đã được duyệt. Vui lòng chọn giường khác.";
+                    return RedirectToAction("DangKy");
                 }
             }
 
@@ -247,7 +365,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Yêu cầu đăng ký đã được gửi tới BQL. Vui lòng chờ xét duyệt.";
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
 
         // GET: Phongs/Details/5
@@ -257,14 +375,8 @@ namespace QL_KT_xa_sin_vien.Controllers
             var phongs = new Phong();
             if (id == null)
             {
-                phongs.MaPhong = "";
-                phongs.MaToaNha = "";
-                phongs.Tang = 0;
-                phongs.LoaiPhong = "";
-                phongs.SucChua = 0;
-                phongs.SoLuongDangO = 0;
-                phongs.GioiTinh = "";
-                phongs.TrangThai = "";
+                TempData["ErrorMessage"] = "Không tìm thấy thông tin phòng. Vui lòng kiểm tra lại dữ liệu đầu vào.";
+                return RedirectToAction(nameof(Index));
             }
 
             var phong = await _context.Phongs
@@ -272,7 +384,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaPhong == id);
             if (phong == null)
             {
-                phong = phongs;
+                TempData["ErrorMessage"] = "Không tìm thấy thông tin phòng. Vui lòng kiểm tra lại dữ liệu đầu vào.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(phong);

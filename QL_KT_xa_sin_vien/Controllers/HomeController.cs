@@ -263,9 +263,9 @@ namespace QL_KT_xa_sin_vien.Controllers
                 };
             }
 
-            // try to get any current contract (by date) for the student
+            // try to get the approved contract for the student (only show when BQL approved)
             var hopDong = await db.HopDongs
-                .Where(h => h.MaSv == sinhVien.MaSv)
+                .Where(h => h.MaSv == sinhVien.MaSv && h.TrangThai == "1")
                 .OrderByDescending(h => h.NgayKetThuc)
                 .FirstOrDefaultAsync();
 

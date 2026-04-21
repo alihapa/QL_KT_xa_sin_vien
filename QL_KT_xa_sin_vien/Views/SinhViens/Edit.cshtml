@@ -9,7 +9,8 @@
 <div class="card shadow-sm">
     <div class="card-body">
         <form asp-action="Edit" asp-controller="SinhViens">
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            <div asp-validation-summary="All" class="alert alert-danger"></div>
+            
             <input type="hidden" asp-for="MaSv" />
 
             <div class="mb-3">
@@ -22,6 +23,17 @@
                 <label asp-for="Lop" class="form-label"></label>
                 <input asp-for="Lop" class="form-control" />
                 <span asp-validation-for="Lop" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="GioiTinh" class="form-label">Giới tính</label>
+                <select asp-for="GioiTinh" class="form-select">
+                    <option value="">-- Chọn --</option>
+                    @if (Model.GioiTinh == "Nam") { <option value="Nam" selected>Nam</option> } else { <option value="Nam">Nam</option> }
+                    @if (Model.GioiTinh == "Nữ") { <option value="Nữ" selected>Nữ</option> } else { <option value="Nữ">Nữ</option> }
+                    @if (Model.GioiTinh == "Khác") { <option value="Khác" selected>Khác</option> } else { <option value="Khác">Khác</option> }
+                </select>
+                <span asp-validation-for="GioiTinh" class="text-danger"></span>
             </div>
 
             <div class="mb-3">

@@ -52,6 +52,7 @@
                                 @if (Context.Session.GetString("userRole") == "1" || Context.Session.GetString("userRole") == "2" || Context.Session.GetString("userRole") == "3")
                                 {
                                     <li><a class="dropdown-item" asp-controller="Home" asp-action="Index">Trang chủ sinh viên</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Phongs" asp-action="ChuyenPhong" asp-route-id="@Context.Session.GetString("userId")">Yêu cầu chuyển phòng</a></li>
                                 }
 
                                 @* Admin group (role 3) - implemented as a dropend submenu with JS support below *@
@@ -69,6 +70,7 @@
                                             <li><a class="dropdown-item" asp-controller="SinhViens" asp-action="Index">Sinh viên</a></li>
                                             <li><a class="dropdown-item" asp-controller="ToaNhas" asp-action="Index">Tòa nhà</a></li>
                                             <li><a class="dropdown-item" asp-controller="Phongs" asp-action="Index">Phòng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Phongs" asp-action="ChuyenPhong" asp-route-id="@Context.Session.GetString("userId")">Yêu cầu chuyển phòng</a></li>
                                             <li><a class="dropdown-item" asp-controller="Giuongs" asp-action="Index">Giường</a></li>
                                             <li><a class="dropdown-item" asp-controller="HopDongs" asp-action="Index">Hợp đồng</a></li>
                                             <li><a class="dropdown-item" asp-controller="HopDongs" asp-action="UploadDieuKhoan">Thêm điều khoản</a></li>
@@ -89,6 +91,7 @@
                                             <li><a class="dropdown-item" asp-controller="Home" asp-action="IndexBQL">Dashboard BQL</a></li>
                                             <li><a class="dropdown-item" asp-controller="ToaNhas" asp-action="Index">Tòa nhà</a></li>
                                             <li><a class="dropdown-item" asp-controller="Phongs" asp-action="Index">Phòng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Phongs" asp-action="ChuyenPhong" asp-route-id="@Context.Session.GetString("userId")">Yêu cầu chuyển phòng</a></li>
                                             <li><a class="dropdown-item" asp-controller="Giuongs" asp-action="Index">Giường</a></li>
                                             <li><a class="dropdown-item" asp-controller="HopDongs" asp-action="Index">Hợp đồng</a></li>
                                            <li><a class="dropdown-item" asp-controller="HopDongs" asp-action="UploadDieuKhoan">Thêm điều khoản</a></li>

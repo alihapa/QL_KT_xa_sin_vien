@@ -42,8 +42,8 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.ThoiGian?.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                        <td>@item.NguoiThucHienNavigation?.TenDangNhap ?? item.NguoiThucHien</td>
+                        <td>@(item.ThoiGian?.ToString("yyyy-MM-dd HH:mm:ss"))</td>
+                        <td>@(item.NguoiThucHienNavigation?.TenDangNhap ?? item.NguoiThucHien)</td>
                         <td>@item.HanhDong</td>
                         <td>@item.DoiTuong</td>
                         <td>@item.GiaTriTruoc</td>

@@ -67,6 +67,29 @@
                 <span asp-validation-for="ThoiGianCapNhat" class="text-danger"></span>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">Đính kèm hiện tại</label>
+                @if(!string.IsNullOrEmpty(Model.MediaPath))
+                {
+                    if(Model.MediaType == "image") { <div><img src="@Model.MediaPath" style="max-width:200px; max-height:150px" /></div> }
+                    else if(Model.MediaType == "video") { <div><video src="@Model.MediaPath" controls style="max-width:320px; max-height:200px"></video></div> }
+                    else { <div><a href="@Model.MediaPath">Tệp đính kèm</a></div> }
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="removeMedia" name="RemoveMedia" value="true" />
+                        <label class="form-check-label" for="removeMedia">Xóa tệp đính kèm hiện tại</label>
+                    </div>
+                }
+                else
+                {
+                    <div>(Chưa có tệp đính kèm)</div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Thay thế / Thêm đính kèm (ảnh hoặc video ≤ 30s)</label>
+                <input type="file" name="mediaFile" id="mediaFile" class="form-control" accept="image/*,video/*,text/plain" />
+            </div>
+
             <div class="mt-3">
                 <button type="submit" class="btn btn-primary me-2">Lưu</button>
                 <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>

@@ -1,9 +1,33 @@
-﻿@model IEnumerable<QL_KT_xa_sin_vien.Models.HoaDon>
+﻿@using System.Text.Json
+@model IEnumerable<QL_KT_xa_sin_vien.Models.HoaDon>
 
 @{
     ViewData["Title"] = "Danh sách hóa đơn";
 }
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        var msg = @Html.Raw(JsonSerializer.Serialize(TempData["ErrorMessage"]?.ToString()));
+        Swal.fire({
+        icon: 'error',
+        title: 'Thông báo',
+        text: msg,
+        confirmButtonText: 'OK'
+        });
+    </script>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        var msg = @Html.Raw(JsonSerializer.Serialize(TempData["SuccessMessage"]?.ToString()));
+        Swal.fire({
+        icon: 'success',
+        title: 'Thông báo',
+        text: msg,
+        confirmButtonText: 'OK'
+        });
+    </script>
+}
 <h2 class="mb-4">Danh sách hóa đơn</h2>
 @if (Context.Session.GetString("userRole") == "2" || Context.Session.GetString("userRole") == "3")
 {

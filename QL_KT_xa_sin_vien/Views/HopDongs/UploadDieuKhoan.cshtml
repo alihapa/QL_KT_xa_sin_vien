@@ -1,7 +1,31 @@
+@using System.Text.Json
 @{
     ViewData["Title"] = "Thêm điều khoản";
 }
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        var msg = @Html.Raw(JsonSerializer.Serialize(TempData["ErrorMessage"]?.ToString()));
+        Swal.fire({
+        icon: 'error',
+        title: 'Thông báo',
+        text: msg,
+        confirmButtonText: 'OK'
+        });
+    </script>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        var msg = @Html.Raw(JsonSerializer.Serialize(TempData["SuccessMessage"]?.ToString()));
+        Swal.fire({
+        icon: 'success',
+        title: 'Thông báo',
+        text: msg,
+        confirmButtonText: 'OK'
+        });
+    </script>
+}
 <h2>Thêm điều khoản</h2>
 
 <form asp-controller="HopDongs" asp-action="UploadDieuKhoan" method="post" enctype="multipart/form-data">

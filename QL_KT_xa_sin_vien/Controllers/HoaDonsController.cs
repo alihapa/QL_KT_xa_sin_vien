@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using QL_KT_xa_sin_vien.Models;
 
 namespace QL_KT_xa_sin_vien.Controllers
@@ -48,6 +49,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
+                TempData["ErrorMessage"] = "Hóa đơn không tồn tại.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -57,6 +59,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaHoaDon == id);
             if (hoaDon == null)
             {
+                TempData["ErrorMessage"] = "Hóa đơn không tồn tại.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -110,12 +113,14 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
+                TempData["ErrorMessage"] = "Hóa đơn không tồn tại.";
                 return RedirectToAction(nameof(Index));
             }
 
             var hoaDon = await _context.HoaDons.FindAsync(id);
             if (hoaDon == null)
             {
+                TempData["ErrorMessage"] = "Hóa đơn không tồn tại.";
                 return RedirectToAction(nameof(Index));
             }
             ViewData["MaHopDong"] = new SelectList(_context.HopDongs, "MaHopDong", "MaHopDong", hoaDon.MaHopDong);
@@ -134,6 +139,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id != hoaDon.MaHoaDon)
             {
+                TempData["ErrorMessage"] = "Hóa đơn không tồn tại.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -148,7 +154,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 {
                     if (!HoaDonExists(hoaDon.MaHoaDon))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Hóa đơn không tồn tại.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -168,7 +175,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Hóa đơn không tồn tại.";
+                return RedirectToAction(nameof(Index));
             }
 
             var hoaDon = await _context.HoaDons
@@ -177,7 +185,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaHoaDon == id);
             if (hoaDon == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Hóa đơn không tồn tại.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(hoaDon);

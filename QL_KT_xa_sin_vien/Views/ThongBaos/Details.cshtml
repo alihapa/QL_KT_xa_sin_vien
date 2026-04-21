@@ -1,9 +1,33 @@
-﻿@model QL_KT_xa_sin_vien.Models.ThongBao
+﻿@using System.Text.Json
+@model QL_KT_xa_sin_vien.Models.ThongBao
 
 @{
     ViewData["Title"] = "Chi tiết thông báo";
 }
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        var msg = @Html.Raw(JsonSerializer.Serialize(TempData["ErrorMessage"]?.ToString()));
+        Swal.fire({
+        icon: 'error',
+        title: 'Thông báo',
+        text: msg,
+        confirmButtonText: 'OK'
+        });
+    </script>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        var msg = @Html.Raw(JsonSerializer.Serialize(TempData["SuccessMessage"]?.ToString()));
+        Swal.fire({
+        icon: 'success',
+        title: 'Thông báo',
+        text: msg,
+        confirmButtonText: 'OK'
+        });
+    </script>
+}
 <h2 class="mb-4">Chi tiết thông báo</h2>
 
 <div class="card shadow-sm">

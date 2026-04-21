@@ -40,17 +40,18 @@
                         <td>
                             @if(!string.IsNullOrEmpty(item.MediaPath))
                             {
+                                var url = item.MediaPath;
                                 if(item.MediaType == "image")
                                 {
-                                    <img src="@item.MediaPath" style="max-width:120px; max-height:90px" />
+                                    <a asp-action="Details" asp-route-id="@item.MaPhanAnh"><img src="@url" style="max-width:120px; max-height:90px" /></a>
                                 }
                                 else if(item.MediaType == "video")
                                 {
-                                    <video src="@item.MediaPath" controls style="max-width:160px; max-height:90px"></video>
+                                    <a asp-action="Details" asp-route-id="@item.MaPhanAnh"><video src="@url" controls style="max-width:160px; max-height:90px"></video></a>
                                 }
                                 else
                                 {
-                                    <a href="@item.MediaPath">Tệp đính kèm</a>
+                                    <a href="@url">Tệp đính kèm</a>
                                 }
                             }
                         </td>

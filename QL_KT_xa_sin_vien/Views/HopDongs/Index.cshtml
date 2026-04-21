@@ -46,8 +46,34 @@
                     <tr>
                         <td>@FormatDate(item.NgayBatDau, "dd/MM/yyyy")</td>
                         <td>@FormatDate(item.NgayKetThuc, "dd/MM/yyyy")</td>
-                        <td>@( "-" )</td>
-                        <td>@( item.DieuKhoanPdf ?? "" )</td>
+                        <td>
+                            @{
+                                var status = item.TrangThai ?? "";
+                                string label = status switch
+                                {
+                                    "0" => "Chờ xét duyệt",
+                                    "1" => "Đã duyệt",
+                                    "2" => "Từ chối",
+                                    "-1" => "Hết hạn",
+                                    _ => status
+                                };
+                            }
+                            @label
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.DieuKhoanPdf))
+                            {
+                                <a href="@item.DieuKhoanPdf" target="_blank">Xem điều khoản</a>
+                            }
+                            else if (!string.IsNullOrEmpty(ViewBag.LatestDieuKhoan as string))
+                            {
+                                <a href="@(ViewBag.LatestDieuKhoan)" target="_blank">Mở điều khoản</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
                         <td>
                             @if(!string.IsNullOrEmpty(item.DieuKhoanPdf))
                             {

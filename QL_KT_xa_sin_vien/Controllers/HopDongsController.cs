@@ -28,6 +28,12 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             // return all contracts; filtering by status removed because status is managed separately
             var qLSinhVienContext = _context.HopDongs.Include(h => h.MaGiuongNavigation).Include(h => h.MaPhongNavigation).Include(h => h.MaSvNavigation).AsQueryable();
+
+            // provide latest uploaded DieuKhoan (terms) so UI can show a link/button
+            var latestDieuKhoan = await _context.DieuKhoans.OrderByDescending(d => d.UploadedAt).FirstOrDefaultAsync();
+            ViewBag.LatestDieuKhoan = latestDieuKhoan?.FilePath;
+            ViewBag.LatestDieuKhoanName = latestDieuKhoan?.OriginalFileName;
+
             return View(await qLSinhVienContext.ToListAsync());
         }
 
@@ -43,30 +49,72 @@ namespace QL_KT_xa_sin_vien.Controllers
             {
                 return BadRequest();
             }
-            var prevStatus = (string?)null; // previous status not tracked on model
-            // if approved, mark bed occupied
-            if (newStatus == "1" && !string.IsNullOrEmpty(hopDong.MaGiuong))
-            {
-                var giu = await _context.Giuongs.FindAsync(hopDong.MaGiuong);
-                if (giu != null)
-                {
-                    giu.OccupiedBy = hopDong.MaSv;
-                    giu.TrangThai = "Đã chiếm";
-                    _context.Giuongs.Update(giu);
+            // capture previous status for logging
+            var prevStatus = hopDong.TrangThai;
 
-                    // also increment room occupancy
-                    if (!string.IsNullOrEmpty(giu.MaPhong))
+            // perform all updates in a transaction to avoid partial updates
+            using var tx = await _context.Database.BeginTransactionAsync();
+            // if approved, free any previous bed occupied by the student (transfer) then mark new bed occupied
+            if (newStatus == "1")
+            {
+                // free any existing occupied beds for this student (except target bed)
+                if (!string.IsNullOrEmpty(hopDong.MaSv))
+                {
+                    var prevBeds = _context.Giuongs.Where(g => g.OccupiedBy == hopDong.MaSv && g.MaGiuong != hopDong.MaGiuong).ToList();
+                    foreach (var pb in prevBeds)
                     {
-                        var phong = await _context.Phongs.FindAsync(giu.MaPhong);
-                        if (phong != null)
+                        pb.OccupiedBy = null;
+                        pb.TrangThai = "Trống";
+                        _context.Giuongs.Update(pb);
+
+                        if (!string.IsNullOrEmpty(pb.MaPhong))
                         {
-                            phong.SoLuongDangO = (phong.SoLuongDangO ?? 0) + 1;
-                            // if room reached capacity, optionally mark as full
-                            if (phong.SucChua.HasValue && phong.SoLuongDangO >= phong.SucChua)
+                            var prevPhong = await _context.Phongs.FindAsync(pb.MaPhong);
+                            if (prevPhong != null)
                             {
-                                phong.TrangThai = "Đầy";
+                                prevPhong.SoLuongDangO = Math.Max(0, (prevPhong.SoLuongDangO ?? 0) - 1);
+                                if (prevPhong.SucChua.HasValue && prevPhong.SoLuongDangO < prevPhong.SucChua)
+                                {
+                                    prevPhong.TrangThai = "Có chỗ";
+                                }
+                                _context.Phongs.Update(prevPhong);
                             }
-                            _context.Phongs.Update(phong);
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(hopDong.MaGiuong))
+                {
+                    var giu = await _context.Giuongs.FindAsync(hopDong.MaGiuong);
+                    if (giu != null)
+                    {
+                        // if the bed is occupied by someone else, do not approve to avoid overwriting
+                        if (!string.IsNullOrEmpty(giu.OccupiedBy) && giu.OccupiedBy != hopDong.MaSv)
+                        {
+                            await tx.RollbackAsync();
+                            TempData["ErrorMessage"] = "Không thể duyệt: giường mục tiêu đang do sinh viên khác chiếm.";
+                            return RedirectToAction(nameof(Index));
+                        }
+
+                        // safe to assign (either free or already occupied by this student)
+                        giu.OccupiedBy = hopDong.MaSv;
+                        giu.TrangThai = "Đã chiếm";
+                        _context.Giuongs.Update(giu);
+
+                        // also increment room occupancy
+                        if (!string.IsNullOrEmpty(giu.MaPhong))
+                        {
+                            var phong = await _context.Phongs.FindAsync(giu.MaPhong);
+                            if (phong != null)
+                            {
+                                phong.SoLuongDangO = (phong.SoLuongDangO ?? 0) + 1;
+                                // if room reached capacity, optionally mark as full
+                                if (phong.SucChua.HasValue && phong.SoLuongDangO >= phong.SucChua)
+                                {
+                                    phong.TrangThai = "Đầy";
+                                }
+                                _context.Phongs.Update(phong);
+                            }
                         }
                     }
                 }
@@ -141,8 +189,21 @@ namespace QL_KT_xa_sin_vien.Controllers
             };
             _context.NhatKies.Add(nk);
 
-            // Note: HopDong model no longer stores TrangThai; we keep other changes if any
-            await _context.SaveChangesAsync();
+            // update hopDong status and persist all changes atomically
+            hopDong.TrangThai = newStatus;
+            _context.HopDongs.Update(hopDong);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -221,7 +282,8 @@ namespace QL_KT_xa_sin_vien.Controllers
             }
             catch
             {
-                // ignore failures
+                TempData["Error"] = "Có lỗi xảy ra khi tải lên điều khoản. Vui lòng thử lại.";
+                return RedirectToAction(nameof(UploadDieuKhoan));
             }
 
             return RedirectToAction(nameof(Index));
@@ -245,6 +307,11 @@ namespace QL_KT_xa_sin_vien.Controllers
             {
                 return NotFound();
             }
+
+            // provide latest dieu khoan for view (so user can open centralized terms)
+            var latestDieuKhoan = await _context.DieuKhoans.OrderByDescending(d => d.UploadedAt).FirstOrDefaultAsync();
+            ViewBag.LatestDieuKhoan = latestDieuKhoan?.FilePath;
+            ViewBag.LatestDieuKhoanName = latestDieuKhoan?.OriginalFileName;
 
             return View(hopDong);
         }
@@ -304,13 +371,15 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy hợp đồng.";
+                return View();
             }
 
             var hopDong = await _context.HopDongs.FindAsync(id);
             if (hopDong == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy hợp đồng.";
+                return View();
             }
             ViewData["MaGiuong"] = new SelectList(_context.Giuongs, "MaGiuong", "MaGiuong", hopDong.MaGiuong);
             ViewData["MaPhong"] = new SelectList(_context.Phongs, "MaPhong", "MaPhong", hopDong.MaPhong);
@@ -329,7 +398,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id != hopDong.MaHopDong)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Mã hợp đồng không khớp.";
+                return View();
             }
 
             if (ModelState.IsValid)
@@ -357,7 +427,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 {
                     if (!HopDongExists(hopDong.MaHopDong))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Hợp đồng không tồn tại.";
+                        return View();
                     }
                     else
                     {

@@ -39,7 +39,8 @@ namespace QL_KT_xa_sin_vien.Controllers
             ws.Cells[1, 2].Value = "HoTen";
             ws.Cells[1, 3].Value = "Lop";
             ws.Cells[1, 4].Value = "Khoa";
-            ws.Cells[1, 5].Value = "Email";
+                ws.Cells[1, 5].Value = "Email";
+                ws.Cells[1, 6].Value = "GioiTinh";
 
             ws.Cells[2, 1].Value = "sv001";
             ws.Cells[2, 2].Value = "Nguyen Van A";
@@ -97,6 +98,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                     var lop = ws.Cells[row, 3].GetValue<string>()?.Trim();
                     var khoa = ws.Cells[row, 4].GetValue<string>()?.Trim();
                     var email = ws.Cells[row, 5].GetValue<string>()?.Trim();
+                    var gioiTinh = ws.Cells[row, 6].GetValue<string>()?.Trim();
 
                     // stop when no MaSv and no HoTen
                     if (string.IsNullOrEmpty(maSv) && string.IsNullOrEmpty(hoTen)) break;
@@ -152,6 +154,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                         Lop = lop,
                         Khoa = khoa,
                         Email = email,
+                        GioiTinh = gioiTinh,
                         MaTaiKhoan = tk.MaTaiKhoan
                     };
                     _context.SinhViens.Add(sv);
@@ -212,7 +215,8 @@ namespace QL_KT_xa_sin_vien.Controllers
 
             if (id == null)
             {
-                return View();
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên.";
+                return RedirectToAction("Index", "Home");
             }
 
             var sinhVien = await _context.SinhViens
@@ -220,13 +224,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .FirstOrDefaultAsync(m => m.MaSv == id);
             if (sinhVien == null)
             {
-                sinhVien = new SinhVien
-                {
-                    HoTen = "chưa có tên",
-                    MaSv = "chưa có mã sinh viên",
-                    Lop = "chưa có lớp",
-                    Email = "chưa có email"
-                };
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên.";
+                return RedirectToAction("Index", "Home");
             }
 
             // If role 1 (student) ensure they can only view their own profile
@@ -249,12 +248,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("3")]
         public IActionResult Create()
         {
-            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            //{
-            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-            //    return RedirectToAction("DangNhap");
-            //}
-            ViewData["MaTaiKhoan"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan");
+            //tao tai khoan ngẫu nhiên cho sinh vien
+            ViewData["MaTaiKhoan"] = Guid.NewGuid().ToString();
             return View();
         }
 
@@ -264,21 +259,10 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("3")]
-        //ghi nhật ký
          
-        public async Task<IActionResult> Create([Bind("MaSv,HoTen,Lop,Khoa,SoCmnd,Email,MaTaiKhoan")] SinhVien sinhVien)
+        public async Task<IActionResult> Create([Bind("MaSv,HoTen,Lop,Khoa,SoCmnd,Email,MaTaiKhoan,GioiTinh")] SinhVien sinhVien)
         {
-            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            //{
-            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-            //    return RedirectToAction("DangNhap");
-            //}
-
-            //var oldSv = await _context.SinhViens.FindAsync(id);
-            //if (oldSv == null) return NotFound();
-
-            //var giaTriTruoc = JsonSerializer.Serialize(oldSv);
-
+            
             if (ModelState.IsValid)
             {
                 // If no account specified, create one automatically with default password "123456"
@@ -317,8 +301,6 @@ namespace QL_KT_xa_sin_vien.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaTaiKhoan"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan", sinhVien.MaTaiKhoan);
-            //await LogService.GhiNhatKy(HttpContext.Session.GetString("userId"), "Them", "SinhVien", null, sinhVien);
             return View(sinhVien);
         }
 
@@ -326,25 +308,25 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Edit(string id)
         {
-            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            //{
-            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-            //    return RedirectToAction("DangNhap");
-            //}
             var oldSv = await _context.SinhViens.FindAsync(id);
-            if (oldSv == null) return NotFound();
+            if (oldSv == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên.";
+                return RedirectToAction("Index", "Home");
+            }
             var giaTriTruoc = JsonSerializer.Serialize(oldSv);
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên.";
+                return RedirectToAction("Index", "Home");
             }
 
             var sinhVien = await _context.SinhViens.FindAsync(id);
             if (sinhVien == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên.";
+                return RedirectToAction("Index", "Home");
             }
-            ViewData["MaTaiKhoan"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan", sinhVien.MaTaiKhoan);
             return View(sinhVien);
         }
 
@@ -354,16 +336,13 @@ namespace QL_KT_xa_sin_vien.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("1", "2", "3")]
-        public async Task<IActionResult> Edit(string id, [Bind("MaSv,HoTen,Lop,Khoa,SoCmnd,Email,MaTaiKhoan")] SinhVien sinhVien)
+        public async Task<IActionResult> Edit(string id, [Bind("MaSv,HoTen,Lop,Khoa,SoCmnd,Email,MaTaiKhoan,GioiTinh")] SinhVien sinhVien)
         {
-            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            //{
-            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-            //    return RedirectToAction("DangNhap");
-            //}
+            
             if (id != sinhVien.MaSv)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy sinh viên.";
+                return RedirectToAction("Index", "Home");
             }
 
             if (ModelState.IsValid)
@@ -377,7 +356,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 {
                     if (!SinhVienExists(sinhVien.MaSv))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Không tìm thấy sinh viên.";
+                        return RedirectToAction("Index", "Home");
                     }
                     else
                     {
@@ -386,7 +366,6 @@ namespace QL_KT_xa_sin_vien.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaTaiKhoan"] = new SelectList(_context.TaiKhoans, "MaTaiKhoan", "MaTaiKhoan", sinhVien.MaTaiKhoan);
             return View(sinhVien);
         }
 
@@ -394,11 +373,6 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("1", "2", "3")]
         public async Task<IActionResult> Delete(string id)
         {
-            //if (string.IsNullOrEmpty(HttpContext.Session.GetString("users")))
-            //{
-            //    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-            //    return RedirectToAction("DangNhap");
-            //}
             if (id == null)
             {
                 return NotFound();

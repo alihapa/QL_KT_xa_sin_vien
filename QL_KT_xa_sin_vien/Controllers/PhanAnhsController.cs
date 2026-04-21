@@ -7,6 +7,7 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QL_KT_xa_sin_vien.Models;
+using Microsoft.Identity.Client;
 
 namespace QL_KT_xa_sin_vien.Controllers
 {
@@ -87,7 +88,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy phản ánh.";
+                return View();
             }
 
             var phanAnh = await _context.PhanAnhs
@@ -96,8 +98,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 .Include(p => p.NguoiXuLyNavigation)
                 .FirstOrDefaultAsync(m => m.MaPhanAnh == id);
             if (phanAnh == null)
-            {
-                return NotFound();
+            {TempData["ErrorMessage"] = "Không tìm thấy phản ánh.";
+                return View();
             }
 
             // prepare sender display for details
@@ -264,7 +266,10 @@ namespace QL_KT_xa_sin_vien.Controllers
                     }
                     await _context.SaveChangesAsync();
                 }
-                catch { }
+                catch {
+                    TempData["ErrorMessage"] = "Phản ánh đã được tạo nhưng có lỗi khi gửi thông báo.";
+                    return RedirectToAction("Index", "Home");
+                }
 
                 return RedirectToAction("Index", "Home");
             }
@@ -303,13 +308,15 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy phản ánh.";
+                return RedirectToAction("Index", "Home");
             }
 
             var phanAnh = await _context.PhanAnhs.FindAsync(id);
             if (phanAnh == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy phản ánh.";
+                return RedirectToAction("Index", "Home");
             }
             ViewData["MaPhong"] = new SelectList(_context.Phongs, "MaPhong", "MaPhong", phanAnh.MaPhong);
             var dsSv = _context.SinhViens.Select(s => new { MaSv = s.MaSv, HoTen = s.HoTen + " (" + s.MaSv + ")" }).ToList();
@@ -330,7 +337,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id != phanAnh.MaPhanAnh)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy phản ánh.";
+                return RedirectToAction("Index", "Home");
             }
 
             // ensure NguoiGoi remains the account id of the session user
@@ -338,12 +346,47 @@ namespace QL_KT_xa_sin_vien.Controllers
             if (!string.IsNullOrEmpty(taiKhoanId)) phanAnh.NguoiGoi = taiKhoanId;
 
             var existing = await _context.PhanAnhs.AsNoTracking().FirstOrDefaultAsync(p => p.MaPhanAnh == phanAnh.MaPhanAnh);
-            if (existing == null) return NotFound();
-
-            // handle media file
+            if (existing == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy phản ánh.";
+                return RedirectToAction("Index", "Home");
+            }
+            // handle media removal or replacement
+            var removeMedia = Request.Form["RemoveMedia"].FirstOrDefault();
             var mediaFile = Request.Form.Files.FirstOrDefault();
+
+            // if user requested to remove existing media
+            if (!string.IsNullOrEmpty(removeMedia) && removeMedia == "true")
+            {
+                if (!string.IsNullOrEmpty(existing.MediaPath))
+                {
+                    try
+                    {
+                        var existingPath = existing.MediaPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                        var fullExisting = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", existingPath);
+                        if (System.IO.File.Exists(fullExisting)) System.IO.File.Delete(fullExisting);
+                    }
+                    catch { }
+                }
+                phanAnh.MediaPath = null;
+                phanAnh.MediaType = null;
+            }
+
+            // if new media uploaded, save and set fields (replace previous file if any)
             if (mediaFile != null && mediaFile.Length > 0)
             {
+                // delete previous file if exists
+                if (!string.IsNullOrEmpty(existing.MediaPath))
+                {
+                    try
+                    {
+                        var existingPath = existing.MediaPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                        var fullExisting = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", existingPath);
+                        if (System.IO.File.Exists(fullExisting)) System.IO.File.Delete(fullExisting);
+                    }
+                    catch { }
+                }
+
                 var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!Directory.Exists(uploads)) Directory.CreateDirectory(uploads);
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(mediaFile.FileName);
@@ -395,7 +438,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 {
                     if (!PhanAnhExists(phanAnh.MaPhanAnh))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Không tìm thấy phản ánh.";
+                        return RedirectToAction("Index", "Home");
                     }
                     else
                     {
@@ -416,7 +460,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Không tìm thấy phản ánh.";
+                return RedirectToAction("Index", "Home");
             }
 
             var phanAnh = await _context.PhanAnhs

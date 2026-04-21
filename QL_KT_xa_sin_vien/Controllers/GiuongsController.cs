@@ -53,7 +53,6 @@ namespace QL_KT_xa_sin_vien.Controllers
         public IActionResult Create()
         {
             ViewData["MaPhong"] = new SelectList(_context.Phongs, "MaPhong", "MaPhong");
-            ViewData["OccupiedBy"] = new SelectList(_context.SinhViens, "MaSv", "MaSv");
             return View();
         }
 
@@ -73,7 +72,6 @@ namespace QL_KT_xa_sin_vien.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["MaPhong"] = new SelectList(_context.Phongs, "MaPhong", "MaPhong", giuong.MaPhong);
-            ViewData["OccupiedBy"] = new SelectList(_context.SinhViens, "MaSv", "MaSv", giuong.OccupiedBy);
             return View(giuong);
         }
 

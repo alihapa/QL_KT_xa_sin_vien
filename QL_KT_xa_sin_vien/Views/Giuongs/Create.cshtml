@@ -30,7 +30,8 @@
 
             <div class="mb-3">
                 <label asp-for="OccupiedBy" class="form-label">Sinh viên đang sử dụng</label>
-                <select asp-for="OccupiedBy" class="form-select" asp-items="ViewBag.OccupiedBy"></select>
+                <input asp-for="OccupiedBy" class="form-control" />
+                <span asp-validation-for="OccupiedBy" class="text-danger"></span>
             </div>
 
             <div class="mb-3">

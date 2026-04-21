@@ -21,6 +21,9 @@ public partial class SinhVien
     [StringLength(20)]
     public string? SoCmnd { get; set; }
 
+    [StringLength(20)]
+    public string? GioiTinh { get; set; }
+
     [EmailAddress]
     public string? Email { get; set; }
     public string? ResetToken { get; set; }
