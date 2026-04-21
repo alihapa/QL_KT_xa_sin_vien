@@ -142,7 +142,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                         TrangThai = "0"
                     };
                     var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<TaiKhoan>();
-                    tk.MatKhauMh = hasher.HashPassword(tk, maSv);
+                    tk.MatKhauMh = hasher.HashPassword(tk, "123456");
                     _context.TaiKhoans.Add(tk);
 
                     var sv = new SinhVien
@@ -281,6 +281,38 @@ namespace QL_KT_xa_sin_vien.Controllers
 
             if (ModelState.IsValid)
             {
+                // If no account specified, create one automatically with default password "123456"
+                if (string.IsNullOrEmpty(sinhVien.MaTaiKhoan))
+                {
+                    string baseUsername = null;
+                    if (!string.IsNullOrEmpty(sinhVien.Email) && sinhVien.Email.Contains("@"))
+                    {
+                        baseUsername = sinhVien.Email.Split('@')[0].Trim();
+                    }
+                    if (string.IsNullOrEmpty(baseUsername)) baseUsername = sinhVien.MaSv;
+
+                    var username = baseUsername;
+                    var suffix = 1;
+                    while (_context.TaiKhoans.Any(t => t.TenDangNhap == username))
+                    {
+                        username = baseUsername + suffix.ToString();
+                        suffix++;
+                    }
+
+                    var tk = new TaiKhoan
+                    {
+                        MaTaiKhoan = Guid.NewGuid().ToString(),
+                        TenDangNhap = username,
+                        Email = sinhVien.Email,
+                        VaiTro = "1",
+                        TrangThai = "0"
+                    };
+                    var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<TaiKhoan>();
+                    tk.MatKhauMh = hasher.HashPassword(tk, "123456");
+                    _context.TaiKhoans.Add(tk);
+                    sinhVien.MaTaiKhoan = tk.MaTaiKhoan;
+                }
+
                 _context.Add(sinhVien);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
