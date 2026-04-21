@@ -233,6 +233,12 @@ namespace QL_KT_xa_sin_vien.Controllers
                 else phanAnh.MediaType = "text";
             }
 
+            // Ensure MoTa (description) is provided
+            if (string.IsNullOrWhiteSpace(phanAnh.MoTa))
+            {
+                ModelState.AddModelError("MoTa", "Mô tả là bắt buộc.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(phanAnh);

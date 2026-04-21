@@ -23,6 +23,7 @@ namespace QL_KT_xa_sin_vien.Models;
 
     public string? MaPhong { get; set; }
 
+    [Required(ErrorMessage = "Mô tả là bắt buộc.")]
     [StringLength(1000)]
     public string? MoTa { get; set; }
 

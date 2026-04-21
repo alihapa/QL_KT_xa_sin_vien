@@ -34,8 +34,8 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="MoTa" class="form-label"></label>
-                <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+                <label asp-for="MoTa" class="form-label">Mô tả <span class="text-danger">*</span></label>
+                <textarea asp-for="MoTa" class="form-control" rows="3" required></textarea>
                 <span asp-validation-for="MoTa" class="text-danger"></span>
             </div>
 
