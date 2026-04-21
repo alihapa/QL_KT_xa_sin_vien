@@ -62,10 +62,18 @@
                 </select>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Tải lên file điều khoản (PDF) (tùy chọn)</label>
-                <input asp-for="DieuKhoanPdfFile" type="file" accept="application/pdf" class="form-control" />
-            </div>
+           
+
+            @* Show latest dieu khoan link to all users (if available) *@
+            @if (!string.IsNullOrEmpty(ViewBag.LatestDieuKhoan as string))
+            {
+                <div class="mb-3">
+                    <label class="form-label">Nội dung điều khoản (mới nhất)</label>
+                    <div>
+                        <a href="@((string)ViewBag.LatestDieuKhoan)" target="_blank" class="btn btn-link">Mở file điều khoản</a>
+                    </div>
+                </div>
+            }
 
             <div class="row">
                 <div class="col-md-6 mb-3">

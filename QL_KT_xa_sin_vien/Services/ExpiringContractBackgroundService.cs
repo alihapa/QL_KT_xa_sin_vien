@@ -56,7 +56,7 @@ namespace QL_KT_xa_sin_vien.Services
             var soon = now.AddDays(7);
 
             var targets = await db.HopDongs
-                .Where(h => h.NgayKetThuc.HasValue && h.NgayKetThuc.Value.CompareTo(now) >= 0 && h.NgayKetThuc.Value.CompareTo(soon) <= 0 && h.TrangThai == "1")
+                .Where(h => h.NgayKetThuc.HasValue && h.NgayKetThuc.Value.CompareTo(now) >= 0 && h.NgayKetThuc.Value.CompareTo(soon) <= 0)
                 .ToListAsync(cancellationToken);
 
             foreach (var h in targets)

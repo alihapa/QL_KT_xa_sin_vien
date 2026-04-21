@@ -26,11 +26,8 @@ namespace QL_KT_xa_sin_vien.Controllers
         [RoleAuthorize("2", "3")]
         public async Task<IActionResult> Index(string? filter = null)
         {
+            // return all contracts; filtering by status removed because status is managed separately
             var qLSinhVienContext = _context.HopDongs.Include(h => h.MaGiuongNavigation).Include(h => h.MaPhongNavigation).Include(h => h.MaSvNavigation).AsQueryable();
-            if (!string.IsNullOrEmpty(filter) && filter == "pending")
-            {
-                qLSinhVienContext = qLSinhVienContext.Where(h => h.TrangThai == "Chờ duyệt");
-            }
             return View(await qLSinhVienContext.ToListAsync());
         }
 
@@ -41,16 +38,12 @@ namespace QL_KT_xa_sin_vien.Controllers
         {
             var hopDong = await _context.HopDongs.FindAsync(id);
             if (hopDong == null) return NotFound();
-            // map business status codes and store to DB
-            var prevStatus = hopDong.TrangThai;
-            if (newStatus == "1" || newStatus == "0" || newStatus == "-1" || newStatus == "2")
-            {
-                hopDong.TrangThai = newStatus;
-            }
-            else
+            // validate status code
+            if (!(newStatus == "1" || newStatus == "0" || newStatus == "-1" || newStatus == "2"))
             {
                 return BadRequest();
             }
+            var prevStatus = (string?)null; // previous status not tracked on model
             // if approved, mark bed occupied
             if (newStatus == "1" && !string.IsNullOrEmpty(hopDong.MaGiuong))
             {
@@ -110,11 +103,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 }
             }
 
-            // if rejected or approved with a reason, ensure reason saved into DieuKhoan for record (store pdf path or text)
-            if (!string.IsNullOrEmpty(reason))
-            {
-                hopDong.DieuKhoan = reason;
-            }
+            // reason is only used for notification/logging; not stored on HopDong model
 
             // notify student about status change
             string? studentAccountId = null;
@@ -133,7 +122,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 // set recipient to student's account id (FK to TaiKhoan). If not available, leave null.
                 NguoiNhan = string.IsNullOrEmpty(studentAccountId) ? null : studentAccountId,
                 LoaiThongBao = "TrangThaiHopDong",
-                NoiDung = $"Trạng thái đơn đăng ký (HĐ {hopDong.MaHopDong}) đã thay đổi thành: {hopDong.TrangThai}." + (string.IsNullOrEmpty(reason) ? "" : $" Lý do: {reason}"),
+                NoiDung = $"Trạng thái đơn đăng ký (HĐ {hopDong.MaHopDong}) đã được cập nhật. Mã trạng thái: {newStatus}." + (string.IsNullOrEmpty(reason) ? "" : $" Lý do: {reason}"),
                 TrangThai = "Chưa đọc",
                 ThoiGianGui = DateTime.Now
             };
@@ -149,7 +138,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                     HanhDong = "Thay doi trang thai hop dong",
                     DoiTuong = hopDong.MaHopDong,
                     GiaTriTruoc = prevStatus,
-                    GiaTriSau = hopDong.TrangThai,
+                    GiaTriSau = newStatus,
                     ThoiGian = DateTime.Now
                 };
                 _context.NhatKies.Add(nk);
@@ -188,13 +177,22 @@ namespace QL_KT_xa_sin_vien.Controllers
                 // ignore email failures
             }
 
-            _context.HopDongs.Update(hopDong);
+            // Note: HopDong model no longer stores TrangThai; we keep other changes if any
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: HopDongs/UploadDieuKhoan
+        // Show upload form for BQL/Admin
+        [RoleAuthorize("2", "3")]
+        [HttpGet]
+        public IActionResult UploadDieuKhoan()
+        {
+            return View();
+        }
+
         // POST: HopDongs/UploadDieuKhoan
-        // Saves a PDF and notifies all accounts
+        // Saves a PDF and creates a DieuKhoan record; only BQL/Admin can upload
         [RoleAuthorize("2", "3")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -213,9 +211,20 @@ namespace QL_KT_xa_sin_vien.Controllers
 
             var relative = "/uploads/" + fileName;
 
-            // create notification for all accounts
             try
             {
+                // create DieuKhoan record
+                var dk = new DieuKhoan
+                {
+                    MaDieuKhoan = Guid.NewGuid().ToString(),
+                    FilePath = relative,
+                    OriginalFileName = file.FileName,
+                    UploadedBy = HttpContext.Session.GetString("userId"),
+                    UploadedAt = DateTime.Now
+                };
+                _context.DieuKhoans.Add(dk);
+
+                // create notification for all accounts
                 var allAccounts = _context.TaiKhoans.Select(t => t.MaTaiKhoan).ToList();
                 foreach (var acc in allAccounts)
                 {
@@ -232,13 +241,13 @@ namespace QL_KT_xa_sin_vien.Controllers
                     _context.ThongBaos.Add(tb);
                 }
 
-                // log upload
+                // log upload in NhatKy
                 var nk = new NhatKy
                 {
                     MaLog = Guid.NewGuid().ToString(),
                     NguoiThucHien = HttpContext.Session.GetString("userId"),
                     HanhDong = "Upload dieu khoan",
-                    DoiTuong = relative,
+                    DoiTuong = dk.MaDieuKhoan,
                     GiaTriSau = relative,
                     ThoiGian = DateTime.Now
                 };
@@ -248,7 +257,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             }
             catch
             {
-                // ignore notification failures
+                // ignore failures
             }
 
             return RedirectToAction(nameof(Index));
@@ -283,6 +292,10 @@ namespace QL_KT_xa_sin_vien.Controllers
             ViewData["MaGiuong"] = new SelectList(_context.Giuongs, "MaGiuong", "MaGiuong");
             ViewData["MaPhong"] = new SelectList(_context.Phongs, "MaPhong", "MaPhong");
             ViewData["MaSv"] = new SelectList(_context.SinhViens, "MaSv", "MaSv");
+            // provide latest uploaded DieuKhoan (terms) for viewing in the Create view
+            var latestDieuKhoan = _context.DieuKhoans.OrderByDescending(d => d.UploadedAt).FirstOrDefault();
+            ViewBag.LatestDieuKhoan = latestDieuKhoan?.FilePath;
+            ViewBag.LatestDieuKhoanName = latestDieuKhoan?.OriginalFileName;
             return View();
         }
 
@@ -293,7 +306,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
          
-        public async Task<IActionResult> Create([Bind("MaHopDong,MaSv,MaPhong,MaGiuong,NgayBatDau,NgayKetThuc,TrangThai,DieuKhoan,Agree,DieuKhoanPdf")] HopDong hopDong, Microsoft.AspNetCore.Http.IFormFile? DieuKhoanPdfFile)
+        public async Task<IActionResult> Create([Bind("MaHopDong,MaSv,MaPhong,MaGiuong,NgayBatDau,NgayKetThuc,Agree,DieuKhoanPdf")] HopDong hopDong, Microsoft.AspNetCore.Http.IFormFile? DieuKhoanPdfFile)
         {
             if (ModelState.IsValid)
             {
@@ -348,7 +361,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         [ValidateAntiForgeryToken]
         [RoleAuthorize( "2", "3")]
          
-        public async Task<IActionResult> Edit(string id, [Bind("MaHopDong,MaSv,MaPhong,MaGiuong,NgayBatDau,NgayKetThuc,TrangThai,DieuKhoan,Agree,DieuKhoanPdf")] HopDong hopDong, Microsoft.AspNetCore.Http.IFormFile? DieuKhoanPdfFile)
+        public async Task<IActionResult> Edit(string id, [Bind("MaHopDong,MaSv,MaPhong,MaGiuong,NgayBatDau,NgayKetThuc,Agree,DieuKhoanPdf")] HopDong hopDong, Microsoft.AspNetCore.Http.IFormFile? DieuKhoanPdfFile)
         {
             if (id != hopDong.MaHopDong)
             {
@@ -445,7 +458,7 @@ namespace QL_KT_xa_sin_vien.Controllers
         public async Task<IActionResult> NotifyExpiring()
         {
             var soon = DateTime.Now.Date.AddDays(7);
-            var targets = _context.HopDongs.Where(h => h.NgayKetThuc.HasValue && h.NgayKetThuc.Value.ToDateTime(TimeOnly.MinValue) <= soon && h.TrangThai == "Đang sử dụng");
+            var targets = _context.HopDongs.Where(h => h.NgayKetThuc.HasValue && h.NgayKetThuc.Value.ToDateTime(TimeOnly.MinValue) <= soon);
             foreach (var h in targets)
             {
                 var studentId = h.MaSv;

@@ -27,7 +27,7 @@
                 <tr>
                     <th>@Html.DisplayNameFor(model => model.NgayBatDau)</th>
                     <th>@Html.DisplayNameFor(model => model.NgayKetThuc)</th>
-                    <th>@Html.DisplayNameFor(model => model.TrangThai)</th>
+                    <th>Trạng thái</th>
                     <th>Điều khoản</th>
                     <th>PDF</th>
                     <th>Giường</th>
@@ -46,8 +46,8 @@
                     <tr>
                         <td>@FormatDate(item.NgayBatDau, "dd/MM/yyyy")</td>
                         <td>@FormatDate(item.NgayKetThuc, "dd/MM/yyyy")</td>
-                        <td>@(item.TrangThai == "1" ? "Đang sử dụng" : item.TrangThai == "0" ? "Chờ duyệt" : item.TrangThai == "-1" ? "Hết hạn" : item.TrangThai == "2" ? "Đã từ chối" : item.TrangThai)</td>
-                        <td>@item.DieuKhoan</td>
+                        <td>@( "-" )</td>
+                        <td>@( item.DieuKhoanPdf ?? "" )</td>
                         <td>
                             @if(!string.IsNullOrEmpty(item.DieuKhoanPdf))
                             {
@@ -72,7 +72,7 @@
                                     <input type="hidden" name="id" value="@item.MaHopDong" />
                                     <select name="newStatus" class="form-select d-inline w-auto">
                                         <option value="1">Đã xét duyệt</option>
-                                        <option value="0" selected="@(item.TrangThai == "0" ? "selected" : null)">Chờ xét duyệt</option>
+                                        <option value="0">Chờ xét duyệt</option>
                                         <option value="-1">Hết hạn</option>
                                         <option value="2">Từ chối</option>
                                     </select>

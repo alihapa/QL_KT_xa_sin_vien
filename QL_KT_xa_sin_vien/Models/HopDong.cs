@@ -19,9 +19,14 @@ public partial class HopDong
 
     public DateOnly? NgayKetThuc { get; set; }
 
+    // legacy mapped columns kept for EF model compatibility
+    [StringLength(500)]
+    public string? DieuKhoan { get; set; }
+
+    [StringLength(50)]
     public string? TrangThai { get; set; }
 
-    public string? DieuKhoan { get; set; }
+    // Note: TrangThai and DieuKhoan moved out of this model; terms are managed centrally via DieuKhoan entity
     // If contract includes a PDF link or acceptance flag
     [StringLength(500)]
     public string? DieuKhoanPdf { get; set; }

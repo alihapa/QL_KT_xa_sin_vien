@@ -58,6 +58,10 @@ namespace QL_KT_xa_sin_vien.Controllers
                     .ToListAsync();
             }
 
+            // provide latest uploaded "dieu khoan" file (if any) so UI can show a link
+            var latest = await _context.DieuKhoans.OrderByDescending(d => d.UploadedAt).FirstOrDefaultAsync();
+            ViewBag.LatestDieuKhoan = latest?.FilePath;
+
             return View(dk);
         }
 
@@ -133,8 +137,8 @@ namespace QL_KT_xa_sin_vien.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // check if student already has active or pending contract
-            var existing = _context.HopDongs.Any(h => h.MaSv == sv.MaSv && (h.TrangThai == "1" || h.TrangThai == "0"));
+            // check if student already has any contract
+            var existing = _context.HopDongs.Any(h => h.MaSv == sv.MaSv);
             if (existing)
             {
                 TempData["ErrorMessage"] = "Bạn đã có hợp đồng đang hoạt động hoặc chờ xét duyệt. Không thể đăng ký thêm.";
@@ -167,7 +171,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 pdfPath = "/uploads/" + fileName;
             }
 
-            // Tạo hợp đồng mới nhưng ở trạng thái chờ duyệt
+            // Tạo hợp đồng mới; trạng thái/điều khoản quản lý tập trung
             var hopDong = new HopDong
             {
                 MaHopDong = Guid.NewGuid().ToString(),
@@ -177,9 +181,6 @@ namespace QL_KT_xa_sin_vien.Controllers
                 // Ly do và thời gian sẽ được gán theo yêu cầu
                 NgayBatDau = dk.NgayBatDau ?? DateOnly.FromDateTime(DateTime.Now),
                 NgayKetThuc = dk.NgayKetThuc ?? DateOnly.FromDateTime(DateTime.Now.AddMonths(6)),
-                // use status codes: "0" = chờ xét duyệt
-                TrangThai = "0",
-                DieuKhoan = string.IsNullOrEmpty(dk.LyDo) ? "Theo quy định ký túc xá" : dk.LyDo,
                 Agree = dk.Agree,
                 DieuKhoanPdf = pdfPath
             };

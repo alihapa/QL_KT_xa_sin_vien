@@ -20,11 +20,20 @@
             </tr>
             <tr>
                 <th>Trạng thái</th>
-                <td>@Model.TrangThai</td>
+                <td>-</td>
             </tr>
             <tr>
                 <th>Điều khoản</th>
-                <td>@Model.DieuKhoan</td>
+                <td>
+                    @if(!string.IsNullOrEmpty(Model.DieuKhoanPdf))
+                    {
+                        <a href="@Model.DieuKhoanPdf" target="_blank">Xem file điều khoản đính kèm</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Không có file điều khoản đính kèm. Tham khảo điều khoản chung.</span>
+                    }
+                </td>
             </tr>
             <tr>
                 <th>Giường</th>

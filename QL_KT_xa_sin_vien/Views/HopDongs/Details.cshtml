@@ -19,12 +19,11 @@
             </tr>
             <tr>
                 <th>Trạng thái</th>
-                <td>@(Model.TrangThai == "1" ? "Đang sử dụng" : Model.TrangThai == "0" ? "Chờ duyệt" : Model.TrangThai == "-1" ? "Hết hạn" : Model.TrangThai == "2" ? "Đã từ chối" : Model.TrangThai)</td>
+                <td>-</td>
             </tr>
             <tr>
                 <th>Điều khoản</th>
                 <td>
-                    <div>@Model.DieuKhoan</div>
                     @if(!string.IsNullOrEmpty(Model.DieuKhoanPdf))
                     {
                         <div class="mt-2">
@@ -32,8 +31,26 @@
                             <div class="mt-2"><a href="@Model.DieuKhoanPdf" target="_blank" class="btn btn-link">Mở file trong tab mới</a></div>
                         </div>
                     }
+                    else
+                    {
+                        <div class="text-muted">Hợp đồng không kèm file điều khoản. Vui lòng tham khảo điều khoản được quản lý tập trung.</div>
+                    }
                 </td>
             </tr>
+            <div class="mb-3">
+                <label class="form-label">Xem điều khoản</label>
+                <div>
+                    @if (!string.IsNullOrEmpty(ViewBag.LatestDieuKhoan as string))
+                    {
+                        <a class="btn btn-outline-primary" href="@ViewBag.LatestDieuKhoan" target="_blank">Mở điều khoản (@(ViewBag.LatestDieuKhoanName ?? "PDF"))</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa có file điều khoản nào được tải lên.</span>
+                    }
+                </div>
+                <span class="form-text">File điều khoản được quản lý tập trung; hợp đồng chỉ tham chiếu tới file này.</span>
+            </div>
             <tr>
                 <th>Giường</th>
                 <td>@Model.MaGiuongNavigation?.MaGiuong</td>

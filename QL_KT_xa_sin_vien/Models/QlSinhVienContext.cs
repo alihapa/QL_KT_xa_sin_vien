@@ -38,6 +38,7 @@ public partial class QLSinhVienContext : DbContext
     public virtual DbSet<ToaNha> ToaNhas { get; set; }
 
     public virtual DbSet<VaiTro> VaiTros { get; set; }
+    public virtual DbSet<DieuKhoan> DieuKhoans { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -74,6 +75,17 @@ public partial class QLSinhVienContext : DbContext
             entity.HasOne(d => d.OccupiedByNavigation).WithMany(p => p.Giuongs)
                 .HasForeignKey(d => d.OccupiedBy)
                 .HasConstraintName("FK_Giuong_SinhVien");
+        });
+
+        modelBuilder.Entity<DieuKhoan>(entity =>
+        {
+            entity.HasKey(e => e.MaDieuKhoan);
+            entity.ToTable("DieuKhoan");
+            entity.Property(e => e.MaDieuKhoan).HasMaxLength(50).HasColumnName("maDieuKhoan");
+            entity.Property(e => e.FilePath).HasMaxLength(500).HasColumnName("filePath");
+            entity.Property(e => e.OriginalFileName).HasMaxLength(500).HasColumnName("originalFileName");
+            entity.Property(e => e.UploadedBy).HasMaxLength(50).HasColumnName("uploadedBy");
+            entity.Property(e => e.UploadedAt).HasColumnType("datetime").HasColumnName("uploadedAt");
         });
 
         modelBuilder.Entity<DonGia>(entity =>

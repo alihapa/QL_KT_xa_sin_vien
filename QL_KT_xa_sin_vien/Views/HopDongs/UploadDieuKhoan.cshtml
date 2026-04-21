@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Thêm điều khoản";
+}
+
+<h2>Thêm điều khoản</h2>
+
+<form asp-controller="HopDongs" asp-action="UploadDieuKhoan" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label for="file" class="form-label">Chọn file PDF</label>
+        <input class="form-control" type="file" id="file" name="file" accept="application/pdf" />
+    </div>
+    <button type="submit" class="btn btn-primary">Tải lên</button>
+    <a asp-action="Index" asp-controller="HopDongs" class="btn btn-secondary ms-2">Hủy</a>
+</form>

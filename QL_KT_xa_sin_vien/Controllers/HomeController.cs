@@ -263,8 +263,11 @@ namespace QL_KT_xa_sin_vien.Controllers
                 };
             }
 
+            // try to get any current contract (by date) for the student
             var hopDong = await db.HopDongs
-            .FirstOrDefaultAsync(h => h.MaSv == sinhVien.MaSv && h.TrangThai == "1");
+                .Where(h => h.MaSv == sinhVien.MaSv)
+                .OrderByDescending(h => h.NgayKetThuc)
+                .FirstOrDefaultAsync();
 
             if (hopDong == null)
             {
@@ -272,8 +275,7 @@ namespace QL_KT_xa_sin_vien.Controllers
                 {
                     MaHopDong = "chưa có hợp đồng",
                     NgayBatDau = null,
-                    NgayKetThuc = null,
-                    TrangThai = "chưa có thông tin"
+                    NgayKetThuc = null
                 };
             }
 
@@ -373,7 +375,7 @@ namespace QL_KT_xa_sin_vien.Controllers
             {
                 hopDongs = new List<HopDong>
                 {
-                    new HopDong { MaHopDong = "chưa có mã hợp đồng", MaSv = "chưa có mã sinh viên", MaPhong = "chưa có mã phòng", MaGiuong = "chưa có mã giường" , NgayBatDau = null, NgayKetThuc = null, TrangThai = "chưa có trạng thái" , DieuKhoan = "chưa có điều khoản"}
+                    new HopDong { MaHopDong = "chưa có mã hợp đồng", MaSv = "chưa có mã sinh viên", MaPhong = "chưa có mã phòng", MaGiuong = "chưa có mã giường" , NgayBatDau = null, NgayKetThuc = null }
                 };
             }
 

@@ -44,17 +44,7 @@
                 <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="TrangThai" class="form-label"></label>
-                <input asp-for="TrangThai" class="form-control" />
-                <span asp-validation-for="TrangThai" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="DieuKhoan" class="form-label"></label>
-                <textarea asp-for="DieuKhoan" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="DieuKhoan" class="text-danger"></span>
-            </div>
+            @* Trạng thái và nội dung điều khoản được quản lý tập trung; không cho nhập trực tiếp trong form hợp đồng *@
 
             <div class="mb-3">
                 <label class="form-label">Đồng ý điều khoản</label>
@@ -65,9 +55,18 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Upload file điều khoản (PDF)</label>
-                <input type="file" name="DieuKhoanPdfFile" accept="application/pdf" class="form-control" />
-                <span class="form-text">Nếu tải lên, đường dẫn sẽ lưu vào trường "DieuKhoanPdf" trên hợp đồng.</span>
+                <label class="form-label">Xem điều khoản</label>
+                <div>
+                    @if (!string.IsNullOrEmpty(ViewBag.LatestDieuKhoan as string))
+                    {
+                        <a class="btn btn-outline-primary" href="@ViewBag.LatestDieuKhoan" target="_blank">Mở điều khoản (@(ViewBag.LatestDieuKhoanName ?? "PDF"))</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa có file điều khoản nào được tải lên.</span>
+                    }
+                </div>
+                <span class="form-text">File điều khoản được quản lý tập trung; hợp đồng chỉ tham chiếu tới file này.</span>
             </div>
 
             <div class="mt-3">

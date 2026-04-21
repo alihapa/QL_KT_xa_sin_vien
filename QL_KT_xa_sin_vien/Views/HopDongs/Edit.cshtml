@@ -42,17 +42,7 @@
                 <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="TrangThai" class="form-label"></label>
-                <input asp-for="TrangThai" class="form-control" />
-                <span asp-validation-for="TrangThai" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="DieuKhoan" class="form-label"></label>
-                <textarea asp-for="DieuKhoan" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="DieuKhoan" class="text-danger"></span>
-            </div>
+            @* Trạng thái và nội dung điều khoản được quản lý tập trung; không cho nhập trực tiếp trong form hợp đồng *@
 
             <div class="mb-3">
                 <label class="form-label">Đồng ý điều khoản</label>
@@ -63,12 +53,17 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Upload file điều khoản (PDF)</label>
-                <input type="file" name="DieuKhoanPdfFile" accept="application/pdf" class="form-control" />
-                @if(!string.IsNullOrEmpty(Model.DieuKhoanPdf))
-                {
-                    <a href="@Model.DieuKhoanPdf" target="_blank">Xem file hiện có</a>
-                }
+                <label class="form-label">Xem điều khoản</label>
+                <div>
+                    @if (!string.IsNullOrEmpty(Model.DieuKhoanPdf))
+                    {
+                        <a href="@Model.DieuKhoanPdf" target="_blank" class="btn btn-link">Mở file điều khoản hiện có</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa có file điều khoản đính kèm.</span>
+                    }
+                </div>
             </div>
 
             <div class="mt-3">

@@ -46,7 +46,8 @@ namespace QL_KT_xa_sin_vien.Services
             if (dg == null) return;
 
             // for each active contract, create monthly HoaDon based on formula: room + dien + nuoc
-            var active = await db.HopDongs.Where(h => h.TrangThai == "1").ToListAsync(cancellationToken);
+            // consider all contracts when generating invoices; status tracking handled elsewhere
+            var active = await db.HopDongs.ToListAsync(cancellationToken);
             foreach (var h in active)
             {
                 cancellationToken.ThrowIfCancellationRequested();
